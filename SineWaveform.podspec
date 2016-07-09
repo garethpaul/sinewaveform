@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "SineWaveform"
-  s.version      = "0.0.4"
+  s.version      = "0.0.5"
   s.summary      = "SineWaveform creates a simple wave."
 
   # This description is used to generate tags and improve search results.
@@ -78,7 +78,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/garethpaul/SineWaveform.git", :tag => "#{s.version}" }
+  s.source       = { :git => "git@github.com:garethpaul/sinewaveform.git", :tag => "#{s.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
