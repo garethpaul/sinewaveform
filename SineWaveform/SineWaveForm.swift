@@ -30,7 +30,11 @@ public class SiriWaveformView: UIView {
     }
     
     override public func drawRect(rect: CGRect) {
-        let context = UIGraphicsGetCurrentContext()
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        let width = CGRectGetWidth(bounds)
+        let height = CGRectGetHeight(bounds)
+        guard width > 0.0 && height > 0.0 else { return }
+
         CGContextClearRect(context, bounds)
         
         backgroundColor?.set()
@@ -39,13 +43,10 @@ public class SiriWaveformView: UIView {
         let waveCount = max(1, numOfWaves)
         let step = max(density, 1.0)
         
-        for waveNumber in 0...waveCount {
-            let context = UIGraphicsGetCurrentContext()
-            
+        for waveNumber in 0..<waveCount {
             CGContextSetLineWidth(context, (waveNumber == 0 ? primaryWaveLineWidth : secondaryWaveLineWidth))
             
-            let halfHeight = CGRectGetHeight(bounds) / 2.0
-            let width = CGRectGetWidth(bounds)
+            let halfHeight = height / 2.0
             let mid = width / 2.0
             
             let maxAmplitude = halfHeight - 4.0 // 4 corresponds to twice the stroke width

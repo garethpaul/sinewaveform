@@ -65,12 +65,22 @@ def waveform_checks():
         errors.append("SiriWaveformView class is missing")
     if "for waveNumber in 0...numOfWaves" in source:
         errors.append("drawRect must not divide by raw numOfWaves")
+    if "for waveNumber in 0...waveCount" in source:
+        errors.append("drawRect must not draw one more wave than the clamped wave count")
     if "x += density" in source:
         errors.append("drawRect must not advance by raw density")
     if "let waveCount = max(1, numOfWaves)" not in source:
         errors.append("drawRect must clamp wave count to at least 1")
     if "let step = max(density, 1.0)" not in source:
         errors.append("drawRect must clamp draw step to a positive value")
+    if "guard let context = UIGraphicsGetCurrentContext() else { return }" not in source:
+        errors.append("drawRect must guard graphics context availability")
+    if "guard width > 0.0 && height > 0.0 else { return }" not in source:
+        errors.append("drawRect must skip zero-size bounds before division")
+    if "for waveNumber in 0..<waveCount" not in source:
+        errors.append("drawRect must iterate within the clamped wave count")
+    if source.count("UIGraphicsGetCurrentContext()") != 1:
+        errors.append("drawRect must fetch the graphics context once before the wave loop")
 
     return errors
 
