@@ -45,3 +45,6 @@ computed and supplied.
 - Hidden telemetry
 - Public API changes without migration notes
 - Visual rewrites without screenshot or sample verification
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
