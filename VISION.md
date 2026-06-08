@@ -35,6 +35,11 @@ Contribution rules:
 
 ## Security And Responsible Use
 
+Canonical security policy and reporting:
+
+- [`SECURITY.md`](SECURITY.md)
+
+
 This should remain a local UI component. It should not collect audio,
 microphone data, or usage analytics; callers should decide how input levels are
 computed and supplied.
