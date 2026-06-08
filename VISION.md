@@ -39,7 +39,7 @@ This should remain a local UI component. It should not collect audio,
 microphone data, or usage analytics; callers should decide how input levels are
 computed and supplied.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Microphone capture inside the view
 - Hidden telemetry
