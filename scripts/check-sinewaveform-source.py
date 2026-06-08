@@ -18,6 +18,8 @@ def require_paths():
     errors = []
     for relative_path in (
         "SineWaveform.podspec",
+        "SineWaveform/0.0.4/SineWaveform.podspec",
+        "SineWaveform/0.0.6/SineWaveform.podspec",
         "SineWaveform/SineWaveForm.swift",
         "SineWaveform/SineWaveform.h",
         "SineWaveform.xcodeproj/project.pbxproj",
@@ -50,6 +52,11 @@ def package_checks():
     if errors:
         return errors
 
+    podspec_paths = (
+        "SineWaveform.podspec",
+        "SineWaveform/0.0.4/SineWaveform.podspec",
+        "SineWaveform/0.0.6/SineWaveform.podspec",
+    )
     podspec = read_text("SineWaveform.podspec")
     for fragment in (
         's.name         = "SineWaveform"',
@@ -60,12 +67,14 @@ def package_checks():
         if fragment not in podspec:
             errors.append(f"podspec is missing expected metadata: {fragment}")
 
-    if re.search(r's\.homepage\s*=\s*"http://', podspec):
-        errors.append("podspec homepage must use HTTPS")
-    if re.search(r's\.social_media_url\s*=\s*"http://', podspec):
-        errors.append("podspec social_media_url must use HTTPS")
-    if "https://github.com/garethpaul/SineWaveform.git" in podspec:
-        errors.append("podspec source URL must match the lowercase GitHub repo URL")
+    for podspec_path in podspec_paths:
+        podspec_source = read_text(podspec_path)
+        if re.search(r's\.homepage\s*=\s*"http://', podspec_source):
+            errors.append(f"{podspec_path} homepage must use HTTPS")
+        if re.search(r's\.social_media_url\s*=\s*"http://', podspec_source):
+            errors.append(f"{podspec_path} social_media_url must use HTTPS")
+        if "https://github.com/garethpaul/SineWaveform.git" in podspec_source:
+            errors.append(f"{podspec_path} source URL must match the lowercase GitHub repo URL")
 
     project = read_text("SineWaveform.xcodeproj/project.pbxproj")
     if "productName = SineWaveform;" not in project:

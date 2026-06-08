@@ -57,6 +57,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   waveform drawing safety checks for context availability, nonzero bounds, wave
   count, and draw step handling. When `xcodebuild` is installed, the `build`
   target also builds the `SineWaveform` target for the iOS simulator.
+- Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks also require completed canonical plans under `docs/plans`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
@@ -79,6 +80,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-sinewaveform-baseline.md` for the canonical
   package and drawing safety baseline.
+- See `docs/plans/2026-06-08-versioned-podspec-metadata.md` for the archived
+  podspec metadata guard.
 
 ## Contributing
 

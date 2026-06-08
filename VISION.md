@@ -17,6 +17,7 @@ Priority:
 - Preserve the `SiriWaveformView` drawing behavior
 - Keep Interface Builder inspectables useful
 - Keep draw loops bounded and safe for zero-size preview states
+- Keep root and archived podspec metadata aligned
 - Maintain screenshot and GIF examples
 - Keep completed maintenance plans under `docs/plans`
 - Treat CocoaPods and Swift syntax as legacy until documented

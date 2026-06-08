@@ -2,6 +2,8 @@
 
 ## 2026-06-08
 
+- Aligned archived versioned podspec URLs with the root HTTPS/lowercase package
+  metadata and extended static package checks across all tracked podspecs.
 - Added `make check` as the shared repository verification alias.
 - Guarded `drawRect` against missing graphics contexts and zero-size bounds.
 - Changed the wave loop to draw within the clamped wave count instead of one
