@@ -1,5 +1,8 @@
 # sinewaveform
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 ## Overview
 
 `garethpaul/sinewaveform` is an Apple platform application or Objective-C/Swift sample. Produce a "Siri" like waveform.
@@ -71,4 +74,3 @@ Keep changes small and tied to the project that is already present in this repos
 Prior README summary:
 
 > SineWaveform <!-- README-OVERVIEW-IMAGE --> A UIView subclass that reproduces a waveform effect. Storyboard or XIB Programmatic Usage Install via cocoapods
-
