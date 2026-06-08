@@ -2,6 +2,7 @@
 
 ## 2026-06-08
 
+- Added `make check` as the shared repository verification alias.
 - Guarded `drawRect` against missing graphics contexts and zero-size bounds.
 - Changed the wave loop to draw within the clamped wave count instead of one
   extra wave.

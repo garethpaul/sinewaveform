@@ -48,7 +48,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
-- `make verify` runs podspec syntax checks, static package metadata checks, and
+- `make check` runs podspec syntax checks, static package metadata checks, and
   waveform drawing safety checks for context availability, nonzero bounds, wave
   count, and draw step handling. When `xcodebuild` is installed, the `build`
   target also builds the `SineWaveform` target for the iOS simulator.

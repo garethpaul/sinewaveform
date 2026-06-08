@@ -1,4 +1,4 @@
-.PHONY: lint test build verify
+.PHONY: build check lint test verify
 
 PYTHON ?= python3
 RUBY ?= ruby
@@ -19,3 +19,5 @@ build: lint
 	fi
 
 verify: lint test build
+
+check: verify
