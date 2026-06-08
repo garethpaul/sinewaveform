@@ -20,7 +20,7 @@ This README is based on the checked-in source, manifests, scripts, and repositor
 Additional scan context:
 
 - Source directories: SineWaveform
-- Dependency and build manifests: none detected
+- Dependency and build manifests: SineWaveform.podspec
 - Entry points or build surfaces: SineWaveform.xcodeproj
 - Test-looking files: no obvious test files detected
 
@@ -30,6 +30,7 @@ Additional scan context:
 
 - Git
 - macOS with Xcode for building Apple platform projects
+- Python 3 and Ruby for repository source checks
 
 ### Setup
 
@@ -43,10 +44,15 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Running or Using the Project
 
 - Open `SineWaveform.xcodeproj` in Xcode, choose the app or sample scheme, and run it on the matching simulator/device.
+- For CocoaPods package checks, start from the root `SineWaveform.podspec`.
 
 ## Testing and Verification
 
-- Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
+- `make verify` runs podspec syntax checks, static package metadata checks, and
+  waveform drawing safety checks. When `xcodebuild` is installed, the `build`
+  target also builds the `SineWaveform` target for the iOS simulator.
+- Xcode's test action or `xcodebuild test` with the appropriate scheme and
+  destination can be used on macOS for deeper verification.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 

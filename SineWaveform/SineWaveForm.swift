@@ -35,8 +35,11 @@ public class SiriWaveformView: UIView {
         
         backgroundColor?.set()
         CGContextFillRect(context, rect)
+
+        let waveCount = max(1, numOfWaves)
+        let step = max(density, 1.0)
         
-        for waveNumber in 0...numOfWaves {
+        for waveNumber in 0...waveCount {
             let context = UIGraphicsGetCurrentContext()
             
             CGContextSetLineWidth(context, (waveNumber == 0 ? primaryWaveLineWidth : secondaryWaveLineWidth))
@@ -46,13 +49,13 @@ public class SiriWaveformView: UIView {
             let mid = width / 2.0
             
             let maxAmplitude = halfHeight - 4.0 // 4 corresponds to twice the stroke width
-            let progress: CGFloat = 1.0 - CGFloat(waveNumber) / CGFloat(numOfWaves)
+            let progress: CGFloat = 1.0 - CGFloat(waveNumber) / CGFloat(waveCount)
             let normedAmplitude = (1.5 * progress - 0.5) * amplitude
             let multiplier: CGFloat = 1.0
             waveColor.colorWithAlphaComponent(multiplier * CGColorGetAlpha(waveColor.CGColor)).set()
             
             var x: CGFloat = 0.0
-            while x < width + density {
+            while x < width + step {
                 let scaling = -pow(1 / mid * (x - mid), 2) + 1
                 let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(x / width) * frequency + _phase
                 let y = scaling * maxAmplitude * normedAmplitude * CGFloat(sinf(Float(tempCasting))) + halfHeight
@@ -61,7 +64,7 @@ public class SiriWaveformView: UIView {
                 } else {
                     CGContextAddLineToPoint(context, x, y)
                 }
-                x += density
+                x += step
             }
             CGContextStrokePath(context)
         }

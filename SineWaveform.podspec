@@ -30,7 +30,7 @@ Pod::Spec.new do |s|
                    Think Sirilike waves..
                    We extend UIView to make it simple to use.
                    DESC
-  s.homepage     = "http://github.com/garethpaul/sinewaveform"
+  s.homepage     = "https://github.com/garethpaul/sinewaveform"
 
 
   # ―――  Spec License  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -54,7 +54,7 @@ Pod::Spec.new do |s|
   #
 
   s.author             = { "Gareth Jones" => "gareth@garethpaul.com" }
-  s.social_media_url   = "http://twitter.com/gpj"
+  s.social_media_url   = "https://twitter.com/gpj"
 
   # ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
@@ -78,7 +78,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/garethpaul/SineWaveform.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/garethpaul/sinewaveform.git", :tag => "#{s.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
