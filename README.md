@@ -1,9 +1,11 @@
 # SineWaveform
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 A UIView subclass that reproduces a waveform effect.
 
 <img src="screenshots/sinewaveform.gif" width="350" style="display:inline"/>
-
 
 ### Storyboard or XIB
 <img src="screenshots/screenshot01.png" width="350" />
