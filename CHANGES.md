@@ -15,3 +15,5 @@
 - Guarded waveform drawing against zero wave counts and non-positive density
   steps from Interface Builder/runtime configuration.
 - Documented local verification steps.
+- Added canonical `docs/plans` coverage and made package checks require
+  completed plans.

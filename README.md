@@ -12,6 +12,11 @@ This README is based on the checked-in source, manifests, scripts, and repositor
 ## Repository Contents
 
 - `README.md` - project overview and local usage notes
+- `CHANGES.md` - maintenance history for package and waveform checks
+- `Makefile` - local verification entry points
+- `docs/plans` - completed maintenance plans for the current baseline
+- `plans` - historical implementation notes
+- `scripts` - static package and waveform validators
 - `SECURITY.md` - security reporting and disclosure guidance
 - `SineWaveform` - source or example code
 - `SineWaveform.xcodeproj` - Xcode project file
@@ -52,6 +57,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   waveform drawing safety checks for context availability, nonzero bounds, wave
   count, and draw step handling. When `xcodebuild` is installed, the `build`
   target also builds the `SineWaveform` target for the iOS simulator.
+- Static package checks also require completed canonical plans under `docs/plans`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
 
@@ -71,6 +77,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - This looks like an Apple platform project or sample. Xcode, Swift, CocoaPods, and deployment target versions may need to match the original project era.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
+- See `docs/plans/2026-06-08-sinewaveform-baseline.md` for the canonical
+  package and drawing safety baseline.
 
 ## Contributing
 
