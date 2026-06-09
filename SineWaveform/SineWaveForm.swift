@@ -8,6 +8,7 @@ public class SiriWaveformView: UIView {
     private var _phase: CGFloat = 0.0
     private var _amplitude: CGFloat = 0.0
     private let maximumWaveCount = 32
+    private let phaseCycle = CGFloat(2.0 * pi)
     
     @IBInspectable public var waveColor: UIColor = UIColor.blackColor()
     @IBInspectable public var numOfWaves = 7
@@ -25,11 +26,15 @@ public class SiriWaveformView: UIView {
     }
     
     public func updateWithLevel(level: CGFloat) {
-        _phase += phaseShift
+        _phase = normalizedPhase(_phase + phaseShift)
         let normalizedLevel = min(max(level, 0.0), 1.0)
         let normalizedIdleAmplitude = min(max(idleAmplitude, 0.0), 1.0)
         _amplitude = max(normalizedLevel, normalizedIdleAmplitude)
         setNeedsDisplay()
+    }
+
+    private func normalizedPhase(phase: CGFloat) -> CGFloat {
+        return CGFloat(fmod(Double(phase), Double(phaseCycle)))
     }
     
     override public func drawRect(rect: CGRect) {

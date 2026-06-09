@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Wrapped waveform phase accumulation to a single sine cycle so long-running
+  updates do not grow `_phase` without bound.
 - Capped draw-time wave counts so excessive `numOfWaves` inspectable values do
   not create unbounded rendering work.
 - Clamped inspectable waveform line widths at draw time before passing them to

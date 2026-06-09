@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_PLANS = ROOT / "docs" / "plans"
 CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-sinewaveform-baseline.md"
+PHASE_PLAN = DOCS_PLANS / "2026-06-09-phase-accumulator-bound.md"
 
 
 def read_text(relative_path):
@@ -34,6 +35,8 @@ def docs_plan_checks():
     errors = []
     if not CANONICAL_PLAN.exists():
         errors.append("docs/plans/2026-06-08-sinewaveform-baseline.md is missing")
+    if not PHASE_PLAN.exists():
+        errors.append("docs/plans/2026-06-09-phase-accumulator-bound.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -135,6 +138,16 @@ def waveform_checks():
         errors.append("updateWithLevel must clamp idleAmplitude into 0...1")
     if "_amplitude = max(normalizedLevel, normalizedIdleAmplitude)" not in source:
         errors.append("updateWithLevel must use the clamped level and idle amplitude")
+    if "_phase += phaseShift" in source:
+        errors.append("updateWithLevel must not let phase grow without bound")
+    if "private let phaseCycle = CGFloat(2.0 * pi)" not in source:
+        errors.append("SiriWaveformView must define a single-cycle phase bound")
+    if "_phase = normalizedPhase(_phase + phaseShift)" not in source:
+        errors.append("updateWithLevel must normalize phase after applying phaseShift")
+    if "private func normalizedPhase(phase: CGFloat) -> CGFloat" not in source:
+        errors.append("SiriWaveformView must centralize phase normalization")
+    if "fmod(Double(phase), Double(phaseCycle))" not in source:
+        errors.append("phase normalization must wrap with fmod")
 
     return errors
 

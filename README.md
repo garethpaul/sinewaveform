@@ -65,6 +65,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   before they are passed to Core Graphics.
 - Static waveform checks also require draw-time wave counts to be capped so
   excessive inspectable values cannot make a draw pass unbounded.
+- Static waveform checks also require phase accumulation to be wrapped to a
+  single sine cycle on each level update.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
@@ -102,6 +104,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   width guard.
 - See `docs/plans/2026-06-09-maximum-wave-count.md` for the draw-time maximum
   wave-count guard.
+- See `docs/plans/2026-06-09-phase-accumulator-bound.md` for the bounded phase
+  accumulator guard.
 
 ## Contributing
 
