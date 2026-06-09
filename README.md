@@ -59,6 +59,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   target also builds the `SineWaveform` target for the iOS simulator.
 - Static waveform checks also require caller-provided levels and idle amplitude
   values to be clamped into the expected `0...1` drawing range.
+- Static waveform checks also require draw-time maximum amplitude to stay
+  nonnegative for very short view bounds.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
@@ -90,6 +92,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   description metadata guard.
 - See `docs/plans/2026-06-09-amplitude-clamp.md` for the waveform amplitude
   input guard.
+- See `docs/plans/2026-06-09-nonnegative-draw-amplitude.md` for the short-bounds
+  draw amplitude guard.
 
 ## Contributing
 

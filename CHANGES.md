@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Clamped draw-time maximum amplitude to a nonnegative value so very short
+  bounds do not invert waveform rendering.
 - Clamped `updateWithLevel` input levels and `idleAmplitude` into the expected
   `0...1` waveform drawing range.
 - Extended waveform static checks to preserve bounded amplitude assignment.

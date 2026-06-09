@@ -18,6 +18,7 @@ Priority:
 - Keep Interface Builder inspectables useful
 - Keep draw loops bounded and safe for zero-size preview states
 - Keep level and idle-amplitude inputs bounded for predictable rendering
+- Keep draw-time amplitude nonnegative for small preview bounds
 - Keep root and archived podspec metadata aligned
 - Keep CocoaPods description metadata non-empty and unambiguous
 - Maintain screenshot and GIF examples

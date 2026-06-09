@@ -51,7 +51,7 @@ public class SiriWaveformView: UIView {
             let halfHeight = height / 2.0
             let mid = width / 2.0
             
-            let maxAmplitude = halfHeight - 4.0 // 4 corresponds to twice the stroke width
+            let maxAmplitude = max(halfHeight - 4.0, 0.0) // 4 corresponds to twice the stroke width
             let progress: CGFloat = 1.0 - CGFloat(waveNumber) / CGFloat(waveCount)
             let normedAmplitude = (1.5 * progress - 0.5) * amplitude
             let multiplier: CGFloat = 1.0
