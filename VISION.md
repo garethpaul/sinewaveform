@@ -22,6 +22,7 @@ Priority:
 - Keep draw-time amplitude nonnegative for small preview bounds
 - Keep inspectable line widths nonnegative before drawing
 - Keep phase accumulation bounded during long-running animations
+- Keep normalized phase values inside the nonnegative sine cycle
 - Keep root and archived podspec metadata aligned
 - Keep CocoaPods description metadata non-empty and unambiguous
 - Maintain screenshot and GIF examples

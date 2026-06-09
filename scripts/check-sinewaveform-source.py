@@ -148,6 +148,12 @@ def waveform_checks():
         errors.append("SiriWaveformView must centralize phase normalization")
     if "fmod(Double(phase), Double(phaseCycle))" not in source:
         errors.append("phase normalization must wrap with fmod")
+    if "return CGFloat(fmod(Double(phase), Double(phaseCycle)))" in source:
+        errors.append("phase normalization must not return negative fmod results directly")
+    if "let wrappedPhase = CGFloat(fmod(Double(phase), Double(phaseCycle)))" not in source:
+        errors.append("phase normalization must store the fmod result before range correction")
+    if "wrappedPhase >= 0.0 ? wrappedPhase : wrappedPhase + phaseCycle" not in source:
+        errors.append("phase normalization must shift negative wrapped phases back into the positive cycle")
 
     return errors
 

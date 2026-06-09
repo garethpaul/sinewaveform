@@ -34,7 +34,8 @@ public class SiriWaveformView: UIView {
     }
 
     private func normalizedPhase(phase: CGFloat) -> CGFloat {
-        return CGFloat(fmod(Double(phase), Double(phaseCycle)))
+        let wrappedPhase = CGFloat(fmod(Double(phase), Double(phaseCycle)))
+        return wrappedPhase >= 0.0 ? wrappedPhase : wrappedPhase + phaseCycle
     }
     
     override public func drawRect(rect: CGRect) {

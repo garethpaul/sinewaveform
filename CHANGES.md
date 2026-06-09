@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Shifted negative `fmod` phase remainders into the nonnegative sine cycle and
+  added static validation for normalized phase range correction.
 - Wrapped waveform phase accumulation to a single sine cycle so long-running
   updates do not grow `_phase` without bound.
 - Capped draw-time wave counts so excessive `numOfWaves` inspectable values do

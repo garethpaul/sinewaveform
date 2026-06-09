@@ -67,6 +67,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   excessive inspectable values cannot make a draw pass unbounded.
 - Static waveform checks also require phase accumulation to be wrapped to a
   single sine cycle on each level update.
+- Static waveform checks also require negative phase remainders to be shifted
+  into the nonnegative cycle.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
@@ -106,6 +108,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   wave-count guard.
 - See `docs/plans/2026-06-09-phase-accumulator-bound.md` for the bounded phase
   accumulator guard.
+- See `docs/plans/2026-06-09-nonnegative-phase-normalization.md` for
+  nonnegative phase normalization.
 
 ## Contributing
 
