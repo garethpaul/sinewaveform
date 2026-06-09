@@ -115,6 +115,14 @@ def waveform_checks():
         errors.append("drawRect must not allow negative max amplitude for short bounds")
     if "let maxAmplitude = max(halfHeight - 4.0, 0.0)" not in source:
         errors.append("drawRect must clamp max amplitude to a nonnegative value")
+    if "CGContextSetLineWidth(context, (waveNumber == 0 ? primaryWaveLineWidth : secondaryWaveLineWidth))" in source:
+        errors.append("drawRect must not pass raw inspectable line widths to Core Graphics")
+    if "let primaryLineWidth = max(primaryWaveLineWidth, 0.0)" not in source:
+        errors.append("drawRect must clamp the primary line width to a nonnegative value")
+    if "let secondaryLineWidth = max(secondaryWaveLineWidth, 0.0)" not in source:
+        errors.append("drawRect must clamp the secondary line width to a nonnegative value")
+    if "CGContextSetLineWidth(context, (waveNumber == 0 ? primaryLineWidth : secondaryLineWidth))" not in source:
+        errors.append("drawRect must set Core Graphics line width from clamped values")
     if "_amplitude = fmax(level, idleAmplitude)" in source:
         errors.append("updateWithLevel must not assign unbounded caller-provided amplitude")
     if "let normalizedLevel = min(max(level, 0.0), 1.0)" not in source:

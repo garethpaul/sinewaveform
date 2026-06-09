@@ -44,9 +44,11 @@ public class SiriWaveformView: UIView {
 
         let waveCount = max(1, numOfWaves)
         let step = max(density, 1.0)
+        let primaryLineWidth = max(primaryWaveLineWidth, 0.0)
+        let secondaryLineWidth = max(secondaryWaveLineWidth, 0.0)
         
         for waveNumber in 0..<waveCount {
-            CGContextSetLineWidth(context, (waveNumber == 0 ? primaryWaveLineWidth : secondaryWaveLineWidth))
+            CGContextSetLineWidth(context, (waveNumber == 0 ? primaryLineWidth : secondaryLineWidth))
             
             let halfHeight = height / 2.0
             let mid = width / 2.0

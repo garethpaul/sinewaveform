@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Clamped inspectable waveform line widths at draw time before passing them to
+  Core Graphics.
 - Clamped draw-time maximum amplitude to a nonnegative value so very short
   bounds do not invert waveform rendering.
 - Clamped `updateWithLevel` input levels and `idleAmplitude` into the expected

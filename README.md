@@ -61,6 +61,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   values to be clamped into the expected `0...1` drawing range.
 - Static waveform checks also require draw-time maximum amplitude to stay
   nonnegative for very short view bounds.
+- Static waveform checks also require inspectable line widths to be clamped
+  before they are passed to Core Graphics.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
@@ -94,6 +96,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   input guard.
 - See `docs/plans/2026-06-09-nonnegative-draw-amplitude.md` for the short-bounds
   draw amplitude guard.
+- See `docs/plans/2026-06-09-line-width-clamp.md` for the inspectable stroke
+  width guard.
 
 ## Contributing
 

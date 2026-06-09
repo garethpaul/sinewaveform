@@ -19,6 +19,7 @@ Priority:
 - Keep draw loops bounded and safe for zero-size preview states
 - Keep level and idle-amplitude inputs bounded for predictable rendering
 - Keep draw-time amplitude nonnegative for small preview bounds
+- Keep inspectable line widths nonnegative before drawing
 - Keep root and archived podspec metadata aligned
 - Keep CocoaPods description metadata non-empty and unambiguous
 - Maintain screenshot and GIF examples
@@ -55,6 +56,7 @@ computed and supplied.
 - Hidden telemetry
 - Public API changes without migration notes
 - Unbounded waveform input values that can distort drawing
+- Negative stroke widths passed into Core Graphics drawing
 - Visual rewrites without screenshot or sample verification
 
 This list is a roadmap guardrail, not a permanent rule.
