@@ -99,8 +99,12 @@ def waveform_checks():
         errors.append("drawRect must not draw one more wave than the clamped wave count")
     if "x += density" in source:
         errors.append("drawRect must not advance by raw density")
-    if "let waveCount = max(1, numOfWaves)" not in source:
-        errors.append("drawRect must clamp wave count to at least 1")
+    if "let waveCount = max(1, numOfWaves)" in source:
+        errors.append("drawRect must not leave numOfWaves without an upper bound")
+    if "private let maximumWaveCount = 32" not in source:
+        errors.append("SiriWaveformView must define a maximum draw-time wave count")
+    if "let waveCount = min(max(1, numOfWaves), maximumWaveCount)" not in source:
+        errors.append("drawRect must clamp wave count to a bounded 1...maximumWaveCount range")
     if "let step = max(density, 1.0)" not in source:
         errors.append("drawRect must clamp draw step to a positive value")
     if "guard let context = UIGraphicsGetCurrentContext() else { return }" not in source:

@@ -7,6 +7,7 @@ let pi = M_PI
 public class SiriWaveformView: UIView {
     private var _phase: CGFloat = 0.0
     private var _amplitude: CGFloat = 0.0
+    private let maximumWaveCount = 32
     
     @IBInspectable public var waveColor: UIColor = UIColor.blackColor()
     @IBInspectable public var numOfWaves = 7
@@ -42,7 +43,7 @@ public class SiriWaveformView: UIView {
         backgroundColor?.set()
         CGContextFillRect(context, rect)
 
-        let waveCount = max(1, numOfWaves)
+        let waveCount = min(max(1, numOfWaves), maximumWaveCount)
         let step = max(density, 1.0)
         let primaryLineWidth = max(primaryWaveLineWidth, 0.0)
         let secondaryLineWidth = max(secondaryWaveLineWidth, 0.0)

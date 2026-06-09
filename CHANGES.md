@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Capped draw-time wave counts so excessive `numOfWaves` inspectable values do
+  not create unbounded rendering work.
 - Clamped inspectable waveform line widths at draw time before passing them to
   Core Graphics.
 - Clamped draw-time maximum amplitude to a nonnegative value so very short

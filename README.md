@@ -63,6 +63,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   nonnegative for very short view bounds.
 - Static waveform checks also require inspectable line widths to be clamped
   before they are passed to Core Graphics.
+- Static waveform checks also require draw-time wave counts to be capped so
+  excessive inspectable values cannot make a draw pass unbounded.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
@@ -98,6 +100,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   draw amplitude guard.
 - See `docs/plans/2026-06-09-line-width-clamp.md` for the inspectable stroke
   width guard.
+- See `docs/plans/2026-06-09-maximum-wave-count.md` for the draw-time maximum
+  wave-count guard.
 
 ## Contributing
 
