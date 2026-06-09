@@ -25,7 +25,9 @@ public class SiriWaveformView: UIView {
     
     public func updateWithLevel(level: CGFloat) {
         _phase += phaseShift
-        _amplitude = fmax(level, idleAmplitude)
+        let normalizedLevel = min(max(level, 0.0), 1.0)
+        let normalizedIdleAmplitude = min(max(idleAmplitude, 0.0), 1.0)
+        _amplitude = max(normalizedLevel, normalizedIdleAmplitude)
         setNeedsDisplay()
     }
     

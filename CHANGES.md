@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-09
+
+- Clamped `updateWithLevel` input levels and `idleAmplitude` into the expected
+  `0...1` waveform drawing range.
+- Extended waveform static checks to preserve bounded amplitude assignment.
+
 ## 2026-06-08
 
 - Removed empty placeholder podspec descriptions and added static package

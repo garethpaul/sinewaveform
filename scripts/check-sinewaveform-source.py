@@ -111,6 +111,14 @@ def waveform_checks():
         errors.append("drawRect must iterate within the clamped wave count")
     if source.count("UIGraphicsGetCurrentContext()") != 1:
         errors.append("drawRect must fetch the graphics context once before the wave loop")
+    if "_amplitude = fmax(level, idleAmplitude)" in source:
+        errors.append("updateWithLevel must not assign unbounded caller-provided amplitude")
+    if "let normalizedLevel = min(max(level, 0.0), 1.0)" not in source:
+        errors.append("updateWithLevel must clamp caller-provided levels into 0...1")
+    if "let normalizedIdleAmplitude = min(max(idleAmplitude, 0.0), 1.0)" not in source:
+        errors.append("updateWithLevel must clamp idleAmplitude into 0...1")
+    if "_amplitude = max(normalizedLevel, normalizedIdleAmplitude)" not in source:
+        errors.append("updateWithLevel must use the clamped level and idle amplitude")
 
     return errors
 

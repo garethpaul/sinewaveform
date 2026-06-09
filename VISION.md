@@ -17,6 +17,7 @@ Priority:
 - Preserve the `SiriWaveformView` drawing behavior
 - Keep Interface Builder inspectables useful
 - Keep draw loops bounded and safe for zero-size preview states
+- Keep level and idle-amplitude inputs bounded for predictable rendering
 - Keep root and archived podspec metadata aligned
 - Keep CocoaPods description metadata non-empty and unambiguous
 - Maintain screenshot and GIF examples
@@ -52,6 +53,7 @@ computed and supplied.
 - Microphone capture inside the view
 - Hidden telemetry
 - Public API changes without migration notes
+- Unbounded waveform input values that can distort drawing
 - Visual rewrites without screenshot or sample verification
 
 This list is a roadmap guardrail, not a permanent rule.
