@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Centralized unit-interval normalization for level and idle-amplitude inputs
+  so `NaN` values fall back before updating draw amplitude.
 - Shifted negative `fmod` phase remainders into the nonnegative sine cycle and
   added static validation for normalized phase range correction.
 - Wrapped waveform phase accumulation to a single sine cycle so long-running

@@ -132,10 +132,20 @@ def waveform_checks():
         errors.append("drawRect must set Core Graphics line width from clamped values")
     if "_amplitude = fmax(level, idleAmplitude)" in source:
         errors.append("updateWithLevel must not assign unbounded caller-provided amplitude")
-    if "let normalizedLevel = min(max(level, 0.0), 1.0)" not in source:
-        errors.append("updateWithLevel must clamp caller-provided levels into 0...1")
-    if "let normalizedIdleAmplitude = min(max(idleAmplitude, 0.0), 1.0)" not in source:
-        errors.append("updateWithLevel must clamp idleAmplitude into 0...1")
+    if "let normalizedLevel = min(max(level, 0.0), 1.0)" in source:
+        errors.append("updateWithLevel must not normalize caller-provided levels inline")
+    if "let normalizedIdleAmplitude = min(max(idleAmplitude, 0.0), 1.0)" in source:
+        errors.append("updateWithLevel must not normalize idleAmplitude inline")
+    if "private func normalizedUnitValue(value: CGFloat) -> CGFloat" not in source:
+        errors.append("SiriWaveformView must centralize unit-interval value normalization")
+    if "guard value == value else { return 0.0 }" not in source:
+        errors.append("unit-interval normalization must reject NaN values")
+    if "return min(max(value, 0.0), 1.0)" not in source:
+        errors.append("unit-interval normalization must clamp values into 0...1")
+    if "let normalizedLevel = normalizedUnitValue(level)" not in source:
+        errors.append("updateWithLevel must normalize caller-provided levels through the shared helper")
+    if "let normalizedIdleAmplitude = normalizedUnitValue(idleAmplitude)" not in source:
+        errors.append("updateWithLevel must normalize idleAmplitude through the shared helper")
     if "_amplitude = max(normalizedLevel, normalizedIdleAmplitude)" not in source:
         errors.append("updateWithLevel must use the clamped level and idle amplitude")
     if "_phase += phaseShift" in source:

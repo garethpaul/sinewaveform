@@ -59,6 +59,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   target also builds the `SineWaveform` target for the iOS simulator.
 - Static waveform checks also require caller-provided levels and idle amplitude
   values to be clamped into the expected `0...1` drawing range.
+- Static waveform checks also require level and idle-amplitude normalization to
+  reject `NaN` before updating the draw amplitude.
 - Static waveform checks also require draw-time maximum amplitude to stay
   nonnegative for very short view bounds.
 - Static waveform checks also require inspectable line widths to be clamped
@@ -100,6 +102,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   description metadata guard.
 - See `docs/plans/2026-06-09-amplitude-clamp.md` for the waveform amplitude
   input guard.
+- See `docs/plans/2026-06-09-nan-safe-unit-normalization.md` for the NaN-safe
+  level and idle-amplitude normalization guard.
 - See `docs/plans/2026-06-09-nonnegative-draw-amplitude.md` for the short-bounds
   draw amplitude guard.
 - See `docs/plans/2026-06-09-line-width-clamp.md` for the inspectable stroke
