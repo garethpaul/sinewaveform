@@ -24,7 +24,6 @@ Pod::Spec.new do |s|
   #   * Try to keep it short, snappy and to the point.
   #   * Write the description between the DESC delimiters below.
   #   * Finally, don't worry about the indent, CocoaPods strips it!
-  s.description  = ""
   s.description  = <<-DESC
                    SineWaveform provides an easy way to provide a sine wave in your app.
                    Think Sirilike waves..

@@ -75,6 +75,8 @@ def package_checks():
             errors.append(f"{podspec_path} social_media_url must use HTTPS")
         if "https://github.com/garethpaul/SineWaveform.git" in podspec_source:
             errors.append(f"{podspec_path} source URL must match the lowercase GitHub repo URL")
+        if re.search(r's\.description\s*=\s*""', podspec_source):
+            errors.append(f"{podspec_path} must not assign an empty podspec description before the real description")
 
     project = read_text("SineWaveform.xcodeproj/project.pbxproj")
     if "productName = SineWaveform;" not in project:

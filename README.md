@@ -58,6 +58,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   count, and draw step handling. When `xcodebuild` is installed, the `build`
   target also builds the `SineWaveform` target for the iOS simulator.
 - Static package checks cover the root and archived versioned podspec metadata.
+- Static package checks reject empty placeholder podspec descriptions before
+  the real package description.
 - Static package checks also require completed canonical plans under `docs/plans`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
@@ -82,6 +84,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   package and drawing safety baseline.
 - See `docs/plans/2026-06-08-versioned-podspec-metadata.md` for the archived
   podspec metadata guard.
+- See `docs/plans/2026-06-08-podspec-description-guard.md` for the podspec
+  description metadata guard.
 
 ## Contributing
 

@@ -2,6 +2,8 @@
 
 ## 2026-06-08
 
+- Removed empty placeholder podspec descriptions and added static package
+  validation for non-empty description metadata.
 - Aligned archived versioned podspec URLs with the root HTTPS/lowercase package
   metadata and extended static package checks across all tracked podspecs.
 - Added `make check` as the shared repository verification alias.
