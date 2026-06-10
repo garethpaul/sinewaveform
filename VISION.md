@@ -29,12 +29,12 @@ Priority:
 - Keep CocoaPods description metadata non-empty and unambiguous
 - Maintain screenshot and GIF examples
 - Keep completed maintenance plans under `docs/plans`
-- Treat CocoaPods and Swift syntax as legacy until documented
+- Keep the Swift 5 framework compiling for the iOS Simulator in hosted CI
 
 Next priorities:
 
 - Fix README installation naming and import examples
-- Document the exact legacy Swift, iOS, and CocoaPods compatibility matrix
+- Document the exact iOS and CocoaPods compatibility matrix
 - Add a simple sample app or snapshot verification path
 - Modernize drawing APIs in a dedicated compatibility pass
 

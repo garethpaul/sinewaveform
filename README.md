@@ -78,8 +78,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
 - Static package checks also require completed canonical plans under `docs/plans`.
-- GitHub Actions runs the portable package and waveform checks on Python 3.12
-  for pushes and pull requests.
+- GitHub Actions runs portable package and waveform checks on Ubuntu 24.04 and
+  builds the framework for a generic iOS Simulator on macOS 15.
+- The Xcode project uses Swift 5 language mode and targets iOS 12 or newer.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
 

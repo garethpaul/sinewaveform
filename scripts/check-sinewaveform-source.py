@@ -88,19 +88,43 @@ def package_checks():
     project = read_text("SineWaveform.xcodeproj/project.pbxproj")
     if "productName = SineWaveform;" not in project:
         errors.append("Xcode project must expose the SineWaveform target")
+    for fragment in ("IPHONEOS_DEPLOYMENT_TARGET = 12.0;", "SWIFT_VERSION = 5.0;"):
+        if fragment not in project:
+            errors.append(f"Xcode project must keep current build setting: {fragment}")
 
     workflow = WORKFLOW.read_text(encoding="utf-8") if WORKFLOW.exists() else ""
     for fragment in (
         "permissions:",
         "contents: read",
-        "timeout-minutes: 10",
+        "concurrency:",
+        "cancel-in-progress: true",
+        "contract:",
+        "runs-on: ubuntu-24.04",
+        "timeout-minutes: 5",
+        "build:",
+        "runs-on: macos-15",
+        "timeout-minutes: 15",
+        "workflow_dispatch:",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
         "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
         'python-version: "3.12"',
         "run: make check",
+        "run: make build",
     ):
         if fragment not in workflow:
             errors.append(f"GitHub Actions workflow must keep contract: {fragment}")
+
+    makefile = read_text("Makefile")
+    for fragment in (
+        "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))",
+        '"$(ROOT)/SineWaveform.podspec"',
+        '"$(ROOT)/scripts/check-sinewaveform-source.py"',
+        '"$(ROOT)/SineWaveform.xcodeproj"',
+        "generic/platform=iOS Simulator",
+        "CODE_SIGNING_ALLOWED=NO",
+    ):
+        if fragment not in makefile:
+            errors.append(f"Makefile must keep root-independent build contract: {fragment}")
 
     return errors
 
@@ -139,13 +163,13 @@ def waveform_checks():
         errors.append("drawRect must not allow negative max amplitude for short bounds")
     if "let maxAmplitude = max(halfHeight - 4.0, 0.0)" not in source:
         errors.append("drawRect must clamp max amplitude to a nonnegative value")
-    if "CGContextSetLineWidth(context, (waveNumber == 0 ? primaryWaveLineWidth : secondaryWaveLineWidth))" in source:
+    if "context.setLineWidth(waveNumber == 0 ? primaryWaveLineWidth : secondaryWaveLineWidth)" in source:
         errors.append("drawRect must not pass raw inspectable line widths to Core Graphics")
     if "let primaryLineWidth = normalizedValue(primaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 2.0)" not in source:
         errors.append("drawRect must clamp the primary line width through finite input normalization")
     if "let secondaryLineWidth = normalizedValue(secondaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 3.0)" not in source:
         errors.append("drawRect must clamp the secondary line width through finite input normalization")
-    if "CGContextSetLineWidth(context, (waveNumber == 0 ? primaryLineWidth : secondaryLineWidth))" not in source:
+    if "context.setLineWidth(waveNumber == 0 ? primaryLineWidth : secondaryLineWidth)" not in source:
         errors.append("drawRect must set Core Graphics line width from clamped values")
     if "_amplitude = fmax(level, idleAmplitude)" in source:
         errors.append("updateWithLevel must not assign unbounded caller-provided amplitude")
@@ -153,7 +177,7 @@ def waveform_checks():
         errors.append("updateWithLevel must not normalize caller-provided levels inline")
     if "let normalizedIdleAmplitude = min(max(idleAmplitude, 0.0), 1.0)" in source:
         errors.append("updateWithLevel must not normalize idleAmplitude inline")
-    if "private func normalizedUnitValue(value: CGFloat) -> CGFloat" not in source:
+    if "private func normalizedUnitValue(_ value: CGFloat) -> CGFloat" not in source:
         errors.append("SiriWaveformView must centralize unit-interval value normalization")
     if "return normalizedValue(value, minimum: 0.0, maximum: 1.0, fallback: 0.0)" not in source:
         errors.append("unit-interval normalization must use shared finite input normalization")
@@ -169,7 +193,7 @@ def waveform_checks():
         errors.append("SiriWaveformView must define a single-cycle phase bound")
     if "_phase = normalizedPhase(_phase + safePhaseShift)" not in source:
         errors.append("updateWithLevel must normalize phase after applying the bounded phase shift")
-    if "private func normalizedPhase(phase: CGFloat) -> CGFloat" not in source:
+    if "private func normalizedPhase(_ phase: CGFloat) -> CGFloat" not in source:
         errors.append("SiriWaveformView must centralize phase normalization")
     if "fmod(Double(phase), Double(phaseCycle))" not in source:
         errors.append("phase normalization must wrap with fmod")
@@ -183,7 +207,7 @@ def waveform_checks():
         "private let maximumFrequency: CGFloat = 100.0",
         "private let maximumDensity: CGFloat = 100.0",
         "private let maximumLineWidth: CGFloat = 100.0",
-        "private func normalizedValue(value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat",
+        "private func normalizedValue(_ value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat",
         "guard value == value else { return fallback }",
         "return min(max(value, minimum), maximum)",
         "let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: -0.15)",
