@@ -9,6 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS_PLANS = ROOT / "docs" / "plans"
 CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-sinewaveform-baseline.md"
 PHASE_PLAN = DOCS_PLANS / "2026-06-09-phase-accumulator-bound.md"
+FINITE_INPUT_PLAN = DOCS_PLANS / "2026-06-10-finite-inspectable-inputs-and-ci.md"
+WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 
 
 def read_text(relative_path):
@@ -37,6 +39,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-08-sinewaveform-baseline.md is missing")
     if not PHASE_PLAN.exists():
         errors.append("docs/plans/2026-06-09-phase-accumulator-bound.md is missing")
+    if not FINITE_INPUT_PLAN.exists():
+        errors.append("docs/plans/2026-06-10-finite-inspectable-inputs-and-ci.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -85,6 +89,19 @@ def package_checks():
     if "productName = SineWaveform;" not in project:
         errors.append("Xcode project must expose the SineWaveform target")
 
+    workflow = WORKFLOW.read_text(encoding="utf-8") if WORKFLOW.exists() else ""
+    for fragment in (
+        "permissions:",
+        "contents: read",
+        "timeout-minutes: 10",
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
+        'python-version: "3.12"',
+        "run: make check",
+    ):
+        if fragment not in workflow:
+            errors.append(f"GitHub Actions workflow must keep contract: {fragment}")
+
     return errors
 
 
@@ -108,8 +125,8 @@ def waveform_checks():
         errors.append("SiriWaveformView must define a maximum draw-time wave count")
     if "let waveCount = min(max(1, numOfWaves), maximumWaveCount)" not in source:
         errors.append("drawRect must clamp wave count to a bounded 1...maximumWaveCount range")
-    if "let step = max(density, 1.0)" not in source:
-        errors.append("drawRect must clamp draw step to a positive value")
+    if "let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)" not in source:
+        errors.append("drawRect must clamp draw step through finite input normalization")
     if "guard let context = UIGraphicsGetCurrentContext() else { return }" not in source:
         errors.append("drawRect must guard graphics context availability")
     if "guard width > 0.0 && height > 0.0 else { return }" not in source:
@@ -124,10 +141,10 @@ def waveform_checks():
         errors.append("drawRect must clamp max amplitude to a nonnegative value")
     if "CGContextSetLineWidth(context, (waveNumber == 0 ? primaryWaveLineWidth : secondaryWaveLineWidth))" in source:
         errors.append("drawRect must not pass raw inspectable line widths to Core Graphics")
-    if "let primaryLineWidth = max(primaryWaveLineWidth, 0.0)" not in source:
-        errors.append("drawRect must clamp the primary line width to a nonnegative value")
-    if "let secondaryLineWidth = max(secondaryWaveLineWidth, 0.0)" not in source:
-        errors.append("drawRect must clamp the secondary line width to a nonnegative value")
+    if "let primaryLineWidth = normalizedValue(primaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 2.0)" not in source:
+        errors.append("drawRect must clamp the primary line width through finite input normalization")
+    if "let secondaryLineWidth = normalizedValue(secondaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 3.0)" not in source:
+        errors.append("drawRect must clamp the secondary line width through finite input normalization")
     if "CGContextSetLineWidth(context, (waveNumber == 0 ? primaryLineWidth : secondaryLineWidth))" not in source:
         errors.append("drawRect must set Core Graphics line width from clamped values")
     if "_amplitude = fmax(level, idleAmplitude)" in source:
@@ -138,10 +155,8 @@ def waveform_checks():
         errors.append("updateWithLevel must not normalize idleAmplitude inline")
     if "private func normalizedUnitValue(value: CGFloat) -> CGFloat" not in source:
         errors.append("SiriWaveformView must centralize unit-interval value normalization")
-    if "guard value == value else { return 0.0 }" not in source:
-        errors.append("unit-interval normalization must reject NaN values")
-    if "return min(max(value, 0.0), 1.0)" not in source:
-        errors.append("unit-interval normalization must clamp values into 0...1")
+    if "return normalizedValue(value, minimum: 0.0, maximum: 1.0, fallback: 0.0)" not in source:
+        errors.append("unit-interval normalization must use shared finite input normalization")
     if "let normalizedLevel = normalizedUnitValue(level)" not in source:
         errors.append("updateWithLevel must normalize caller-provided levels through the shared helper")
     if "let normalizedIdleAmplitude = normalizedUnitValue(idleAmplitude)" not in source:
@@ -152,8 +167,8 @@ def waveform_checks():
         errors.append("updateWithLevel must not let phase grow without bound")
     if "private let phaseCycle = CGFloat(2.0 * pi)" not in source:
         errors.append("SiriWaveformView must define a single-cycle phase bound")
-    if "_phase = normalizedPhase(_phase + phaseShift)" not in source:
-        errors.append("updateWithLevel must normalize phase after applying phaseShift")
+    if "_phase = normalizedPhase(_phase + safePhaseShift)" not in source:
+        errors.append("updateWithLevel must normalize phase after applying the bounded phase shift")
     if "private func normalizedPhase(phase: CGFloat) -> CGFloat" not in source:
         errors.append("SiriWaveformView must centralize phase normalization")
     if "fmod(Double(phase), Double(phaseCycle))" not in source:
@@ -164,6 +179,19 @@ def waveform_checks():
         errors.append("phase normalization must store the fmod result before range correction")
     if "wrappedPhase >= 0.0 ? wrappedPhase : wrappedPhase + phaseCycle" not in source:
         errors.append("phase normalization must shift negative wrapped phases back into the positive cycle")
+    for fragment in (
+        "private let maximumFrequency: CGFloat = 100.0",
+        "private let maximumDensity: CGFloat = 100.0",
+        "private let maximumLineWidth: CGFloat = 100.0",
+        "private func normalizedValue(value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat",
+        "guard value == value else { return fallback }",
+        "return min(max(value, minimum), maximum)",
+        "let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: 0.0)",
+        "let drawFrequency = normalizedValue(frequency, minimum: -maximumFrequency, maximum: maximumFrequency, fallback: 1.5)",
+        "* drawFrequency + _phase",
+    ):
+        if fragment not in source:
+            errors.append(f"waveform finite-input contract is missing: {fragment}")
 
     return errors
 
