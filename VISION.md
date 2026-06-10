@@ -25,6 +25,7 @@ Priority:
 - Keep phase accumulation bounded during long-running animations
 - Keep normalized phase values inside the nonnegative sine cycle
 - Keep every inspectable floating-point value finite before phase math or drawing
+- Keep sampled waveform coordinates within the view's horizontal bounds
 - Keep root and archived podspec metadata aligned
 - Keep CocoaPods description metadata non-empty and unambiguous
 - Maintain screenshot and GIF examples

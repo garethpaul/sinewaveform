@@ -81,15 +81,17 @@ public class SiriWaveformView: UIView {
             waveColor.withAlphaComponent(multiplier * waveColor.cgColor.alpha).set()
             
             var x: CGFloat = 0.0
-            while x < width + step {
-                let scaling = -pow(1 / mid * (x - mid), 2) + 1
-                let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(x / width) * drawFrequency + _phase
+            while true {
+                let sampleX = min(x, width)
+                let scaling = -pow(1 / mid * (sampleX - mid), 2) + 1
+                let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(sampleX / width) * drawFrequency + _phase
                 let y = scaling * maxAmplitude * normedAmplitude * sin(tempCasting) + halfHeight
-                if x == 0 {
-                    context.move(to: CGPoint(x: x, y: y))
+                if sampleX == 0 {
+                    context.move(to: CGPoint(x: sampleX, y: y))
                 } else {
-                    context.addLine(to: CGPoint(x: x, y: y))
+                    context.addLine(to: CGPoint(x: sampleX, y: y))
                 }
+                if sampleX == width { break }
                 x += step
             }
             context.strokePath()

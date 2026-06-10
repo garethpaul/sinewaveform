@@ -143,6 +143,8 @@ def waveform_checks():
         errors.append("drawRect must not draw one more wave than the clamped wave count")
     if "x += density" in source:
         errors.append("drawRect must not advance by raw density")
+    if "while x < width + step" in source:
+        errors.append("drawRect must not sample beyond the right view bound")
     if "let waveCount = max(1, numOfWaves)" in source:
         errors.append("drawRect must not leave numOfWaves without an upper bound")
     if "private let maximumWaveCount = 32" not in source:
@@ -151,6 +153,16 @@ def waveform_checks():
         errors.append("drawRect must clamp wave count to a bounded 1...maximumWaveCount range")
     if "let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)" not in source:
         errors.append("drawRect must clamp draw step through finite input normalization")
+    for fragment in (
+        "while true",
+        "let sampleX = min(x, width)",
+        "(sampleX - mid)",
+        "sampleX / width",
+        "CGPoint(x: sampleX, y: y)",
+        "if sampleX == width { break }",
+    ):
+        if fragment not in source:
+            errors.append(f"drawRect right-edge sampling contract is missing: {fragment}")
     if "guard let context = UIGraphicsGetCurrentContext() else { return }" not in source:
         errors.append("drawRect must guard graphics context availability")
     if "guard width > 0.0 && height > 0.0 else { return }" not in source:

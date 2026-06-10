@@ -74,6 +74,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Static waveform checks also require frequency, density, line widths, and
   phase shift to pass through shared finite-range normalization before drawing;
   negative frequency remains supported for mirrored waveforms.
+- Static waveform checks also require the final horizontal sample to be
+  clamped to the right view edge so draw geometry never extends past bounds.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
@@ -122,6 +124,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   nonnegative phase normalization.
 - See `docs/plans/2026-06-10-finite-inspectable-inputs-and-ci.md` for bounded
   inspectable floating-point inputs and the CI gate.
+- See `docs/plans/2026-06-10-right-edge-sample-clamp.md` for bounded
+  right-edge waveform sampling.
 
 ## Contributing
 

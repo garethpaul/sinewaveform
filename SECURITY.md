@@ -30,6 +30,8 @@ Helpful reports include:
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 - GitHub Actions uses fixed Ubuntu 24.04 and macOS 15 runners with read-only
   repository permissions; the macOS job builds an unsigned simulator framework.
+- Waveform input normalization and right-edge sample clamping keep generated
+  Core Graphics coordinates within the view's finite drawing bounds.
 
 ## Mobile Privacy Notes
 

@@ -13,6 +13,8 @@
 - Preserved the declared idle-amplitude and phase-shift defaults when
   Interface Builder supplies NaN values.
 - Added a least-privilege Python 3.12 GitHub Actions gate for portable checks.
+- Clamped the final waveform sample to the right view edge so coarse density
+  steps cannot produce off-bounds geometry or a negative edge envelope.
 
 ## 2026-06-09
 
