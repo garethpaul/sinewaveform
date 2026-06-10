@@ -71,10 +71,15 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   single sine cycle on each level update.
 - Static waveform checks also require negative phase remainders to be shifted
   into the nonnegative cycle.
+- Static waveform checks also require frequency, density, line widths, and
+  phase shift to pass through shared finite-range normalization before drawing;
+  negative frequency remains supported for mirrored waveforms.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
 - Static package checks also require completed canonical plans under `docs/plans`.
+- GitHub Actions runs the portable package and waveform checks on Python 3.12
+  for pushes and pull requests.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
 
@@ -114,6 +119,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   accumulator guard.
 - See `docs/plans/2026-06-09-nonnegative-phase-normalization.md` for
   nonnegative phase normalization.
+- See `docs/plans/2026-06-10-finite-inspectable-inputs-and-ci.md` for bounded
+  inspectable floating-point inputs and the CI gate.
 
 ## Contributing
 

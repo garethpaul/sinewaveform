@@ -9,6 +9,9 @@ public class SiriWaveformView: UIView {
     private var _amplitude: CGFloat = 0.0
     private let maximumWaveCount = 32
     private let phaseCycle = CGFloat(2.0 * pi)
+    private let maximumFrequency: CGFloat = 100.0
+    private let maximumDensity: CGFloat = 100.0
+    private let maximumLineWidth: CGFloat = 100.0
     
     @IBInspectable public var waveColor: UIColor = UIColor.blackColor()
     @IBInspectable public var numOfWaves = 7
@@ -26,16 +29,21 @@ public class SiriWaveformView: UIView {
     }
     
     public func updateWithLevel(level: CGFloat) {
-        _phase = normalizedPhase(_phase + phaseShift)
+        let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: -0.15)
+        _phase = normalizedPhase(_phase + safePhaseShift)
         let normalizedLevel = normalizedUnitValue(level)
-        let normalizedIdleAmplitude = normalizedUnitValue(idleAmplitude)
+        let normalizedIdleAmplitude = normalizedValue(idleAmplitude, minimum: 0.0, maximum: 1.0, fallback: 0.01)
         _amplitude = max(normalizedLevel, normalizedIdleAmplitude)
         setNeedsDisplay()
     }
 
     private func normalizedUnitValue(value: CGFloat) -> CGFloat {
-        guard value == value else { return 0.0 }
-        return min(max(value, 0.0), 1.0)
+        return normalizedValue(value, minimum: 0.0, maximum: 1.0, fallback: 0.0)
+    }
+
+    private func normalizedValue(value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat {
+        guard value == value else { return fallback }
+        return min(max(value, minimum), maximum)
     }
 
     private func normalizedPhase(phase: CGFloat) -> CGFloat {
@@ -55,9 +63,10 @@ public class SiriWaveformView: UIView {
         CGContextFillRect(context, rect)
 
         let waveCount = min(max(1, numOfWaves), maximumWaveCount)
-        let step = max(density, 1.0)
-        let primaryLineWidth = max(primaryWaveLineWidth, 0.0)
-        let secondaryLineWidth = max(secondaryWaveLineWidth, 0.0)
+        let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)
+        let drawFrequency = normalizedValue(frequency, minimum: -maximumFrequency, maximum: maximumFrequency, fallback: 1.5)
+        let primaryLineWidth = normalizedValue(primaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 2.0)
+        let secondaryLineWidth = normalizedValue(secondaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 3.0)
         
         for waveNumber in 0..<waveCount {
             CGContextSetLineWidth(context, (waveNumber == 0 ? primaryLineWidth : secondaryLineWidth))
@@ -74,7 +83,7 @@ public class SiriWaveformView: UIView {
             var x: CGFloat = 0.0
             while x < width + step {
                 let scaling = -pow(1 / mid * (x - mid), 2) + 1
-                let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(x / width) * frequency + _phase
+                let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(x / width) * drawFrequency + _phase
                 let y = scaling * maxAmplitude * normedAmplitude * CGFloat(sinf(Float(tempCasting))) + halfHeight
                 if x == 0 {
                     CGContextMoveToPoint(context, x, y)

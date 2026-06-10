@@ -1,5 +1,13 @@
 # Changes
 
+## 2026-06-10
+
+- Bounded inspectable frequency, density, line widths, and phase shift through
+  shared NaN-safe normalization before drawing.
+- Preserved the declared idle-amplitude and phase-shift defaults when
+  Interface Builder supplies NaN values.
+- Added a least-privilege Python 3.12 GitHub Actions gate for portable checks.
+
 ## 2026-06-09
 
 - Centralized unit-interval normalization for level and idle-amplitude inputs
