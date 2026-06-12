@@ -2,6 +2,7 @@
 import argparse
 import re
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -11,6 +12,52 @@ CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-sinewaveform-baseline.md"
 PHASE_PLAN = DOCS_PLANS / "2026-06-09-phase-accumulator-bound.md"
 FINITE_INPUT_PLAN = DOCS_PLANS / "2026-06-10-finite-inspectable-inputs-and-ci.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
+
+EXPECTED_WORKFLOW = """name: Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Run static verification
+        run: make check
+
+  build:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build iOS Simulator framework
+        run: make build
+"""
 
 
 def read_text(relative_path):
@@ -26,6 +73,9 @@ def require_paths():
         "SineWaveform/SineWaveForm.swift",
         "SineWaveform/SineWaveform.h",
         "SineWaveform.xcodeproj/project.pbxproj",
+        "README.md",
+        "docs/readme-overview.svg",
+        "docs/device-preview.svg",
         "LICENSE",
     ):
         if not (ROOT / relative_path).exists():
@@ -70,9 +120,13 @@ def package_checks():
         's.version      = "0.0.6"',
         's.license = { :type => "MIT", :file => "LICENSE" }',
         's.source_files = "SineWaveform/*.{h,m,swift}"',
+        's.platform     = :ios, "12.0"',
+        's.swift_version = "5.0"',
     ):
         if fragment not in podspec:
             errors.append(f"podspec is missing expected metadata: {fragment}")
+    if 's.platform     = :ios, "8.0"' in podspec:
+        errors.append("root podspec must not advertise the retired iOS 8 deployment target")
 
     for podspec_path in podspec_paths:
         podspec_source = read_text(podspec_path)
@@ -92,6 +146,23 @@ def package_checks():
         if fragment not in project:
             errors.append(f"Xcode project must keep current build setting: {fragment}")
 
+    readme = read_text("README.md")
+    for fragment in (
+        "<!-- README-OVERVIEW-IMAGE -->",
+        "![Project overview](docs/readme-overview.svg)",
+        "## Device Preview",
+        "<!-- DEVICE-PREVIEW-IMAGE -->",
+        "![Device preview](docs/device-preview.svg)",
+    ):
+        if fragment not in readme:
+            errors.append(f"README must keep visual documentation contract: {fragment}")
+
+    for relative_path in ("docs/readme-overview.svg", "docs/device-preview.svg"):
+        try:
+            ET.parse(ROOT / relative_path)
+        except ET.ParseError as error:
+            errors.append(f"{relative_path} must be valid XML: {error}")
+
     workflow = WORKFLOW.read_text(encoding="utf-8") if WORKFLOW.exists() else ""
     for fragment in (
         "permissions:",
@@ -107,12 +178,32 @@ def package_checks():
         "workflow_dispatch:",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
         "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
+        "persist-credentials: false",
         'python-version: "3.12"',
         "run: make check",
         "run: make build",
     ):
         if fragment not in workflow:
             errors.append(f"GitHub Actions workflow must keep contract: {fragment}")
+
+    workflow_files = sorted(
+        path
+        for path in WORKFLOW.parent.glob("*")
+        if path.is_file() and path.suffix in {".yml", ".yaml"}
+    )
+    if workflow_files != [WORKFLOW]:
+        errors.append(".github/workflows/check.yml must remain the only approved workflow")
+    if workflow != EXPECTED_WORKFLOW:
+        errors.append(".github/workflows/check.yml must match the approved build policy")
+
+    checker_source = Path(__file__).read_text(encoding="utf-8")
+    for fragment in (
+        "while true",
+        "let sampleX = min(x, width)",
+        "if sampleX == width { break }",
+    ):
+        if checker_source.count(f'"{fragment}"') < 2:
+            errors.append(f"waveform checker must retain right-edge assertion: {fragment}")
 
     makefile = read_text("Makefile")
     for fragment in (
