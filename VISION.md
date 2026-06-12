@@ -16,7 +16,7 @@ Priority:
 
 - Preserve the `SiriWaveformView` drawing behavior
 - Keep Interface Builder inspectables useful
-- Keep draw loops bounded and safe for zero-size preview states
+- Keep draw loops bounded and safe for zero-size or non-finite preview states
 - Keep excessive wave-count values from creating unbounded draw work
 - Keep level and idle-amplitude inputs bounded for predictable rendering
 - Keep invalid level and idle-amplitude values from poisoning draw amplitude

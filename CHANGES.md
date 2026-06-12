@@ -2,6 +2,8 @@
 
 ## 2026-06-12
 
+- Rejected non-finite view dimensions before waveform geometry and sampling so
+  invalid bounds cannot produce non-terminating draw work.
 - Aligned the publishable root podspec with the hosted Swift 5 and iOS 12
   framework build while preserving archived release metadata.
 

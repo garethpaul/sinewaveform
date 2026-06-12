@@ -11,6 +11,7 @@ DOCS_PLANS = ROOT / "docs" / "plans"
 CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-sinewaveform-baseline.md"
 PHASE_PLAN = DOCS_PLANS / "2026-06-09-phase-accumulator-bound.md"
 FINITE_INPUT_PLAN = DOCS_PLANS / "2026-06-10-finite-inspectable-inputs-and-ci.md"
+FINITE_BOUNDS_PLAN = DOCS_PLANS / "2026-06-12-finite-waveform-bounds.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 
 EXPECTED_WORKFLOW = """name: Check
@@ -91,6 +92,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-09-phase-accumulator-bound.md is missing")
     if not FINITE_INPUT_PLAN.exists():
         errors.append("docs/plans/2026-06-10-finite-inspectable-inputs-and-ci.md is missing")
+    if not FINITE_BOUNDS_PLAN.exists():
+        errors.append("docs/plans/2026-06-12-finite-waveform-bounds.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -256,8 +259,11 @@ def waveform_checks():
             errors.append(f"drawRect right-edge sampling contract is missing: {fragment}")
     if "guard let context = UIGraphicsGetCurrentContext() else { return }" not in source:
         errors.append("drawRect must guard graphics context availability")
-    if "guard width > 0.0 && height > 0.0 else { return }" not in source:
-        errors.append("drawRect must skip zero-size bounds before division")
+    finite_bounds_guard = "guard width.isFinite && height.isFinite && width > 0.0 && height > 0.0 else { return }"
+    if finite_bounds_guard not in source:
+        errors.append("drawRect must skip non-finite and non-positive bounds before division")
+    elif source.index(finite_bounds_guard) > source.index("context.clear(bounds)"):
+        errors.append("drawRect must validate finite bounds before mutating the graphics context")
     if "for waveNumber in 0..<waveCount" not in source:
         errors.append("drawRect must iterate within the clamped wave count")
     if source.count("UIGraphicsGetCurrentContext()") != 1:
