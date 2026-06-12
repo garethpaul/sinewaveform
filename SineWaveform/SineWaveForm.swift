@@ -1,7 +1,7 @@
 import UIKit
 import Darwin
 
-let pi = M_PI
+let pi = Double.pi
 
 @IBDesignable
 public class SiriWaveformView: UIView {
@@ -13,7 +13,7 @@ public class SiriWaveformView: UIView {
     private let maximumDensity: CGFloat = 100.0
     private let maximumLineWidth: CGFloat = 100.0
     
-    @IBInspectable public var waveColor: UIColor = UIColor.blackColor()
+    @IBInspectable public var waveColor: UIColor = UIColor.black
     @IBInspectable public var numOfWaves = 7
     @IBInspectable public var primaryWaveLineWidth: CGFloat = 2.0
     @IBInspectable public var secondaryWaveLineWidth: CGFloat = 3.0
@@ -28,39 +28,39 @@ public class SiriWaveformView: UIView {
         }
     }
     
-    public func updateWithLevel(level: CGFloat) {
-        let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: 0.0)
+    public func updateWithLevel(_ level: CGFloat) {
+        let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: -0.15)
         _phase = normalizedPhase(_phase + safePhaseShift)
         let normalizedLevel = normalizedUnitValue(level)
-        let normalizedIdleAmplitude = normalizedUnitValue(idleAmplitude)
+        let normalizedIdleAmplitude = normalizedValue(idleAmplitude, minimum: 0.0, maximum: 1.0, fallback: 0.01)
         _amplitude = max(normalizedLevel, normalizedIdleAmplitude)
         setNeedsDisplay()
     }
 
-    private func normalizedUnitValue(value: CGFloat) -> CGFloat {
+    private func normalizedUnitValue(_ value: CGFloat) -> CGFloat {
         return normalizedValue(value, minimum: 0.0, maximum: 1.0, fallback: 0.0)
     }
 
-    private func normalizedValue(value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat {
+    private func normalizedValue(_ value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat {
         guard value == value else { return fallback }
         return min(max(value, minimum), maximum)
     }
 
-    private func normalizedPhase(phase: CGFloat) -> CGFloat {
+    private func normalizedPhase(_ phase: CGFloat) -> CGFloat {
         let wrappedPhase = CGFloat(fmod(Double(phase), Double(phaseCycle)))
         return wrappedPhase >= 0.0 ? wrappedPhase : wrappedPhase + phaseCycle
     }
     
-    override public func drawRect(rect: CGRect) {
+    override public func draw(_ rect: CGRect) {
         guard let context = UIGraphicsGetCurrentContext() else { return }
-        let width = CGRectGetWidth(bounds)
-        let height = CGRectGetHeight(bounds)
+        let width = bounds.width
+        let height = bounds.height
         guard width > 0.0 && height > 0.0 else { return }
 
-        CGContextClearRect(context, bounds)
+        context.clear(bounds)
         
         backgroundColor?.set()
-        CGContextFillRect(context, rect)
+        context.fill(rect)
 
         let waveCount = min(max(1, numOfWaves), maximumWaveCount)
         let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)
@@ -69,7 +69,7 @@ public class SiriWaveformView: UIView {
         let secondaryLineWidth = normalizedValue(secondaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 3.0)
         
         for waveNumber in 0..<waveCount {
-            CGContextSetLineWidth(context, (waveNumber == 0 ? primaryLineWidth : secondaryLineWidth))
+            context.setLineWidth(waveNumber == 0 ? primaryLineWidth : secondaryLineWidth)
             
             let halfHeight = height / 2.0
             let mid = width / 2.0
@@ -78,21 +78,23 @@ public class SiriWaveformView: UIView {
             let progress: CGFloat = 1.0 - CGFloat(waveNumber) / CGFloat(waveCount)
             let normedAmplitude = (1.5 * progress - 0.5) * amplitude
             let multiplier: CGFloat = 1.0
-            waveColor.colorWithAlphaComponent(multiplier * CGColorGetAlpha(waveColor.CGColor)).set()
+            waveColor.withAlphaComponent(multiplier * waveColor.cgColor.alpha).set()
             
             var x: CGFloat = 0.0
-            while x < width + step {
-                let scaling = -pow(1 / mid * (x - mid), 2) + 1
-                let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(x / width) * drawFrequency + _phase
-                let y = scaling * maxAmplitude * normedAmplitude * CGFloat(sinf(Float(tempCasting))) + halfHeight
-                if x == 0 {
-                    CGContextMoveToPoint(context, x, y)
+            while true {
+                let sampleX = min(x, width)
+                let scaling = -pow(1 / mid * (sampleX - mid), 2) + 1
+                let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(sampleX / width) * drawFrequency + _phase
+                let y = scaling * maxAmplitude * normedAmplitude * sin(tempCasting) + halfHeight
+                if sampleX == 0 {
+                    context.move(to: CGPoint(x: sampleX, y: y))
                 } else {
-                    CGContextAddLineToPoint(context, x, y)
+                    context.addLine(to: CGPoint(x: sampleX, y: y))
                 }
+                if sampleX == width { break }
                 x += step
             }
-            CGContextStrokePath(context)
+            context.strokePath()
         }
     }
 }

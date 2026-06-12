@@ -10,7 +10,7 @@
 
 ## Overview
 
-`garethpaul/sinewaveform` is an Apple platform application or Objective-C/Swift sample. Produce a "Siri" like waveform.
+`garethpaul/sinewaveform` is a reusable Swift view that renders a Siri-style animated waveform for Apple platforms.
 
 This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: C/C++ headers (1), Swift (1).
 
@@ -79,12 +79,17 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Static waveform checks also require frequency, density, line widths, and
   phase shift to pass through shared finite-range normalization before drawing;
   negative frequency remains supported for mirrored waveforms.
+- Static waveform checks also require the final horizontal sample to be
+  clamped to the right view edge so draw geometry never extends past bounds.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
 - Static package checks also require completed canonical plans under `docs/plans`.
-- GitHub Actions runs the portable package and waveform checks on Python 3.12
-  for pushes and pull requests.
+- GitHub Actions runs portable package and waveform checks on Ubuntu 24.04 and
+  builds the framework for a generic iOS Simulator on macOS 15.
+- The single approved workflow uses immutable actions, read-only permissions,
+  and checkout with persisted GitHub credentials disabled in both jobs.
+- The Xcode project uses Swift 5 language mode and targets iOS 12 or newer.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
 
@@ -126,6 +131,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   nonnegative phase normalization.
 - See `docs/plans/2026-06-10-finite-inspectable-inputs-and-ci.md` for bounded
   inspectable floating-point inputs and the CI gate.
+- See `docs/plans/2026-06-10-right-edge-sample-clamp.md` for bounded
+  right-edge waveform sampling.
 
 ## Contributing
 

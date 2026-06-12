@@ -2,9 +2,21 @@
 
 ## 2026-06-10
 
+- Added a fixed macOS 15 CI job that builds the framework for a generic iOS
+  Simulator and fixed portable checks to Ubuntu 24.04.
+- Disabled persisted checkout credentials and made the two-job workflow an
+  exact single-file repository contract.
+- Updated the project to Swift 5 and iOS 12 and migrated the waveform view to
+  current UIKit and Core Graphics APIs.
+- Made Makefile verification and build paths independent of the caller's
+  working directory.
 - Bounded inspectable frequency, density, line widths, and phase shift through
   shared NaN-safe normalization before drawing.
+- Preserved the declared idle-amplitude and phase-shift defaults when
+  Interface Builder supplies NaN values.
 - Added a least-privilege Python 3.12 GitHub Actions gate for portable checks.
+- Clamped the final waveform sample to the right view edge so coarse density
+  steps cannot produce off-bounds geometry or a negative edge envelope.
 
 ## 2026-06-09
 

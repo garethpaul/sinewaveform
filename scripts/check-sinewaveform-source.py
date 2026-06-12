@@ -2,6 +2,7 @@
 import argparse
 import re
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -11,6 +12,52 @@ CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-sinewaveform-baseline.md"
 PHASE_PLAN = DOCS_PLANS / "2026-06-09-phase-accumulator-bound.md"
 FINITE_INPUT_PLAN = DOCS_PLANS / "2026-06-10-finite-inspectable-inputs-and-ci.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
+
+EXPECTED_WORKFLOW = """name: Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Run static verification
+        run: make check
+
+  build:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build iOS Simulator framework
+        run: make build
+"""
 
 
 def read_text(relative_path):
@@ -26,6 +73,9 @@ def require_paths():
         "SineWaveform/SineWaveForm.swift",
         "SineWaveform/SineWaveform.h",
         "SineWaveform.xcodeproj/project.pbxproj",
+        "README.md",
+        "docs/readme-overview.svg",
+        "docs/device-preview.svg",
         "LICENSE",
     ):
         if not (ROOT / relative_path).exists():
@@ -88,19 +138,80 @@ def package_checks():
     project = read_text("SineWaveform.xcodeproj/project.pbxproj")
     if "productName = SineWaveform;" not in project:
         errors.append("Xcode project must expose the SineWaveform target")
+    for fragment in ("IPHONEOS_DEPLOYMENT_TARGET = 12.0;", "SWIFT_VERSION = 5.0;"):
+        if fragment not in project:
+            errors.append(f"Xcode project must keep current build setting: {fragment}")
+
+    readme = read_text("README.md")
+    for fragment in (
+        "<!-- README-OVERVIEW-IMAGE -->",
+        "![Project overview](docs/readme-overview.svg)",
+        "## Device Preview",
+        "<!-- DEVICE-PREVIEW-IMAGE -->",
+        "![Device preview](docs/device-preview.svg)",
+    ):
+        if fragment not in readme:
+            errors.append(f"README must keep visual documentation contract: {fragment}")
+
+    for relative_path in ("docs/readme-overview.svg", "docs/device-preview.svg"):
+        try:
+            ET.parse(ROOT / relative_path)
+        except ET.ParseError as error:
+            errors.append(f"{relative_path} must be valid XML: {error}")
 
     workflow = WORKFLOW.read_text(encoding="utf-8") if WORKFLOW.exists() else ""
     for fragment in (
         "permissions:",
         "contents: read",
-        "timeout-minutes: 10",
+        "concurrency:",
+        "cancel-in-progress: true",
+        "contract:",
+        "runs-on: ubuntu-24.04",
+        "timeout-minutes: 5",
+        "build:",
+        "runs-on: macos-15",
+        "timeout-minutes: 15",
+        "workflow_dispatch:",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
         "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
+        "persist-credentials: false",
         'python-version: "3.12"',
         "run: make check",
+        "run: make build",
     ):
         if fragment not in workflow:
             errors.append(f"GitHub Actions workflow must keep contract: {fragment}")
+
+    workflow_files = sorted(
+        path
+        for path in WORKFLOW.parent.glob("*")
+        if path.is_file() and path.suffix in {".yml", ".yaml"}
+    )
+    if workflow_files != [WORKFLOW]:
+        errors.append(".github/workflows/check.yml must remain the only approved workflow")
+    if workflow != EXPECTED_WORKFLOW:
+        errors.append(".github/workflows/check.yml must match the approved build policy")
+
+    checker_source = Path(__file__).read_text(encoding="utf-8")
+    for fragment in (
+        "while true",
+        "let sampleX = min(x, width)",
+        "if sampleX == width { break }",
+    ):
+        if checker_source.count(f'"{fragment}"') < 2:
+            errors.append(f"waveform checker must retain right-edge assertion: {fragment}")
+
+    makefile = read_text("Makefile")
+    for fragment in (
+        "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))",
+        '"$(ROOT)/SineWaveform.podspec"',
+        '"$(ROOT)/scripts/check-sinewaveform-source.py"',
+        '"$(ROOT)/SineWaveform.xcodeproj"',
+        "generic/platform=iOS Simulator",
+        "CODE_SIGNING_ALLOWED=NO",
+    ):
+        if fragment not in makefile:
+            errors.append(f"Makefile must keep root-independent build contract: {fragment}")
 
     return errors
 
@@ -119,6 +230,8 @@ def waveform_checks():
         errors.append("drawRect must not draw one more wave than the clamped wave count")
     if "x += density" in source:
         errors.append("drawRect must not advance by raw density")
+    if "while x < width + step" in source:
+        errors.append("drawRect must not sample beyond the right view bound")
     if "let waveCount = max(1, numOfWaves)" in source:
         errors.append("drawRect must not leave numOfWaves without an upper bound")
     if "private let maximumWaveCount = 32" not in source:
@@ -127,6 +240,16 @@ def waveform_checks():
         errors.append("drawRect must clamp wave count to a bounded 1...maximumWaveCount range")
     if "let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)" not in source:
         errors.append("drawRect must clamp draw step through finite input normalization")
+    for fragment in (
+        "while true",
+        "let sampleX = min(x, width)",
+        "(sampleX - mid)",
+        "sampleX / width",
+        "CGPoint(x: sampleX, y: y)",
+        "if sampleX == width { break }",
+    ):
+        if fragment not in source:
+            errors.append(f"drawRect right-edge sampling contract is missing: {fragment}")
     if "guard let context = UIGraphicsGetCurrentContext() else { return }" not in source:
         errors.append("drawRect must guard graphics context availability")
     if "guard width > 0.0 && height > 0.0 else { return }" not in source:
@@ -139,13 +262,13 @@ def waveform_checks():
         errors.append("drawRect must not allow negative max amplitude for short bounds")
     if "let maxAmplitude = max(halfHeight - 4.0, 0.0)" not in source:
         errors.append("drawRect must clamp max amplitude to a nonnegative value")
-    if "CGContextSetLineWidth(context, (waveNumber == 0 ? primaryWaveLineWidth : secondaryWaveLineWidth))" in source:
+    if "context.setLineWidth(waveNumber == 0 ? primaryWaveLineWidth : secondaryWaveLineWidth)" in source:
         errors.append("drawRect must not pass raw inspectable line widths to Core Graphics")
     if "let primaryLineWidth = normalizedValue(primaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 2.0)" not in source:
         errors.append("drawRect must clamp the primary line width through finite input normalization")
     if "let secondaryLineWidth = normalizedValue(secondaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 3.0)" not in source:
         errors.append("drawRect must clamp the secondary line width through finite input normalization")
-    if "CGContextSetLineWidth(context, (waveNumber == 0 ? primaryLineWidth : secondaryLineWidth))" not in source:
+    if "context.setLineWidth(waveNumber == 0 ? primaryLineWidth : secondaryLineWidth)" not in source:
         errors.append("drawRect must set Core Graphics line width from clamped values")
     if "_amplitude = fmax(level, idleAmplitude)" in source:
         errors.append("updateWithLevel must not assign unbounded caller-provided amplitude")
@@ -153,14 +276,14 @@ def waveform_checks():
         errors.append("updateWithLevel must not normalize caller-provided levels inline")
     if "let normalizedIdleAmplitude = min(max(idleAmplitude, 0.0), 1.0)" in source:
         errors.append("updateWithLevel must not normalize idleAmplitude inline")
-    if "private func normalizedUnitValue(value: CGFloat) -> CGFloat" not in source:
+    if "private func normalizedUnitValue(_ value: CGFloat) -> CGFloat" not in source:
         errors.append("SiriWaveformView must centralize unit-interval value normalization")
     if "return normalizedValue(value, minimum: 0.0, maximum: 1.0, fallback: 0.0)" not in source:
         errors.append("unit-interval normalization must use shared finite input normalization")
     if "let normalizedLevel = normalizedUnitValue(level)" not in source:
         errors.append("updateWithLevel must normalize caller-provided levels through the shared helper")
-    if "let normalizedIdleAmplitude = normalizedUnitValue(idleAmplitude)" not in source:
-        errors.append("updateWithLevel must normalize idleAmplitude through the shared helper")
+    if "let normalizedIdleAmplitude = normalizedValue(idleAmplitude, minimum: 0.0, maximum: 1.0, fallback: 0.01)" not in source:
+        errors.append("updateWithLevel must normalize idleAmplitude with its inspectable default fallback")
     if "_amplitude = max(normalizedLevel, normalizedIdleAmplitude)" not in source:
         errors.append("updateWithLevel must use the clamped level and idle amplitude")
     if "_phase += phaseShift" in source:
@@ -169,7 +292,7 @@ def waveform_checks():
         errors.append("SiriWaveformView must define a single-cycle phase bound")
     if "_phase = normalizedPhase(_phase + safePhaseShift)" not in source:
         errors.append("updateWithLevel must normalize phase after applying the bounded phase shift")
-    if "private func normalizedPhase(phase: CGFloat) -> CGFloat" not in source:
+    if "private func normalizedPhase(_ phase: CGFloat) -> CGFloat" not in source:
         errors.append("SiriWaveformView must centralize phase normalization")
     if "fmod(Double(phase), Double(phaseCycle))" not in source:
         errors.append("phase normalization must wrap with fmod")
@@ -183,10 +306,10 @@ def waveform_checks():
         "private let maximumFrequency: CGFloat = 100.0",
         "private let maximumDensity: CGFloat = 100.0",
         "private let maximumLineWidth: CGFloat = 100.0",
-        "private func normalizedValue(value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat",
+        "private func normalizedValue(_ value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat",
         "guard value == value else { return fallback }",
         "return min(max(value, minimum), maximum)",
-        "let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: 0.0)",
+        "let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: -0.15)",
         "let drawFrequency = normalizedValue(frequency, minimum: -maximumFrequency, maximum: maximumFrequency, fallback: 1.5)",
         "* drawFrequency + _phase",
     ):

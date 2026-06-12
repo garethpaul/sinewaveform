@@ -28,6 +28,10 @@ Helpful reports include:
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
+- GitHub Actions uses fixed Ubuntu 24.04 and macOS 15 runners with read-only
+  repository permissions; the macOS job builds an unsigned simulator framework.
+- Waveform input normalization and right-edge sample clamping keep generated
+  Core Graphics coordinates within the view's finite drawing bounds.
 
 ## Mobile Privacy Notes
 

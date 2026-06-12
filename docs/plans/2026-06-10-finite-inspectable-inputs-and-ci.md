@@ -15,7 +15,8 @@ The repository also had no automated CI for its portable static checks.
   point inputs.
 - Bounded frequency, density, line widths, and phase shift before drawing or
   phase accumulation while preserving mirrored negative-frequency rendering.
-- Used each inspectable property's existing default as the fallback for NaN.
+- Used each inspectable property's existing default as the fallback for NaN,
+  including `idleAmplitude` and `phaseShift`.
 - Extended the static waveform checker to protect each normalization contract.
 - Added a least-privilege Python 3.12 GitHub Actions workflow using immutable
   Node 24 action references.

@@ -2,7 +2,7 @@
 
 ## Repository purpose
 
-`garethpaul/sinewaveform` is an Apple platform application or Objective-C/Swift sample. Produce a "Siri" like waveform.
+`garethpaul/sinewaveform` is a reusable Swift waveform view that produces a Siri-style animation for Apple platforms.
 
 ## Project structure
 
@@ -28,7 +28,7 @@
 ## Coding conventions
 
 - Language mix noted in the README: C/C++ headers (1), Swift (1).
-- Preserve legacy Xcode project settings and signing assumptions unless the change is explicitly about modernization.
+- Preserve Swift 5 language mode, the iOS 12 deployment target, and signing assumptions unless the change explicitly updates compatibility.
 
 ## Testing guidance
 
@@ -53,6 +53,8 @@
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-sinewaveform-baseline.md` for the canonical package and drawing safety baseline.
 - See `docs/plans/2026-06-08-versioned-podspec-metadata.md` for the archived podspec metadata guard.
+- Keep `.github/workflows/check.yml` as the only workflow, with immutable actions, read-only permissions, and persisted checkout credentials disabled in both jobs.
+- Preserve the checked-in project overview and device preview SVG references in README.md.
 
 ## Agent workflow
 
