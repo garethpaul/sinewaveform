@@ -55,7 +55,7 @@ public class SiriWaveformView: UIView {
         guard let context = UIGraphicsGetCurrentContext() else { return }
         let width = bounds.width
         let height = bounds.height
-        guard width > 0.0 && height > 0.0 else { return }
+        guard width.isFinite && height.isFinite && width > 0.0 && height > 0.0 else { return }
 
         context.clear(bounds)
         

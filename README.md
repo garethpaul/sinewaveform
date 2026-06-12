@@ -59,9 +59,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Testing and Verification
 
 - `make check` runs podspec syntax checks, static package metadata checks, and
-  waveform drawing safety checks for context availability, nonzero bounds, wave
-  count, and draw step handling. When `xcodebuild` is installed, the `build`
-  target also builds the `SineWaveform` target for the iOS simulator.
+  waveform drawing safety checks for context availability, finite positive
+  bounds, wave count, and draw step handling. When `xcodebuild` is installed,
+  the `build` target also builds the `SineWaveform` target for the iOS simulator.
 - Static waveform checks also require caller-provided levels and idle amplitude
   values to be clamped into the expected `0...1` drawing range.
 - Static waveform checks also require level and idle-amplitude normalization to
@@ -81,6 +81,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   negative frequency remains supported for mirrored waveforms.
 - Static waveform checks also require the final horizontal sample to be
   clamped to the right view edge so draw geometry never extends past bounds.
+- Static waveform checks reject non-finite view dimensions before Core Graphics
+  mutations, division, or horizontal sampling.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks require the publishable root podspec to declare Swift 5
   and the same iOS 12 minimum as the hosted Xcode build; archived release

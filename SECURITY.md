@@ -32,6 +32,8 @@ Helpful reports include:
   repository permissions; the macOS job builds an unsigned simulator framework.
 - Waveform input normalization and right-edge sample clamping keep generated
   Core Graphics coordinates within the view's finite drawing bounds.
+- Drawing rejects non-finite view dimensions before entering geometry math or
+  the horizontal sampling loop.
 
 ## Mobile Privacy Notes
 
