@@ -82,6 +82,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Static waveform checks also require the final horizontal sample to be
   clamped to the right view edge so draw geometry never extends past bounds.
 - Static package checks cover the root and archived versioned podspec metadata.
+- Static package checks require the publishable root podspec to declare Swift 5
+  and the same iOS 12 minimum as the hosted Xcode build; archived release
+  podspec snapshots retain their historical compatibility metadata.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
 - Static package checks also require completed canonical plans under `docs/plans`.
@@ -133,6 +136,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   inspectable floating-point inputs and the CI gate.
 - See `docs/plans/2026-06-10-right-edge-sample-clamp.md` for bounded
   right-edge waveform sampling.
+- See `docs/plans/2026-06-12-root-podspec-toolchain-alignment.md` for the
+  publishable CocoaPods/Xcode compatibility contract.
 
 ## Contributing
 

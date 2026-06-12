@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-12
+
+- Aligned the publishable root podspec with the hosted Swift 5 and iOS 12
+  framework build while preserving archived release metadata.
+
 ## 2026-06-10
 
 - Added a fixed macOS 15 CI job that builds the framework for a generic iOS

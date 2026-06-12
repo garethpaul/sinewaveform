@@ -27,6 +27,7 @@ Priority:
 - Keep every inspectable floating-point value finite before phase math or drawing
 - Keep sampled waveform coordinates within the view's horizontal bounds
 - Keep root and archived podspec metadata aligned
+- Keep the publishable podspec's Swift and iOS requirements aligned with CI
 - Keep CocoaPods description metadata non-empty and unambiguous
 - Maintain screenshot and GIF examples
 - Keep completed maintenance plans under `docs/plans`

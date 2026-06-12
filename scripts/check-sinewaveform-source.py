@@ -120,9 +120,13 @@ def package_checks():
         's.version      = "0.0.6"',
         's.license = { :type => "MIT", :file => "LICENSE" }',
         's.source_files = "SineWaveform/*.{h,m,swift}"',
+        's.platform     = :ios, "12.0"',
+        's.swift_version = "5.0"',
     ):
         if fragment not in podspec:
             errors.append(f"podspec is missing expected metadata: {fragment}")
+    if 's.platform     = :ios, "8.0"' in podspec:
+        errors.append("root podspec must not advertise the retired iOS 8 deployment target")
 
     for podspec_path in podspec_paths:
         podspec_source = read_text(podspec_path)
