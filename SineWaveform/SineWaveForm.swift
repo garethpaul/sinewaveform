@@ -12,6 +12,7 @@ public class SiriWaveformView: UIView {
     private let maximumFrequency: CGFloat = 100.0
     private let maximumDensity: CGFloat = 100.0
     private let maximumLineWidth: CGFloat = 100.0
+    private let maximumSampleCount: CGFloat = 4096.0
     
     @IBInspectable public var waveColor: UIColor = UIColor.black
     @IBInspectable public var numOfWaves = 7
@@ -64,6 +65,7 @@ public class SiriWaveformView: UIView {
 
         let waveCount = min(max(1, numOfWaves), maximumWaveCount)
         let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)
+        let sampleStep = max(step, width / maximumSampleCount)
         let drawFrequency = normalizedValue(frequency, minimum: -maximumFrequency, maximum: maximumFrequency, fallback: 1.5)
         let primaryLineWidth = normalizedValue(primaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 2.0)
         let secondaryLineWidth = normalizedValue(secondaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 3.0)
@@ -92,7 +94,7 @@ public class SiriWaveformView: UIView {
                     context.addLine(to: CGPoint(x: sampleX, y: y))
                 }
                 if sampleX == width { break }
-                x += step
+                x += sampleStep
             }
             context.strokePath()
         }
