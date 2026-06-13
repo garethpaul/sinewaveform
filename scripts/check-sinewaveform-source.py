@@ -12,6 +12,7 @@ CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-sinewaveform-baseline.md"
 PHASE_PLAN = DOCS_PLANS / "2026-06-09-phase-accumulator-bound.md"
 FINITE_INPUT_PLAN = DOCS_PLANS / "2026-06-10-finite-inspectable-inputs-and-ci.md"
 FINITE_BOUNDS_PLAN = DOCS_PLANS / "2026-06-12-finite-waveform-bounds.md"
+SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-13-waveform-sample-budget.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 
 EXPECTED_WORKFLOW = """name: Check
@@ -94,6 +95,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-10-finite-inspectable-inputs-and-ci.md is missing")
     if not FINITE_BOUNDS_PLAN.exists():
         errors.append("docs/plans/2026-06-12-finite-waveform-bounds.md is missing")
+    if not SAMPLE_BUDGET_PLAN.exists():
+        errors.append("docs/plans/2026-06-13-waveform-sample-budget.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -220,6 +223,11 @@ def package_checks():
         if fragment not in makefile:
             errors.append(f"Makefile must keep root-independent build contract: {fragment}")
 
+    for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
+        document = re.sub(r"\s+", " ", read_text(doc_path)).lower()
+        if "waveform sample budget" not in document:
+            errors.append(f"{doc_path} must document the waveform sample budget")
+
     return errors
 
 
@@ -321,6 +329,9 @@ def waveform_checks():
         "return min(max(value, minimum), maximum)",
         "let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: -0.15)",
         "let drawFrequency = normalizedValue(frequency, minimum: -maximumFrequency, maximum: maximumFrequency, fallback: 1.5)",
+        "private let maximumSampleCount: CGFloat = 4096.0",
+        "let sampleStep = max(step, width / maximumSampleCount)",
+        "x += sampleStep",
         "* drawFrequency + _phase",
     ):
         if fragment not in source:

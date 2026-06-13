@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-13
+
+- Added a waveform sample budget of approximately 4,096 horizontal points per
+  path while preserving configured density and the exact right-edge sample.
+
 ## 2026-06-12
 
 - Rejected non-finite view dimensions before waveform geometry and sampling so
