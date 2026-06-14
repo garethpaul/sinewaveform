@@ -1,6 +1,6 @@
 # Make Root Override Protection
 
-## Status: Planned
+## Status: Completed
 
 ## Context
 
@@ -26,23 +26,34 @@ tool overrides.
 - Keep hosted iOS Simulator compilation required on the exact pull-request
   head.
 
-## Planned Work
+## Work Completed
 
-- Mark the Makefile root assignment as an explicit GNU Make override.
-- Extend the package checker to require exactly one protected declaration and
-  this plan's completed evidence.
-- Exercise environment and command-line precedence through all public Make
-  aliases without changing application or package source.
+- Marked the Makefile root assignment as an explicit GNU Make override.
+- Extended the package checker to require exactly one protected declaration,
+  preserved tool overrides, README indexing, and this plan's evidence.
+- Kept application source, package metadata, the Xcode project, and workflow
+  configuration unchanged.
 
-## Verification Plan
+## Verification
 
-- Run package and waveform checks plus full `make check` from repository and
-  external working directories.
-- Run Ruby syntax checks for all podspecs and Python checker compilation.
-- Reject weakened override, duplicate declaration, path, documentation, plan,
-  and alias mutations.
-- Audit the exact diff, generated artifacts, secrets, and protected source.
-- Require the hosted macOS framework build on the exact pull-request head.
+- `make check` passed through package, waveform, podspec, and static build
+  checks; local `xcodebuild` was unavailable and used the documented static
+  path.
+- All five public Make aliases passed from both repository and external working
+  directories with hostile environment and command-line `ROOT` assignments,
+  for 20 bounded precedence cases.
+- Package and waveform modes passed under Python 3.12 with networking disabled,
+  a read-only source mount, and bytecode generation disabled.
+- All three podspecs passed Ruby syntax checks, and checker compilation passed
+  with its bytecode directed outside the repository.
+- Seven declaration, duplicate, placement, alias, path, README, and plan
+  mutations were rejected for the intended reason.
+- Exact diff, protected-source, generated-artifact, high-confidence secret, and
+  `git diff --check` audits passed. The pre-existing untracked checker bytecode
+  remains excluded from the explicit-path commit.
+
+Hosted macOS framework compilation remains required on the exact pull-request
+head.
 
 ## Scope Boundary
 

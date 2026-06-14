@@ -3,7 +3,7 @@
 PYTHON ?= python3
 RUBY ?= ruby
 XCODEBUILD ?= xcodebuild
-ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 lint:
 	$(RUBY) -c "$(ROOT)/SineWaveform.podspec"
