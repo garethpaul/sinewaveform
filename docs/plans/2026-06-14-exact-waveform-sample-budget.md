@@ -1,6 +1,6 @@
 # Exact Waveform Sample Budget
 
-## Status: Planned
+## Status: Completed
 
 ## Context
 
@@ -28,3 +28,21 @@ stated point budget exactly while preserving endpoint geometry.
 - hostile point-budget, interval, step, endpoint, documentation, and plan mutations
 - hosted iOS Simulator framework build on the exact pull-request head
 - podspec syntax, generated-artifact, credential-pattern, and exact-diff audits
+
+## Verification Results
+
+- Focused package and waveform contracts passed with a 4,096-point integer
+  budget, 4,095 intervals, and a forced exact-right-edge final point.
+- A deterministic loop simulation over normal, fractional, million-point, and
+  trillion-point widths retained both endpoints and never exceeded 4,096
+  points.
+- The repository and external-directory `make check` passed; Linux truthfully
+  used the static-only boundary because `xcodebuild` is unavailable.
+- Six hostile exact sample-budget mutations were rejected across point count,
+  interval count, divisor, terminal endpoint, documentation, and completed-plan
+  status.
+- Final podspec syntax, generated-artifact, credential-pattern, and exact-diff
+  audits passed with only the intended waveform, checker, documentation, and
+  plan changes.
+- Hosted iOS Simulator framework compilation remains required on the exact
+  pushed head.

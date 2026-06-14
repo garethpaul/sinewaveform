@@ -81,8 +81,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   negative frequency remains supported for mirrored waveforms.
 - Static waveform checks also require the final horizontal sample to be
   clamped to the right view edge so draw geometry never extends past bounds.
-- A waveform sample budget caps each path at approximately 4,096 horizontal
-  samples while retaining the configured density for normal view widths.
+- An exact 4,096-point waveform sample budget includes both path endpoints
+  while retaining the configured density for normal view widths.
 - Static waveform checks reject non-finite view dimensions before Core Graphics
   mutations, division, or horizontal sampling.
 - Static package checks cover the root and archived versioned podspec metadata.
@@ -144,6 +144,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   budget on pathological finite view widths.
 - See `docs/plans/2026-06-14-make-root-override-protection.md` for authoritative
   repository-root selection across all Make aliases.
+- See `docs/plans/2026-06-14-exact-waveform-sample-budget.md` for the exact
+  endpoint-inclusive per-wave point budget.
 - See `docs/plans/2026-06-12-root-podspec-toolchain-alignment.md` for the
   publishable CocoaPods/Xcode compatibility contract.
 

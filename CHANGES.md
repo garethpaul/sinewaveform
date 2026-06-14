@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-14
+
+- Made the exact 4,096-point waveform sample budget include both left and right
+  endpoint samples by budgeting 4,095 intervals.
+
 ## 2026-06-13
 
 - Added a waveform sample budget of approximately 4,096 horizontal points per

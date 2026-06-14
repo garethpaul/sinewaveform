@@ -14,6 +14,7 @@ FINITE_INPUT_PLAN = DOCS_PLANS / "2026-06-10-finite-inspectable-inputs-and-ci.md
 FINITE_BOUNDS_PLAN = DOCS_PLANS / "2026-06-12-finite-waveform-bounds.md"
 SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-13-waveform-sample-budget.md"
 ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
+EXACT_SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-14-exact-waveform-sample-budget.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 
 EXPECTED_WORKFLOW = """name: Check
@@ -100,6 +101,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-13-waveform-sample-budget.md is missing")
     if not ROOT_OVERRIDE_PLAN.exists():
         errors.append("docs/plans/2026-06-14-make-root-override-protection.md is missing")
+    if not EXACT_SAMPLE_BUDGET_PLAN.exists():
+        errors.append("docs/plans/2026-06-14-exact-waveform-sample-budget.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -208,7 +211,7 @@ def package_checks():
     checker_source = Path(__file__).read_text(encoding="utf-8")
     for fragment in (
         "while true",
-        "let sampleX = min(x, width)",
+        "let sampleX = sampleIndex == maximumSampleIntervalCount ? width : min(x, width)",
         "if sampleX == width { break }",
     ):
         if checker_source.count(f'"{fragment}"') < 2:
@@ -243,11 +246,15 @@ def package_checks():
 
     if "docs/plans/2026-06-14-make-root-override-protection.md" not in read_text("README.md"):
         errors.append("README must index Make root override protection evidence")
+    if "docs/plans/2026-06-14-exact-waveform-sample-budget.md" not in read_text("README.md"):
+        errors.append("README must index exact waveform sample budget evidence")
 
     for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
         document = re.sub(r"\s+", " ", read_text(doc_path)).lower()
         if "waveform sample budget" not in document:
             errors.append(f"{doc_path} must document the waveform sample budget")
+        if "exact 4,096-point waveform sample budget" not in document:
+            errors.append(f"{doc_path} must document the exact endpoint-inclusive sample budget")
 
     return errors
 
@@ -278,7 +285,7 @@ def waveform_checks():
         errors.append("drawRect must clamp draw step through finite input normalization")
     for fragment in (
         "while true",
-        "let sampleX = min(x, width)",
+        "let sampleX = sampleIndex == maximumSampleIntervalCount ? width : min(x, width)",
         "(sampleX - mid)",
         "sampleX / width",
         "CGPoint(x: sampleX, y: y)",
@@ -350,13 +357,28 @@ def waveform_checks():
         "return min(max(value, minimum), maximum)",
         "let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: -0.15)",
         "let drawFrequency = normalizedValue(frequency, minimum: -maximumFrequency, maximum: maximumFrequency, fallback: 1.5)",
-        "private let maximumSampleCount: CGFloat = 4096.0",
-        "let sampleStep = max(step, width / maximumSampleCount)",
+        "private let maximumSamplePointCount = 4096",
+        "let maximumSampleIntervalCount = maximumSamplePointCount - 1",
+        "let sampleStep = max(step, width / CGFloat(maximumSampleIntervalCount))",
+        "var sampleIndex = 0",
+        "let sampleX = sampleIndex == maximumSampleIntervalCount ? width : min(x, width)",
+        "sampleIndex += 1",
         "x += sampleStep",
         "* drawFrequency + _phase",
     ):
         if fragment not in source:
             errors.append(f"waveform finite-input contract is missing: {fragment}")
+    if "width / CGFloat(maximumSamplePointCount)" in source or "maximumSampleCount" in source:
+        errors.append("waveform sample budgeting must count both endpoint samples")
+    if EXACT_SAMPLE_BUDGET_PLAN.exists():
+        plan = EXACT_SAMPLE_BUDGET_PLAN.read_text(encoding="utf-8")
+        for evidence in (
+            "Status: Completed",
+            "repository and external-directory `make check` passed",
+            "hostile exact sample-budget mutations were rejected",
+        ):
+            if evidence not in plan:
+                errors.append(f"{EXACT_SAMPLE_BUDGET_PLAN.relative_to(ROOT)} must record verification evidence {evidence!r}")
 
     return errors
 

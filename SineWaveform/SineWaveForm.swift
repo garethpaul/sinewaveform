@@ -12,7 +12,7 @@ public class SiriWaveformView: UIView {
     private let maximumFrequency: CGFloat = 100.0
     private let maximumDensity: CGFloat = 100.0
     private let maximumLineWidth: CGFloat = 100.0
-    private let maximumSampleCount: CGFloat = 4096.0
+    private let maximumSamplePointCount = 4096
     
     @IBInspectable public var waveColor: UIColor = UIColor.black
     @IBInspectable public var numOfWaves = 7
@@ -65,7 +65,8 @@ public class SiriWaveformView: UIView {
 
         let waveCount = min(max(1, numOfWaves), maximumWaveCount)
         let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)
-        let sampleStep = max(step, width / maximumSampleCount)
+        let maximumSampleIntervalCount = maximumSamplePointCount - 1
+        let sampleStep = max(step, width / CGFloat(maximumSampleIntervalCount))
         let drawFrequency = normalizedValue(frequency, minimum: -maximumFrequency, maximum: maximumFrequency, fallback: 1.5)
         let primaryLineWidth = normalizedValue(primaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 2.0)
         let secondaryLineWidth = normalizedValue(secondaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 3.0)
@@ -83,8 +84,9 @@ public class SiriWaveformView: UIView {
             waveColor.withAlphaComponent(multiplier * waveColor.cgColor.alpha).set()
             
             var x: CGFloat = 0.0
+            var sampleIndex = 0
             while true {
-                let sampleX = min(x, width)
+                let sampleX = sampleIndex == maximumSampleIntervalCount ? width : min(x, width)
                 let scaling = -pow(1 / mid * (sampleX - mid), 2) + 1
                 let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(sampleX / width) * drawFrequency + _phase
                 let y = scaling * maxAmplitude * normedAmplitude * sin(tempCasting) + halfHeight
@@ -94,6 +96,7 @@ public class SiriWaveformView: UIView {
                     context.addLine(to: CGPoint(x: sampleX, y: y))
                 }
                 if sampleX == width { break }
+                sampleIndex += 1
                 x += sampleStep
             }
             context.strokePath()
