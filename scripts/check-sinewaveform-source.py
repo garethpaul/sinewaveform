@@ -13,6 +13,7 @@ PHASE_PLAN = DOCS_PLANS / "2026-06-09-phase-accumulator-bound.md"
 FINITE_INPUT_PLAN = DOCS_PLANS / "2026-06-10-finite-inspectable-inputs-and-ci.md"
 FINITE_BOUNDS_PLAN = DOCS_PLANS / "2026-06-12-finite-waveform-bounds.md"
 SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-13-waveform-sample-budget.md"
+ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 
 EXPECTED_WORKFLOW = """name: Check
@@ -97,6 +98,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-12-finite-waveform-bounds.md is missing")
     if not SAMPLE_BUDGET_PLAN.exists():
         errors.append("docs/plans/2026-06-13-waveform-sample-budget.md is missing")
+    if not ROOT_OVERRIDE_PLAN.exists():
+        errors.append("docs/plans/2026-06-14-make-root-override-protection.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -212,8 +215,23 @@ def package_checks():
             errors.append(f"waveform checker must retain right-edge assertion: {fragment}")
 
     makefile = read_text("Makefile")
+    root_declaration = "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))"
+    if makefile.count(root_declaration) != 1:
+        errors.append("Makefile must contain exactly one protected repository-root declaration")
+    tool_and_root_block = "\n".join((
+        "PYTHON ?= python3",
+        "RUBY ?= ruby",
+        "XCODEBUILD ?= xcodebuild",
+        root_declaration,
+    ))
+    if makefile.count(tool_and_root_block) != 1:
+        errors.append("Makefile must keep tool overrides before the protected repository root")
+
     for fragment in (
-        "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))",
+        ".PHONY: build check lint test verify",
+        "build: lint",
+        "verify: lint test build",
+        "check: verify",
         '"$(ROOT)/SineWaveform.podspec"',
         '"$(ROOT)/scripts/check-sinewaveform-source.py"',
         '"$(ROOT)/SineWaveform.xcodeproj"',
@@ -222,6 +240,9 @@ def package_checks():
     ):
         if fragment not in makefile:
             errors.append(f"Makefile must keep root-independent build contract: {fragment}")
+
+    if "docs/plans/2026-06-14-make-root-override-protection.md" not in read_text("README.md"):
+        errors.append("README must index Make root override protection evidence")
 
     for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
         document = re.sub(r"\s+", " ", read_text(doc_path)).lower()

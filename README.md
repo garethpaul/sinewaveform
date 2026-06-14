@@ -142,6 +142,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   right-edge waveform sampling.
 - See `docs/plans/2026-06-13-waveform-sample-budget.md` for the waveform sample
   budget on pathological finite view widths.
+- See `docs/plans/2026-06-14-make-root-override-protection.md` for authoritative
+  repository-root selection across all Make aliases.
 - See `docs/plans/2026-06-12-root-podspec-toolchain-alignment.md` for the
   publishable CocoaPods/Xcode compatibility contract.
 
