@@ -2,6 +2,7 @@
 
 PYTHON ?= python3
 RUBY ?= ruby
+SWIFTC ?= swiftc
 XCODEBUILD ?= xcodebuild
 override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
@@ -11,6 +12,11 @@ lint:
 
 test:
 	$(PYTHON) "$(ROOT)/scripts/check-sinewaveform-source.py" --mode waveform
+	@if command -v "$(SWIFTC)" >/dev/null 2>&1; then \
+		SWIFTC="$(SWIFTC)" "$(ROOT)/scripts/run-waveform-math-tests.sh"; \
+	else \
+		echo "swiftc not found; executable waveform math tests skipped"; \
+	fi
 
 build: lint
 	@if command -v "$(XCODEBUILD)" >/dev/null 2>&1; then \

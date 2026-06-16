@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-16
+
+- Added executable Swift tests for waveform normalization, phase wrapping, and
+  exact sample-budget coordinates, using the same helper as the UIKit view.
+
 ## 2026-06-14
 
 - Made the exact 4,096-point waveform sample budget include both left and right

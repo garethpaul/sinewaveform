@@ -39,17 +39,15 @@ public class SiriWaveformView: UIView {
     }
 
     private func normalizedUnitValue(_ value: CGFloat) -> CGFloat {
-        return normalizedValue(value, minimum: 0.0, maximum: 1.0, fallback: 0.0)
+        return WaveformMath.normalizedUnitValue(value)
     }
 
     private func normalizedValue(_ value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat {
-        guard value == value else { return fallback }
-        return min(max(value, minimum), maximum)
+        return WaveformMath.normalizedValue(value, minimum: minimum, maximum: maximum, fallback: fallback)
     }
 
     private func normalizedPhase(_ phase: CGFloat) -> CGFloat {
-        let wrappedPhase = CGFloat(fmod(Double(phase), Double(phaseCycle)))
-        return wrappedPhase >= 0.0 ? wrappedPhase : wrappedPhase + phaseCycle
+        return WaveformMath.normalizedPhase(phase, cycle: phaseCycle)
     }
     
     override public func draw(_ rect: CGRect) {
@@ -66,7 +64,11 @@ public class SiriWaveformView: UIView {
         let waveCount = min(max(1, numOfWaves), maximumWaveCount)
         let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)
         let maximumSampleIntervalCount = maximumSamplePointCount - 1
-        let sampleStep = max(step, width / CGFloat(maximumSampleIntervalCount))
+        let sampleStep = WaveformMath.sampleStep(
+            width: width,
+            step: step,
+            maximumSampleIntervalCount: maximumSampleIntervalCount
+        )
         let drawFrequency = normalizedValue(frequency, minimum: -maximumFrequency, maximum: maximumFrequency, fallback: 1.5)
         let primaryLineWidth = normalizedValue(primaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 2.0)
         let secondaryLineWidth = normalizedValue(secondaryWaveLineWidth, minimum: 0.0, maximum: maximumLineWidth, fallback: 3.0)
@@ -86,7 +88,12 @@ public class SiriWaveformView: UIView {
             var x: CGFloat = 0.0
             var sampleIndex = 0
             while true {
-                let sampleX = sampleIndex == maximumSampleIntervalCount ? width : min(x, width)
+                let sampleX = WaveformMath.sampleX(
+                    index: sampleIndex,
+                    accumulatedX: x,
+                    width: width,
+                    maximumSampleIntervalCount: maximumSampleIntervalCount
+                )
                 let scaling = -pow(1 / mid * (sampleX - mid), 2) + 1
                 let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(sampleX / width) * drawFrequency + _phase
                 let y = scaling * maxAmplitude * normedAmplitude * sin(tempCasting) + halfHeight

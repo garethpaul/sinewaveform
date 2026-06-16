@@ -27,13 +27,15 @@
 
 ## Coding conventions
 
-- Language mix noted in the README: C/C++ headers (1), Swift (1).
+- Language mix noted in the README: C/C++ headers (1), Swift (3).
 - Preserve Swift 5 language mode, the iOS 12 deployment target, and signing assumptions unless the change explicitly updates compatibility.
 
 ## Testing guidance
 
 - Test-related files detected: `docs/plans/2026-06-08-podspec-description-guard.md`, `docs/plans/2026-06-08-versioned-podspec-metadata.md`, `SineWaveform.podspec`, `SineWaveform/0.0.4/SineWaveform.podspec`, `SineWaveform/0.0.6/SineWaveform.podspec`
 - Start with the narrowest relevant test or Make target, then run `make check` before handing off if the change is not documentation-only.
+- `make test` compiles and runs the shared waveform math harness when `swiftc`
+  is available; the hosted macOS gate is the authoritative execution boundary.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 - Preserve the shared finite-range normalization path for inspectable waveform
   values before phase math or Core Graphics calls.

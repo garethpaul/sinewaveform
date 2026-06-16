@@ -12,7 +12,7 @@
 
 `garethpaul/sinewaveform` is a reusable Swift view that renders a Siri-style animated waveform for Apple platforms.
 
-This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: C/C++ headers (1), Swift (1).
+This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: C/C++ headers (1), Swift (3).
 
 ## Repository Contents
 
@@ -92,13 +92,14 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
 - Static package checks also require completed canonical plans under `docs/plans`.
-- GitHub Actions runs portable package and waveform checks on Ubuntu 24.04 and
-  builds the framework for a generic iOS Simulator on macOS 15.
+- GitHub Actions runs portable package and waveform checks on Ubuntu 24.04. On
+  macOS 15 it also compiles and runs the shared Swift waveform math tests before
+  building the framework for a generic iOS Simulator.
 - The single approved workflow uses immutable actions, read-only permissions,
   and checkout with persisted GitHub credentials disabled in both jobs.
 - The Xcode project uses Swift 5 language mode and targets iOS 12 or newer.
-- Xcode's test action or `xcodebuild test` with the appropriate scheme and
-  destination can be used on macOS for deeper verification.
+- `make test` runs the executable Swift behavioral harness when `swiftc` is
+  available and reports an explicit skip on hosts without that toolchain.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -146,6 +147,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   repository-root selection across all Make aliases.
 - See `docs/plans/2026-06-14-exact-waveform-sample-budget.md` for the exact
   endpoint-inclusive per-wave point budget.
+- See `docs/plans/2026-06-16-executable-waveform-math-tests.md` for the shared
+  production math and executable Swift behavioral gate.
 - See `docs/plans/2026-06-12-root-podspec-toolchain-alignment.md` for the
   publishable CocoaPods/Xcode compatibility contract.
 

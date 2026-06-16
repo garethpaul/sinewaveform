@@ -15,6 +15,7 @@ FINITE_BOUNDS_PLAN = DOCS_PLANS / "2026-06-12-finite-waveform-bounds.md"
 SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-13-waveform-sample-budget.md"
 ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
 EXACT_SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-14-exact-waveform-sample-budget.md"
+BEHAVIOR_TEST_PLAN = DOCS_PLANS / "2026-06-16-executable-waveform-math-tests.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 
 EXPECTED_WORKFLOW = """name: Check
@@ -59,8 +60,8 @@ jobs:
           persist-credentials: false
       - name: Show Xcode version
         run: xcodebuild -version
-      - name: Build iOS Simulator framework
-        run: make build
+      - name: Run executable tests and build iOS Simulator framework
+        run: make check
 """
 
 
@@ -75,8 +76,11 @@ def require_paths():
         "SineWaveform/0.0.4/SineWaveform.podspec",
         "SineWaveform/0.0.6/SineWaveform.podspec",
         "SineWaveform/SineWaveForm.swift",
+        "SineWaveform/WaveformMath.swift",
         "SineWaveform/SineWaveform.h",
         "SineWaveform.xcodeproj/project.pbxproj",
+        "Tests/WaveformMathTests/main.swift",
+        "scripts/run-waveform-math-tests.sh",
         "README.md",
         "docs/readme-overview.svg",
         "docs/device-preview.svg",
@@ -103,6 +107,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-14-make-root-override-protection.md is missing")
     if not EXACT_SAMPLE_BUDGET_PLAN.exists():
         errors.append("docs/plans/2026-06-14-exact-waveform-sample-budget.md is missing")
+    if not BEHAVIOR_TEST_PLAN.exists():
+        errors.append("docs/plans/2026-06-16-executable-waveform-math-tests.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -157,6 +163,9 @@ def package_checks():
     for fragment in ("IPHONEOS_DEPLOYMENT_TARGET = 12.0;", "SWIFT_VERSION = 5.0;"):
         if fragment not in project:
             errors.append(f"Xcode project must keep current build setting: {fragment}")
+    for fragment in ("WaveformMath.swift", "WaveformMath.swift in Sources"):
+        if fragment not in project:
+            errors.append(f"Xcode project must compile shared waveform math: {fragment}")
 
     readme = read_text("README.md")
     for fragment in (
@@ -193,7 +202,6 @@ def package_checks():
         "persist-credentials: false",
         'python-version: "3.12"',
         "run: make check",
-        "run: make build",
     ):
         if fragment not in workflow:
             errors.append(f"GitHub Actions workflow must keep contract: {fragment}")
@@ -211,7 +219,7 @@ def package_checks():
     checker_source = Path(__file__).read_text(encoding="utf-8")
     for fragment in (
         "while true",
-        "let sampleX = sampleIndex == maximumSampleIntervalCount ? width : min(x, width)",
+        "let sampleX = WaveformMath.sampleX(",
         "if sampleX == width { break }",
     ):
         if checker_source.count(f'"{fragment}"') < 2:
@@ -224,6 +232,7 @@ def package_checks():
     tool_and_root_block = "\n".join((
         "PYTHON ?= python3",
         "RUBY ?= ruby",
+        "SWIFTC ?= swiftc",
         "XCODEBUILD ?= xcodebuild",
         root_declaration,
     ))
@@ -237,6 +246,7 @@ def package_checks():
         "check: verify",
         '"$(ROOT)/SineWaveform.podspec"',
         '"$(ROOT)/scripts/check-sinewaveform-source.py"',
+        '"$(ROOT)/scripts/run-waveform-math-tests.sh"',
         '"$(ROOT)/SineWaveform.xcodeproj"',
         "generic/platform=iOS Simulator",
         "CODE_SIGNING_ALLOWED=NO",
@@ -248,6 +258,8 @@ def package_checks():
         errors.append("README must index Make root override protection evidence")
     if "docs/plans/2026-06-14-exact-waveform-sample-budget.md" not in read_text("README.md"):
         errors.append("README must index exact waveform sample budget evidence")
+    if "docs/plans/2026-06-16-executable-waveform-math-tests.md" not in read_text("README.md"):
+        errors.append("README must index executable waveform math test evidence")
 
     for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
         document = re.sub(r"\s+", " ", read_text(doc_path)).lower()
@@ -265,6 +277,9 @@ def waveform_checks():
         return errors
 
     source = read_text("SineWaveform/SineWaveForm.swift")
+    math_source = read_text("SineWaveform/WaveformMath.swift")
+    test_source = read_text("Tests/WaveformMathTests/main.swift")
+    test_runner = read_text("scripts/run-waveform-math-tests.sh")
     if "class SiriWaveformView: UIView" not in source:
         errors.append("SiriWaveformView class is missing")
     if "for waveNumber in 0...numOfWaves" in source:
@@ -285,7 +300,7 @@ def waveform_checks():
         errors.append("drawRect must clamp draw step through finite input normalization")
     for fragment in (
         "while true",
-        "let sampleX = sampleIndex == maximumSampleIntervalCount ? width : min(x, width)",
+        "let sampleX = WaveformMath.sampleX(",
         "(sampleX - mid)",
         "sampleX / width",
         "CGPoint(x: sampleX, y: y)",
@@ -324,7 +339,7 @@ def waveform_checks():
         errors.append("updateWithLevel must not normalize idleAmplitude inline")
     if "private func normalizedUnitValue(_ value: CGFloat) -> CGFloat" not in source:
         errors.append("SiriWaveformView must centralize unit-interval value normalization")
-    if "return normalizedValue(value, minimum: 0.0, maximum: 1.0, fallback: 0.0)" not in source:
+    if "return WaveformMath.normalizedUnitValue(value)" not in source:
         errors.append("unit-interval normalization must use shared finite input normalization")
     if "let normalizedLevel = normalizedUnitValue(level)" not in source:
         errors.append("updateWithLevel must normalize caller-provided levels through the shared helper")
@@ -340,34 +355,56 @@ def waveform_checks():
         errors.append("updateWithLevel must normalize phase after applying the bounded phase shift")
     if "private func normalizedPhase(_ phase: CGFloat) -> CGFloat" not in source:
         errors.append("SiriWaveformView must centralize phase normalization")
-    if "fmod(Double(phase), Double(phaseCycle))" not in source:
-        errors.append("phase normalization must wrap with fmod")
-    if "return CGFloat(fmod(Double(phase), Double(phaseCycle)))" in source:
-        errors.append("phase normalization must not return negative fmod results directly")
-    if "let wrappedPhase = CGFloat(fmod(Double(phase), Double(phaseCycle)))" not in source:
-        errors.append("phase normalization must store the fmod result before range correction")
-    if "wrappedPhase >= 0.0 ? wrappedPhase : wrappedPhase + phaseCycle" not in source:
+    if "return WaveformMath.normalizedPhase(phase, cycle: phaseCycle)" not in source:
+        errors.append("phase normalization must delegate to shared executable math")
+    if "phase.truncatingRemainder(dividingBy: cycle)" not in math_source:
+        errors.append("shared phase normalization must wrap within one cycle")
+    if "wrappedPhase >= 0.0 ? wrappedPhase : wrappedPhase + cycle" not in math_source:
         errors.append("phase normalization must shift negative wrapped phases back into the positive cycle")
     for fragment in (
         "private let maximumFrequency: CGFloat = 100.0",
         "private let maximumDensity: CGFloat = 100.0",
         "private let maximumLineWidth: CGFloat = 100.0",
         "private func normalizedValue(_ value: CGFloat, minimum: CGFloat, maximum: CGFloat, fallback: CGFloat) -> CGFloat",
-        "guard value == value else { return fallback }",
-        "return min(max(value, minimum), maximum)",
+        "return WaveformMath.normalizedValue(value, minimum: minimum, maximum: maximum, fallback: fallback)",
         "let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: -0.15)",
         "let drawFrequency = normalizedValue(frequency, minimum: -maximumFrequency, maximum: maximumFrequency, fallback: 1.5)",
         "private let maximumSamplePointCount = 4096",
         "let maximumSampleIntervalCount = maximumSamplePointCount - 1",
-        "let sampleStep = max(step, width / CGFloat(maximumSampleIntervalCount))",
+        "let sampleStep = WaveformMath.sampleStep(",
         "var sampleIndex = 0",
-        "let sampleX = sampleIndex == maximumSampleIntervalCount ? width : min(x, width)",
+        "let sampleX = WaveformMath.sampleX(",
         "sampleIndex += 1",
         "x += sampleStep",
         "* drawFrequency + _phase",
     ):
         if fragment not in source:
             errors.append(f"waveform finite-input contract is missing: {fragment}")
+    for fragment in (
+        "guard value == value else { return fallback }",
+        "return min(max(value, minimum), maximum)",
+        "return max(step, width / CGFloat(maximumSampleIntervalCount))",
+        "return index == maximumSampleIntervalCount ? width : min(accumulatedX, width)",
+    ):
+        if fragment not in math_source:
+            errors.append(f"shared executable waveform math is missing: {fragment}")
+    for fragment in (
+        "if !actual.isFinite || abs(actual - expected) > accuracy",
+        "WaveformMath.normalizedValue(.nan",
+        "WaveformMath.normalizedPhase(-0.5",
+        "WaveformMath.sampleStep(width: 8190.0",
+        "WaveformMath.sampleX(index: 4095",
+    ):
+        if fragment not in test_source:
+            errors.append(f"executable waveform behavior coverage is missing: {fragment}")
+    for fragment in (
+        '"$SWIFTC"',
+        '"$ROOT/SineWaveform/WaveformMath.swift"',
+        '"$ROOT/Tests/WaveformMathTests/main.swift"',
+        '"$BUILD_DIR/waveform-math-tests"',
+    ):
+        if fragment not in test_runner:
+            errors.append(f"waveform behavior test runner is missing: {fragment}")
     if "width / CGFloat(maximumSamplePointCount)" in source or "maximumSampleCount" in source:
         errors.append("waveform sample budgeting must count both endpoint samples")
     if EXACT_SAMPLE_BUDGET_PLAN.exists():

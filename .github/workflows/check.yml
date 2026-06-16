@@ -40,5 +40,5 @@ jobs:
           persist-credentials: false
       - name: Show Xcode version
         run: xcodebuild -version
-      - name: Build iOS Simulator framework
-        run: make build
+      - name: Run executable tests and build iOS Simulator framework
+        run: make check

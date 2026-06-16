@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		7F4610D51D316EFE004F36A7 /* SineWaveform.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F4610D41D316EFE004F36A7 /* SineWaveform.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7F4610DD1D316FEB004F36A7 /* SineWaveForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4610DC1D316FEB004F36A7 /* SineWaveForm.swift */; };
+		A16061601D316FEB004F36A7 /* WaveformMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16061611D316FEB004F36A7 /* WaveformMath.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -16,6 +17,7 @@
 		7F4610D41D316EFE004F36A7 /* SineWaveform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SineWaveform.h; sourceTree = "<group>"; };
 		7F4610D61D316EFE004F36A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F4610DC1D316FEB004F36A7 /* SineWaveForm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SineWaveForm.swift; sourceTree = "<group>"; };
+		A16061611D316FEB004F36A7 /* WaveformMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveformMath.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +52,7 @@
 			children = (
 				7F4610D41D316EFE004F36A7 /* SineWaveform.h */,
 				7F4610DC1D316FEB004F36A7 /* SineWaveForm.swift */,
+				A16061611D316FEB004F36A7 /* WaveformMath.swift */,
 				7F4610D61D316EFE004F36A7 /* Info.plist */,
 			);
 			path = SineWaveform;
@@ -134,6 +137,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F4610DD1D316FEB004F36A7 /* SineWaveForm.swift in Sources */,
+				A16061601D316FEB004F36A7 /* WaveformMath.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
