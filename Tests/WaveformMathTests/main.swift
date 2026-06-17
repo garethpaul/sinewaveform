@@ -69,6 +69,27 @@ expectEqual(
     100.0,
     "overshooting samples clamp to the right edge"
 )
+expectEqual(
+    WaveformMath.waveformScaling(sampleX: 0.0, midpoint: .leastNonzeroMagnitude),
+    0.0,
+    "tiny nonzero midpoints retain a finite left-edge envelope"
+)
+expectEqual(
+    WaveformMath.waveformScaling(
+        sampleX: .leastNonzeroMagnitude,
+        midpoint: .leastNonzeroMagnitude
+    ),
+    1.0,
+    "tiny nonzero midpoints retain the center envelope peak"
+)
+expectEqual(
+    WaveformMath.waveformScaling(
+        sampleX: .leastNonzeroMagnitude * 2.0,
+        midpoint: .leastNonzeroMagnitude
+    ),
+    0.0,
+    "tiny nonzero midpoints retain a finite right-edge envelope"
+)
 
 if failureCount > 0 {
     exit(1)

@@ -85,6 +85,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   while retaining the configured density for normal view widths.
 - Static waveform checks reject non-finite view dimensions before Core Graphics
   mutations, division, or horizontal sampling.
+- Subnormal waveform widths are rejected before Core Graphics mutation, and
+  envelope scaling avoids a separately overflowing reciprocal.
 - Static package checks cover the root and archived versioned podspec metadata.
 - Static package checks require the publishable root podspec to declare Swift 5
   and the same iOS 12 minimum as the hosted Xcode build; archived release
@@ -149,6 +151,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   endpoint-inclusive per-wave point budget.
 - See `docs/plans/2026-06-16-executable-waveform-math-tests.md` for the shared
   production math and executable Swift behavioral gate.
+- See `docs/plans/2026-06-17-subnormal-width-geometry.md` for the midpoint
+  underflow guard and overflow-safe envelope scaling.
 - See `docs/plans/2026-06-12-root-podspec-toolchain-alignment.md` for the
   publishable CocoaPods/Xcode compatibility contract.
 

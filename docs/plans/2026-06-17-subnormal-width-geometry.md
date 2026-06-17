@@ -6,7 +6,7 @@ date: 2026-06-17
 
 # Keep Subnormal Waveform Widths Out of Core Graphics
 
-Status: In Progress
+Status: Completed
 
 ## Context
 
@@ -69,7 +69,15 @@ the existing finite-bounds guard and pass them to Core Graphics.
 
 ## Verification
 
-- Planned: executable Swift math tests where `swiftc` is available.
-- Planned: focused source and hostile mutations.
-- Planned: repository and external-directory `make check`.
-- Planned: exact-head hosted iOS Simulator framework build.
+- Focused package and waveform source contracts passed.
+- repository and external-directory `make check` passed; local `swiftc` and
+  `xcodebuild` were unavailable, so executable UIKit evidence remains hosted.
+- Five hostile subnormal-width mutations were rejected. The checker records
+  that hostile subnormal-width mutations were rejected, covering a removed or
+  late midpoint guard, restored reciprocal math, helper regression, and missing
+  tiny-midpoint executable coverage.
+- Numeric reproduction confirmed that the smallest positive width underflows
+  when halved, while direct normalized envelope math stays finite at both edges
+  and the midpoint for a tiny nonzero midpoint.
+- generated-artifact and credential-pattern audits passed.
+- Exact-head hosted iOS Simulator framework build required after push.

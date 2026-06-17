@@ -55,6 +55,8 @@ public class SiriWaveformView: UIView {
         let width = bounds.width
         let height = bounds.height
         guard width.isFinite && height.isFinite && width > 0.0 && height > 0.0 else { return }
+        let midpoint = width / 2.0
+        guard midpoint > 0.0 else { return }
 
         context.clear(bounds)
         
@@ -77,7 +79,6 @@ public class SiriWaveformView: UIView {
             context.setLineWidth(waveNumber == 0 ? primaryLineWidth : secondaryLineWidth)
             
             let halfHeight = height / 2.0
-            let mid = width / 2.0
             
             let maxAmplitude = max(halfHeight - 4.0, 0.0) // 4 corresponds to twice the stroke width
             let progress: CGFloat = 1.0 - CGFloat(waveNumber) / CGFloat(waveCount)
@@ -94,7 +95,7 @@ public class SiriWaveformView: UIView {
                     width: width,
                     maximumSampleIntervalCount: maximumSampleIntervalCount
                 )
-                let scaling = -pow(1 / mid * (sampleX - mid), 2) + 1
+                let scaling = WaveformMath.waveformScaling(sampleX: sampleX, midpoint: midpoint)
                 let tempCasting: CGFloat = 2.0 * CGFloat(pi) * CGFloat(sampleX / width) * drawFrequency + _phase
                 let y = scaling * maxAmplitude * normedAmplitude * sin(tempCasting) + halfHeight
                 if sampleX == 0 {

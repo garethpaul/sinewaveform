@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-17
+
+- Subnormal waveform widths are rejected before Core Graphics mutation, with
+  overflow-safe envelope scaling for tiny nonzero midpoints.
+
 ## 2026-06-16
 
 - Added executable Swift tests for waveform normalization, phase wrapping, and

@@ -36,4 +36,9 @@ enum WaveformMath {
     ) -> CGFloat {
         return index == maximumSampleIntervalCount ? width : min(accumulatedX, width)
     }
+
+    static func waveformScaling(sampleX: CGFloat, midpoint: CGFloat) -> CGFloat {
+        let normalizedX = (sampleX - midpoint) / midpoint
+        return -(normalizedX * normalizedX) + 1.0
+    }
 }

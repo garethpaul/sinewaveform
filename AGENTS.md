@@ -39,6 +39,7 @@
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 - Preserve the shared finite-range normalization path for inspectable waveform
   values before phase math or Core Graphics calls.
+- Subnormal waveform widths are rejected before Core Graphics mutation.
 
 ## PR / change guidance
 

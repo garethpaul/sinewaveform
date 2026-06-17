@@ -34,6 +34,8 @@ Helpful reports include:
   Core Graphics coordinates within the view's finite drawing bounds.
 - Drawing rejects non-finite view dimensions before entering geometry math or
   the horizontal sampling loop.
+- Subnormal waveform widths are rejected before Core Graphics mutation so
+  underflowed geometry cannot produce non-finite path coordinates.
 - The exact 4,096-point waveform sample budget bounds path-generation work for
   extremely wide finite views while counting both endpoints.
 

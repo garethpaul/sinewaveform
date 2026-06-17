@@ -15,6 +15,7 @@ FINITE_BOUNDS_PLAN = DOCS_PLANS / "2026-06-12-finite-waveform-bounds.md"
 SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-13-waveform-sample-budget.md"
 ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
 EXACT_SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-14-exact-waveform-sample-budget.md"
+SUBNORMAL_WIDTH_PLAN = DOCS_PLANS / "2026-06-17-subnormal-width-geometry.md"
 BEHAVIOR_TEST_PLAN = DOCS_PLANS / "2026-06-16-executable-waveform-math-tests.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 
@@ -107,6 +108,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-14-make-root-override-protection.md is missing")
     if not EXACT_SAMPLE_BUDGET_PLAN.exists():
         errors.append("docs/plans/2026-06-14-exact-waveform-sample-budget.md is missing")
+    if not SUBNORMAL_WIDTH_PLAN.exists():
+        errors.append("docs/plans/2026-06-17-subnormal-width-geometry.md is missing")
     if not BEHAVIOR_TEST_PLAN.exists():
         errors.append("docs/plans/2026-06-16-executable-waveform-math-tests.md is missing")
 
@@ -260,6 +263,8 @@ def package_checks():
         errors.append("README must index exact waveform sample budget evidence")
     if "docs/plans/2026-06-16-executable-waveform-math-tests.md" not in read_text("README.md"):
         errors.append("README must index executable waveform math test evidence")
+    if str(SUBNORMAL_WIDTH_PLAN.relative_to(ROOT)) not in read_text("README.md"):
+        errors.append("README must index subnormal-width geometry evidence")
 
     for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
         document = re.sub(r"\s+", " ", read_text(doc_path)).lower()
@@ -267,6 +272,8 @@ def package_checks():
             errors.append(f"{doc_path} must document the waveform sample budget")
         if "exact 4,096-point waveform sample budget" not in document:
             errors.append(f"{doc_path} must document the exact endpoint-inclusive sample budget")
+        if "subnormal waveform widths are rejected before core graphics mutation" not in document:
+            errors.append(f"{doc_path} must document subnormal-width rejection")
 
     return errors
 
@@ -301,7 +308,7 @@ def waveform_checks():
     for fragment in (
         "while true",
         "let sampleX = WaveformMath.sampleX(",
-        "(sampleX - mid)",
+        "WaveformMath.waveformScaling(sampleX: sampleX, midpoint: midpoint)",
         "sampleX / width",
         "CGPoint(x: sampleX, y: y)",
         "if sampleX == width { break }",
@@ -381,6 +388,27 @@ def waveform_checks():
         if fragment not in source:
             errors.append(f"waveform finite-input contract is missing: {fragment}")
     for fragment in (
+        "static func waveformScaling(sampleX: CGFloat, midpoint: CGFloat) -> CGFloat",
+        "let normalizedX = (sampleX - midpoint) / midpoint",
+        "return -(normalizedX * normalizedX) + 1.0",
+        "let midpoint = width / 2.0",
+        "guard midpoint > 0.0 else { return }",
+        "WaveformMath.waveformScaling(sampleX: sampleX, midpoint: midpoint)",
+        "WaveformMath.waveformScaling(sampleX: 0.0, midpoint: .leastNonzeroMagnitude)",
+    ):
+        if fragment not in math_source + source + test_source:
+            errors.append(f"waveform subnormal-width contract is missing: {fragment}")
+    midpoint_guard = source.find("guard midpoint > 0.0 else { return }")
+    context_clear = source.find("context.clear(bounds)")
+    if min(midpoint_guard, context_clear) < 0 or midpoint_guard > context_clear:
+        errors.append("drawRect must reject midpoint underflow before graphics context mutation")
+    if (
+        "1 / mid * (sampleX - mid)" in source
+        or "1 / midpoint * (sampleX - midpoint)" in source
+        or "1 / midpoint * (sampleX - midpoint)" in math_source
+    ):
+        errors.append("waveform scaling must not use an overflowing reciprocal")
+    for fragment in (
         "guard value == value else { return fallback }",
         "return min(max(value, minimum), maximum)",
         "return max(step, width / CGFloat(maximumSampleIntervalCount))",
@@ -416,6 +444,16 @@ def waveform_checks():
         ):
             if evidence not in plan:
                 errors.append(f"{EXACT_SAMPLE_BUDGET_PLAN.relative_to(ROOT)} must record verification evidence {evidence!r}")
+    if SUBNORMAL_WIDTH_PLAN.exists():
+        plan = SUBNORMAL_WIDTH_PLAN.read_text(encoding="utf-8")
+        for evidence in (
+            "Status: Completed",
+            "repository and external-directory `make check` passed",
+            "hostile subnormal-width mutations were rejected",
+            "generated-artifact and credential-pattern audits passed",
+        ):
+            if evidence not in plan:
+                errors.append(f"{SUBNORMAL_WIDTH_PLAN.relative_to(ROOT)} must record verification evidence {evidence!r}")
 
     return errors
 

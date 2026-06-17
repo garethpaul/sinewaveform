@@ -27,6 +27,7 @@ Priority:
 - Keep every inspectable floating-point value finite before phase math or drawing
 - Keep sampled waveform coordinates within the view's horizontal bounds
 - Keep an exact 4,096-point waveform sample budget including both endpoints
+- Subnormal waveform widths are rejected before Core Graphics mutation
 - Keep root and archived podspec metadata aligned
 - Keep the publishable podspec's Swift and iOS requirements aligned with CI
 - Keep CocoaPods description metadata non-empty and unambiguous
