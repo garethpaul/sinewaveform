@@ -18,6 +18,7 @@ EXACT_SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-14-exact-waveform-sample-budget
 SUBNORMAL_WIDTH_PLAN = DOCS_PLANS / "2026-06-17-subnormal-width-geometry.md"
 BEHAVIOR_TEST_PLAN = DOCS_PLANS / "2026-06-16-executable-waveform-math-tests.md"
 TEMP_XCODE_ARTIFACT_PLAN = DOCS_PLANS / "2026-06-19-temp-xcode-artifacts.md"
+TEST_EXECUTION_CONTRACT_PLAN = DOCS_PLANS / "2026-06-19-waveform-test-execution-contract.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 
 EXPECTED_WORKFLOW = """name: Check
@@ -115,6 +116,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-16-executable-waveform-math-tests.md is missing")
     if not TEMP_XCODE_ARTIFACT_PLAN.exists():
         errors.append("docs/plans/2026-06-19-temp-xcode-artifacts.md is missing")
+    if not TEST_EXECUTION_CONTRACT_PLAN.exists():
+        errors.append("docs/plans/2026-06-19-waveform-test-execution-contract.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -274,6 +277,8 @@ def package_checks():
         errors.append("README must index subnormal-width geometry evidence")
     if str(TEMP_XCODE_ARTIFACT_PLAN.relative_to(ROOT)) not in read_text("README.md"):
         errors.append("README must index temp Xcode artifact evidence")
+    if str(TEST_EXECUTION_CONTRACT_PLAN.relative_to(ROOT)) not in read_text("README.md"):
+        errors.append("README must index waveform test execution contract evidence")
 
     for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
         document = re.sub(r"\s+", " ", read_text(doc_path)).lower()
@@ -442,6 +447,11 @@ def waveform_checks():
     ):
         if fragment not in test_runner:
             errors.append(f"waveform behavior test runner is missing: {fragment}")
+    executable = '"$BUILD_DIR/waveform-math-tests"'
+    if f'-o {executable}' not in test_runner:
+        errors.append("waveform behavior test runner must compile the expected test binary")
+    if [line.strip() for line in test_runner.splitlines()].count(executable) != 1:
+        errors.append("waveform behavior test runner must execute the compiled test binary exactly once")
     if "width / CGFloat(maximumSamplePointCount)" in source or "maximumSampleCount" in source:
         errors.append("waveform sample budgeting must count both endpoint samples")
     if EXACT_SAMPLE_BUDGET_PLAN.exists():

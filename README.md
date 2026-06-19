@@ -158,6 +158,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   underflow guard and overflow-safe envelope scaling.
 - See `docs/plans/2026-06-19-temp-xcode-artifacts.md` for the temp Xcode
   artifact contract.
+- See `docs/plans/2026-06-19-waveform-test-execution-contract.md` for the
+  static guarantee that the compiled waveform math test binary is executed.
 - See `docs/plans/2026-06-12-root-podspec-toolchain-alignment.md` for the
   publishable CocoaPods/Xcode compatibility contract.
 

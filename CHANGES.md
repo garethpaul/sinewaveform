@@ -4,6 +4,8 @@
 
 - Xcode builds now use the shared scheme and put DerivedData under `TMPDIR` by
   default, keeping local and CI build artifacts out of user-global locations.
+- Static package verification now rejects waveform test runners that compile
+  the behavioral harness without executing the resulting binary.
 
 ## 2026-06-17
 
