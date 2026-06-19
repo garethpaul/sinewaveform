@@ -4,6 +4,8 @@ PYTHON ?= python3
 RUBY ?= ruby
 SWIFTC ?= swiftc
 XCODEBUILD ?= xcodebuild
+TMPDIR ?= /tmp
+XCODEBUILD_DERIVED_DATA_PATH ?= $(abspath $(TMPDIR)/sinewaveform-derived-data)
 override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 lint:
@@ -20,7 +22,7 @@ test:
 
 build: lint
 	@if command -v "$(XCODEBUILD)" >/dev/null 2>&1; then \
-		"$(XCODEBUILD)" -project "$(ROOT)/SineWaveform.xcodeproj" -target SineWaveform -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build; \
+		"$(XCODEBUILD)" -project "$(ROOT)/SineWaveform.xcodeproj" -scheme SineWaveform -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$(XCODEBUILD_DERIVED_DATA_PATH)" CODE_SIGNING_ALLOWED=NO build; \
 	else \
 		echo "xcodebuild not found; static package checks completed"; \
 	fi

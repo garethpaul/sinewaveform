@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-19
+
+- Xcode builds now use the shared scheme and put DerivedData under `TMPDIR` by
+  default, keeping local and CI build artifacts out of user-global locations.
+
 ## 2026-06-17
 
 - Subnormal waveform widths are rejected before Core Graphics mutation, with

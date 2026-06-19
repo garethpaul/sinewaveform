@@ -97,6 +97,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - GitHub Actions runs portable package and waveform checks on Ubuntu 24.04. On
   macOS 15 it also compiles and runs the shared Swift waveform math tests before
   building the framework for a generic iOS Simulator.
+- Xcode builds use the shared `SineWaveform` scheme and place DerivedData under
+  `TMPDIR` by default; override `XCODEBUILD_DERIVED_DATA_PATH` when a different
+  temporary artifact location is required.
 - The single approved workflow uses immutable actions, read-only permissions,
   and checkout with persisted GitHub credentials disabled in both jobs.
 - The Xcode project uses Swift 5 language mode and targets iOS 12 or newer.
@@ -153,6 +156,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   production math and executable Swift behavioral gate.
 - See `docs/plans/2026-06-17-subnormal-width-geometry.md` for the midpoint
   underflow guard and overflow-safe envelope scaling.
+- See `docs/plans/2026-06-19-temp-xcode-artifacts.md` for the temp Xcode
+  artifact contract.
 - See `docs/plans/2026-06-12-root-podspec-toolchain-alignment.md` for the
   publishable CocoaPods/Xcode compatibility contract.
 

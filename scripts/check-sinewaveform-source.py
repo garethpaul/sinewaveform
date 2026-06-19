@@ -17,6 +17,7 @@ ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
 EXACT_SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-14-exact-waveform-sample-budget.md"
 SUBNORMAL_WIDTH_PLAN = DOCS_PLANS / "2026-06-17-subnormal-width-geometry.md"
 BEHAVIOR_TEST_PLAN = DOCS_PLANS / "2026-06-16-executable-waveform-math-tests.md"
+TEMP_XCODE_ARTIFACT_PLAN = DOCS_PLANS / "2026-06-19-temp-xcode-artifacts.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 
 EXPECTED_WORKFLOW = """name: Check
@@ -112,6 +113,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-17-subnormal-width-geometry.md is missing")
     if not BEHAVIOR_TEST_PLAN.exists():
         errors.append("docs/plans/2026-06-16-executable-waveform-math-tests.md is missing")
+    if not TEMP_XCODE_ARTIFACT_PLAN.exists():
+        errors.append("docs/plans/2026-06-19-temp-xcode-artifacts.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -237,10 +240,12 @@ def package_checks():
         "RUBY ?= ruby",
         "SWIFTC ?= swiftc",
         "XCODEBUILD ?= xcodebuild",
+        "TMPDIR ?= /tmp",
+        "XCODEBUILD_DERIVED_DATA_PATH ?= $(abspath $(TMPDIR)/sinewaveform-derived-data)",
         root_declaration,
     ))
     if makefile.count(tool_and_root_block) != 1:
-        errors.append("Makefile must keep tool overrides before the protected repository root")
+        errors.append("Makefile must keep tool and temp-artifact overrides before the protected repository root")
 
     for fragment in (
         ".PHONY: build check lint test verify",
@@ -251,6 +256,8 @@ def package_checks():
         '"$(ROOT)/scripts/check-sinewaveform-source.py"',
         '"$(ROOT)/scripts/run-waveform-math-tests.sh"',
         '"$(ROOT)/SineWaveform.xcodeproj"',
+        "-scheme SineWaveform",
+        '-derivedDataPath "$(XCODEBUILD_DERIVED_DATA_PATH)"',
         "generic/platform=iOS Simulator",
         "CODE_SIGNING_ALLOWED=NO",
     ):
@@ -265,6 +272,8 @@ def package_checks():
         errors.append("README must index executable waveform math test evidence")
     if str(SUBNORMAL_WIDTH_PLAN.relative_to(ROOT)) not in read_text("README.md"):
         errors.append("README must index subnormal-width geometry evidence")
+    if str(TEMP_XCODE_ARTIFACT_PLAN.relative_to(ROOT)) not in read_text("README.md"):
+        errors.append("README must index temp Xcode artifact evidence")
 
     for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
         document = re.sub(r"\s+", " ", read_text(doc_path)).lower()
