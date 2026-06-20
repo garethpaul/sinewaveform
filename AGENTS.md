@@ -38,6 +38,8 @@
 - Start with the narrowest relevant test or Make target, then run `make check` before handing off if the change is not documentation-only.
 - `make test` compiles and runs the shared waveform math harness when `swiftc`
   is available; the hosted macOS gate is the authoritative execution boundary.
+- Keep the test-runner source contract sensitive to a missing, duplicated, or
+  replaced standalone waveform test-binary execution command.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 - Preserve the shared finite-range normalization path for inspectable waveform
   values before phase math or Core Graphics calls.

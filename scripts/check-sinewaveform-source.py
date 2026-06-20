@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import _hashlib
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -18,7 +19,14 @@ EXACT_SAMPLE_BUDGET_PLAN = DOCS_PLANS / "2026-06-14-exact-waveform-sample-budget
 SUBNORMAL_WIDTH_PLAN = DOCS_PLANS / "2026-06-17-subnormal-width-geometry.md"
 BEHAVIOR_TEST_PLAN = DOCS_PLANS / "2026-06-16-executable-waveform-math-tests.md"
 TEMP_XCODE_ARTIFACT_PLAN = DOCS_PLANS / "2026-06-19-temp-xcode-artifacts.md"
+TEST_EXECUTION_CONTRACT_PLAN = DOCS_PLANS / "2026-06-19-waveform-test-execution-contract.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
+EXECUTION_CONTRACT_HASHES = {
+    "Makefile": "f76e615c5f0447a18528a23dd7b4d52188f2e0bc4b35a9297282f13574c3fa89",
+    "Tests/WaveformMathTests/main.swift": "735ef34cc9affe9efe44e015a722d6632e2ea85c250fb7db7c656b6021e59b24",
+    "scripts/run-waveform-math-tests.sh": "5ea5c63ce8aec9e46ed14dbb23c95a26997f9fac41e7e9d4784b58d510278999",
+    "scripts/verify-waveform-math-execution.py": "eb5042f68e29d1b5840083da440b3ebf6b87ece2e7ac321b7ca6226fdb789cbb",
+}
 
 EXPECTED_WORKFLOW = """name: Check
 
@@ -115,6 +123,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-16-executable-waveform-math-tests.md is missing")
     if not TEMP_XCODE_ARTIFACT_PLAN.exists():
         errors.append("docs/plans/2026-06-19-temp-xcode-artifacts.md is missing")
+    if not TEST_EXECUTION_CONTRACT_PLAN.exists():
+        errors.append("docs/plans/2026-06-19-waveform-test-execution-contract.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -248,9 +258,9 @@ def package_checks():
         errors.append("Makefile must keep tool and temp-artifact overrides before the protected repository root")
 
     for fragment in (
-        ".PHONY: build check lint test verify",
+        ".PHONY: build check contract-test lint test verify",
         "build: lint",
-        "verify: lint test build",
+        "verify: lint contract-test test build",
         "check: verify",
         '"$(ROOT)/SineWaveform.podspec"',
         '"$(ROOT)/scripts/check-sinewaveform-source.py"',
@@ -274,6 +284,8 @@ def package_checks():
         errors.append("README must index subnormal-width geometry evidence")
     if str(TEMP_XCODE_ARTIFACT_PLAN.relative_to(ROOT)) not in read_text("README.md"):
         errors.append("README must index temp Xcode artifact evidence")
+    if str(TEST_EXECUTION_CONTRACT_PLAN.relative_to(ROOT)) not in read_text("README.md"):
+        errors.append("README must index waveform test execution contract evidence")
 
     for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
         document = re.sub(r"\s+", " ", read_text(doc_path)).lower()
@@ -296,6 +308,10 @@ def waveform_checks():
     math_source = read_text("SineWaveform/WaveformMath.swift")
     test_source = read_text("Tests/WaveformMathTests/main.swift")
     test_runner = read_text("scripts/run-waveform-math-tests.sh")
+    for relative_path, expected_hash in EXECUTION_CONTRACT_HASHES.items():
+        actual_hash = _hashlib.openssl_sha256((ROOT / relative_path).read_bytes()).hexdigest()
+        if actual_hash != expected_hash:
+            errors.append(f"waveform execution contract file changed unexpectedly: {relative_path}")
     if "class SiriWaveformView: UIView" not in source:
         errors.append("SiriWaveformView class is missing")
     if "for waveNumber in 0...numOfWaves" in source:
@@ -420,6 +436,7 @@ def waveform_checks():
     for fragment in (
         "guard value == value else { return fallback }",
         "return min(max(value, minimum), maximum)",
+        "return normalizedValue(value, minimum: 0.0, maximum: 1.0, fallback: 0.0)",
         "return max(step, width / CGFloat(maximumSampleIntervalCount))",
         "return index == maximumSampleIntervalCount ? width : min(accumulatedX, width)",
     ):
@@ -427,6 +444,11 @@ def waveform_checks():
             errors.append(f"shared executable waveform math is missing: {fragment}")
     for fragment in (
         "if !actual.isFinite || abs(actual - expected) > accuracy",
+        "assertionCount += 1",
+        "guard assertionCount == 15",
+        "guard failureCount == 0",
+        'print("ASSERT \\(nonce) \\(identifier) PASS")',
+        'print("COMPLETE \\(nonce) \\(assertionCount)")',
         "WaveformMath.normalizedValue(.nan",
         "WaveformMath.normalizedPhase(-0.5",
         "WaveformMath.sampleStep(width: 8190.0",
@@ -435,10 +457,9 @@ def waveform_checks():
         if fragment not in test_source:
             errors.append(f"executable waveform behavior coverage is missing: {fragment}")
     for fragment in (
-        '"$SWIFTC"',
-        '"$ROOT/SineWaveform/WaveformMath.swift"',
-        '"$ROOT/Tests/WaveformMathTests/main.swift"',
-        '"$BUILD_DIR/waveform-math-tests"',
+        'PYTHON=${PYTHON:-python3}',
+        'SWIFTC=${SWIFTC:-swiftc}',
+        'exec "$PYTHON" "$ROOT/scripts/verify-waveform-math-execution.py" --swiftc "$SWIFTC"',
     ):
         if fragment not in test_runner:
             errors.append(f"waveform behavior test runner is missing: {fragment}")

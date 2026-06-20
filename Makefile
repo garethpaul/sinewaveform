@@ -1,4 +1,4 @@
-.PHONY: build check lint test verify
+.PHONY: build check contract-test lint test verify
 
 PYTHON ?= python3
 RUBY ?= ruby
@@ -15,10 +15,13 @@ lint:
 test:
 	$(PYTHON) "$(ROOT)/scripts/check-sinewaveform-source.py" --mode waveform
 	@if command -v "$(SWIFTC)" >/dev/null 2>&1; then \
-		SWIFTC="$(SWIFTC)" "$(ROOT)/scripts/run-waveform-math-tests.sh"; \
+		PYTHON="$(PYTHON)" SWIFTC="$(SWIFTC)" "$(ROOT)/scripts/run-waveform-math-tests.sh"; \
 	else \
 		echo "swiftc not found; executable waveform math tests skipped"; \
 	fi
+
+contract-test:
+	$(PYTHON) -m unittest discover -s "$(ROOT)/Tests/ContractCheckerTests" -p 'test_*.py'
 
 build: lint
 	@if command -v "$(XCODEBUILD)" >/dev/null 2>&1; then \
@@ -27,6 +30,6 @@ build: lint
 		echo "xcodebuild not found; static package checks completed"; \
 	fi
 
-verify: lint test build
+verify: lint contract-test test build
 
 check: verify
