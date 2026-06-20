@@ -436,6 +436,7 @@ def waveform_checks():
     for fragment in (
         "guard value == value else { return fallback }",
         "return min(max(value, minimum), maximum)",
+        "return normalizedValue(value, minimum: 0.0, maximum: 1.0, fallback: 0.0)",
         "return max(step, width / CGFloat(maximumSampleIntervalCount))",
         "return index == maximumSampleIntervalCount ? width : min(accumulatedX, width)",
     ):
