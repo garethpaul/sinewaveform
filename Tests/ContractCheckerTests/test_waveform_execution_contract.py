@@ -208,6 +208,29 @@ class WaveformExecutionContractTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.run_mutation(name, mutate)
 
+    def test_checker_does_not_echo_repository_content(self):
+        marker = "SINEWAVEFORM_SECRET_MARKER_DO_NOT_PRINT"
+        with tempfile.TemporaryDirectory(prefix="sinewaveform-diagnostic-redaction-") as temporary:
+            checkout = Path(temporary) / "repo"
+            shutil.copytree(ROOT, checkout, ignore=shutil.ignore_patterns(".git"))
+            (checkout / "docs/device-preview.svg").write_text(f"<{marker}>")
+            result = subprocess.run(
+                [
+                    str(checkout / "scripts/run-python.sh"),
+                    str(checkout / "scripts/check-sinewaveform-source.py"),
+                    "--mode",
+                    "package",
+                ],
+                cwd=checkout,
+                text=True,
+                capture_output=True,
+                timeout=120,
+            )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn(marker, result.stderr)
+        self.assertRegex(result.stderr, r"package checks failed: \d+ validation error\(s\)")
+        self.assertNotIn("must be valid XML", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

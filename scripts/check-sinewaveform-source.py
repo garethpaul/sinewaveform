@@ -570,8 +570,9 @@ def main():
 
     errors = package_checks() if args.mode == "package" else waveform_checks()
     if errors:
-        for error in errors:
-            print(error, file=sys.stderr)
+        print(f"{args.mode} checks failed: {len(errors)} validation error(s)", file=sys.stderr)
+        for index in range(1, len(errors) + 1):
+            print(f"validation error {index}", file=sys.stderr)
         return 1
     print(f"{args.mode} checks passed")
     return 0
