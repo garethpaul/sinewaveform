@@ -22,8 +22,8 @@
 - Lint/static checks: `make lint`
 - Tests: `make test`
 - Build: `make build`
-- Xcode build artifacts default to `$(TMPDIR)/sinewaveform-derived-data`;
-  override `XCODEBUILD_DERIVED_DATA_PATH` for a different temporary path.
+- Xcode build artifacts use `/tmp/sinewaveform-derived-data`; keep that
+  repository-controlled location unless a security-focused change replaces it.
 - Local Apple development: `open SineWaveform.xcodeproj`
 - If a command above skips because a platform toolchain is missing, verify on a machine with that SDK before claiming platform behavior is tested.
 

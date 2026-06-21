@@ -37,9 +37,9 @@ class WaveformExecutionContractTests(unittest.TestCase):
 
     def test_rejects_all_known_bypass_families(self):
         test_recipe = '''test:
-\t$(PYTHON) "$(ROOT)/scripts/check-sinewaveform-source.py" --mode waveform
-\t@if command -v "$(SWIFTC)" >/dev/null 2>&1; then \\
-\t\tPYTHON="$(PYTHON)" SWIFTC="$(SWIFTC)" "$(ROOT)/scripts/run-waveform-math-tests.sh"; \\
+\t"$$PYTHON" "$$ROOT/scripts/check-sinewaveform-source.py" --mode waveform
+\t@if "$$SWIFTC" --available; then \\
+\t\t"$$ROOT/scripts/run-waveform-math-tests.sh"; \\
 \telse \\
 \t\techo "swiftc not found; executable waveform math tests skipped"; \\
 \tfi
@@ -65,7 +65,7 @@ class WaveformExecutionContractTests(unittest.TestCase):
             "make_if_false": lambda checkout: self.replace_once(
                 checkout,
                 "Makefile",
-                'if command -v "$(SWIFTC)" >/dev/null 2>&1; then \\\n',
+                'if "$$SWIFTC" --available; then \\\n',
                 "if false; then \\\n",
             ),
             "make_comment": lambda checkout: self.replace_once(
@@ -73,8 +73,8 @@ class WaveformExecutionContractTests(unittest.TestCase):
                 "Makefile",
                 test_recipe,
                 '''test:
-\t$(PYTHON) "$(ROOT)/scripts/check-sinewaveform-source.py" --mode waveform
-\t@# PYTHON="$(PYTHON)" SWIFTC="$(SWIFTC)" "$(ROOT)/scripts/run-waveform-math-tests.sh"
+\t"$$PYTHON" "$$ROOT/scripts/check-sinewaveform-source.py" --mode waveform
+\t@# "$$ROOT/scripts/run-waveform-math-tests.sh"
 ''',
             ),
             "make_string": lambda checkout: self.replace_once(
@@ -82,8 +82,8 @@ class WaveformExecutionContractTests(unittest.TestCase):
                 "Makefile",
                 test_recipe,
                 '''test:
-\t$(PYTHON) "$(ROOT)/scripts/check-sinewaveform-source.py" --mode waveform
-\t@printf '%s\\n' 'PYTHON="$(PYTHON)" SWIFTC="$(SWIFTC)" "$(ROOT)/scripts/run-waveform-math-tests.sh"'
+\t"$$PYTHON" "$$ROOT/scripts/check-sinewaveform-source.py" --mode waveform
+\t@printf '%s\n' '"$$ROOT/scripts/run-waveform-math-tests.sh"'
 ''',
             ),
             "swift_if_false": lambda checkout: mutate_assertion_region(
@@ -157,8 +157,8 @@ class WaveformExecutionContractTests(unittest.TestCase):
             "make_exit_before_execution": lambda checkout: self.replace_once(
                 checkout,
                 "Makefile",
-                '\t@if command -v "$(SWIFTC)" >/dev/null 2>&1; then \\\n',
-                '\t@exit 0; # if command -v "$(SWIFTC)" >/dev/null 2>&1; then \\\n',
+                '\t@if "$$SWIFTC" --available; then \\\n',
+                '\t@exit 0; # if "$$SWIFTC" --available; then \\\n',
             ),
             "swift_comparison_always_false": lambda checkout: self.replace_once(
                 checkout,
