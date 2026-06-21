@@ -20,6 +20,7 @@ intended source tree.
   authoritative over caller assignments.
 - Added a bounded hostile-input matrix across all seven public Make targets.
 - Documented that GNU Make preload and additional `-f` files can execute during
+  startup before an in-Makefile guard can establish authority.
 - Documented that GNU Make also expands literal `$()` syntax in an absolute
   `-f` filename before exposing `MAKEFILE_LIST`, so that external filename form
   cannot be recovered portably by the loaded Makefile.
@@ -38,3 +39,11 @@ intended source tree.
 
 This change does not alter waveform rendering, public APIs, package metadata,
 deployment targets, or signing behavior.
+
+## Trust Boundary
+
+The checked-in Makefile cannot make an already-started GNU Make process safe
+against caller-supplied programs. `MAKEFILES` preloads and additional `-f`
+programs can execute during GNU Make startup before this Makefile can reject
+their visible metadata. Trusted automation must invoke the repository Makefile
+without preload or additional Makefile programs.

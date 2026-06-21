@@ -306,14 +306,40 @@ def package_checks():
         errors.append("README must index Make authority isolation evidence")
 
     trusted_launchers = {
-        "scripts/run-python.sh": "/usr/bin/python3",
-        "scripts/run-ruby.sh": "/usr/bin/ruby",
-        "scripts/run-swiftc.sh": "/usr/bin/swiftc /usr/local/swift/usr/bin/swiftc",
-        "scripts/run-xcodebuild.sh": "/usr/bin/xcodebuild",
+        "scripts/run-python.sh": (
+            'exec /usr/bin/python3 -I -B "$@"',
+            "runpy.run_path",
+        ),
+        "scripts/run-ruby.sh": ('exec /usr/bin/ruby "$@"',),
+        "scripts/run-swiftc.sh": (
+            "/usr/bin/swiftc /usr/local/swift/usr/bin/swiftc",
+            'if [ "${1:-}" = --available ]',
+            'exec "$compiler" "$@"',
+        ),
+        "scripts/run-xcodebuild.sh": (
+            'if [ "${1:-}" = --available ]',
+            'exec /usr/bin/xcodebuild "$@"',
+        ),
     }
-    for relative_path, fragment in trusted_launchers.items():
-        if fragment not in read_text(relative_path):
-            errors.append(f"{relative_path} must keep its approved absolute tool path")
+    for relative_path, fragments in trusted_launchers.items():
+        launcher = read_text(relative_path)
+        for fragment in fragments:
+            if fragment not in launcher:
+                errors.append(
+                    f"{relative_path} must preserve trusted launcher fragment {fragment!r}"
+                )
+
+    runner = read_text("scripts/run-waveform-math-tests.sh")
+    for fragment in (
+        'PYTHON="$ROOT/scripts/run-python.sh"',
+        'SWIFTC="$ROOT/scripts/run-swiftc.sh"',
+    ):
+        if fragment not in runner:
+            errors.append(f"scripts/run-waveform-math-tests.sh must preserve {fragment}")
+
+    contract_tests = read_text("Tests/ContractCheckerTests/test_waveform_execution_contract.py")
+    if '["/usr/bin/make", "test"]' not in contract_tests:
+        errors.append("contract mutation tests must invoke the trusted absolute GNU Make path")
 
     root_test = read_text("scripts/test-makefile-root.sh")
     for evidence in (
@@ -324,6 +350,17 @@ def package_checks():
     ):
         if evidence not in root_test:
             errors.append(f"scripts/test-makefile-root.sh must preserve {evidence!r}")
+
+    if MAKE_AUTHORITY_PLAN.exists():
+        authority_plan = MAKE_AUTHORITY_PLAN.read_text(encoding="utf-8")
+        for evidence in (
+            "Status: Completed",
+            "`make root-test` passed 133 target/authority cases",
+            "checked-in Makefile cannot make an already-started GNU Make process safe",
+            "Repository and external-directory `make check` passed",
+        ):
+            if evidence not in authority_plan:
+                errors.append(f"{MAKE_AUTHORITY_PLAN.relative_to(ROOT)} must record {evidence!r}")
 
     for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
         document = re.sub(r"\s+", " ", read_text(doc_path)).lower()

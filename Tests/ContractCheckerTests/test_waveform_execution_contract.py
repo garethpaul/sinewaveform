@@ -17,7 +17,7 @@ class WaveformExecutionContractTests(unittest.TestCase):
             shutil.copytree(ROOT, checkout, ignore=shutil.ignore_patterns(".git"))
             mutate(checkout)
             result = subprocess.run(
-                ["make", "test"],
+                ["/usr/bin/make", "test"],
                 cwd=checkout,
                 text=True,
                 capture_output=True,
