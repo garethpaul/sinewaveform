@@ -2,7 +2,7 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-PYTHON=${PYTHON:-python3}
-SWIFTC=${SWIFTC:-swiftc}
+PYTHON="$ROOT/scripts/run-python.sh"
+SWIFTC="$ROOT/scripts/run-swiftc.sh"
 
 exec "$PYTHON" "$ROOT/scripts/verify-waveform-math-execution.py" --swiftc "$SWIFTC"

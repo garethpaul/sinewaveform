@@ -20,11 +20,12 @@ SUBNORMAL_WIDTH_PLAN = DOCS_PLANS / "2026-06-17-subnormal-width-geometry.md"
 BEHAVIOR_TEST_PLAN = DOCS_PLANS / "2026-06-16-executable-waveform-math-tests.md"
 TEMP_XCODE_ARTIFACT_PLAN = DOCS_PLANS / "2026-06-19-temp-xcode-artifacts.md"
 TEST_EXECUTION_CONTRACT_PLAN = DOCS_PLANS / "2026-06-19-waveform-test-execution-contract.md"
+MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXECUTION_CONTRACT_HASHES = {
-    "Makefile": "f76e615c5f0447a18528a23dd7b4d52188f2e0bc4b35a9297282f13574c3fa89",
+    "Makefile": "19a5f1d4f119034456c88291d1b24097dc98f20daf3be29755e428bff9821b11",
     "Tests/WaveformMathTests/main.swift": "735ef34cc9affe9efe44e015a722d6632e2ea85c250fb7db7c656b6021e59b24",
-    "scripts/run-waveform-math-tests.sh": "5ea5c63ce8aec9e46ed14dbb23c95a26997f9fac41e7e9d4784b58d510278999",
+    "scripts/run-waveform-math-tests.sh": "156169416ec43dae2730fbf22dfac7ddc87fce9c1da05faa4863615b301b153b",
     "scripts/verify-waveform-math-execution.py": "eb5042f68e29d1b5840083da440b3ebf6b87ece2e7ac321b7ca6226fdb789cbb",
 }
 
@@ -91,6 +92,11 @@ def require_paths():
         "SineWaveform.xcodeproj/project.pbxproj",
         "Tests/WaveformMathTests/main.swift",
         "scripts/run-waveform-math-tests.sh",
+        "scripts/run-python.sh",
+        "scripts/run-ruby.sh",
+        "scripts/run-swiftc.sh",
+        "scripts/run-xcodebuild.sh",
+        "scripts/test-makefile-root.sh",
         "README.md",
         "docs/readme-overview.svg",
         "docs/device-preview.svg",
@@ -125,6 +131,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-19-temp-xcode-artifacts.md is missing")
     if not TEST_EXECUTION_CONTRACT_PLAN.exists():
         errors.append("docs/plans/2026-06-19-waveform-test-execution-contract.md is missing")
+    if not MAKE_AUTHORITY_PLAN.exists():
+        errors.append("docs/plans/2026-06-21-make-authority-isolation.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -242,32 +250,44 @@ def package_checks():
             errors.append(f"waveform checker must retain right-edge assertion: {fragment}")
 
     makefile = read_text("Makefile")
-    root_declaration = "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))"
+    root_declaration = "override ROOT := $(shell path='$(subst ','\"'\"',$(value MAKEFILE_LIST))'; path=$$(printf '%s' \"$$path\" | /usr/bin/sed 's/^ //'); [ -f \"$$path\" ] || exit 1; directory=$$(/usr/bin/dirname -- \"$$path\"); CDPATH= cd -- \"$$directory\" && /bin/pwd -P)"
     if makefile.count(root_declaration) != 1:
         errors.append("Makefile must contain exactly one protected repository-root declaration")
-    tool_and_root_block = "\n".join((
-        "PYTHON ?= python3",
-        "RUBY ?= ruby",
-        "SWIFTC ?= swiftc",
-        "XCODEBUILD ?= xcodebuild",
-        "TMPDIR ?= /tmp",
-        "XCODEBUILD_DERIVED_DATA_PATH ?= $(abspath $(TMPDIR)/sinewaveform-derived-data)",
-        root_declaration,
-    ))
-    if makefile.count(tool_and_root_block) != 1:
-        errors.append("Makefile must keep tool and temp-artifact overrides before the protected repository root")
 
     for fragment in (
-        ".PHONY: build check contract-test lint test verify",
+        ".DEFAULT_GOAL := check",
+        ".PHONY: __repository-make-authority build check contract-test lint root-test test verify",
+        ".SECONDEXPANSION:",
+        "override SHELL := /bin/sh",
+        "override .SHELLFLAGS := -c",
+        "override PYTHONDONTWRITEBYTECODE := 1",
+        "$(error MAKEFLAGS must not be overridden for repository verification)",
+        "$(error non-executing or error-ignoring MAKEFLAGS are not supported for repository verification)",
+        "$(error MAKEFILES must be empty; repository verification requires this Makefile to be loaded alone)",
+        "$(error MAKEFILE_LIST must not be overridden)",
+        "$(error repository Makefile must be loaded alone)",
+        root_declaration,
+        "$(error repository Makefile path could not be resolved)",
+        "override PYTHON := $(ROOT)/scripts/run-python.sh",
+        "override RUBY := $(ROOT)/scripts/run-ruby.sh",
+        "override SWIFTC := $(ROOT)/scripts/run-swiftc.sh",
+        "override XCODEBUILD := $(ROOT)/scripts/run-xcodebuild.sh",
+        "override TMPDIR := /tmp",
+        "override XCODEBUILD_DERIVED_DATA_PATH := $(TMPDIR)/sinewaveform-derived-data",
         "build: lint",
-        "verify: lint contract-test test build",
+        "root-test:",
+        '"$$RUBY" -c "$$ROOT/SineWaveform.podspec"',
+        '"$$PYTHON" "$$ROOT/scripts/check-sinewaveform-source.py" --mode package',
+        'if "$$SWIFTC" --available; then',
+        '"$$ROOT/scripts/run-waveform-math-tests.sh"',
+        'if "$$XCODEBUILD" --available; then',
+        '"$$XCODEBUILD" -project "$$ROOT/SineWaveform.xcodeproj"',
+        '-derivedDataPath "$$XCODEBUILD_DERIVED_DATA_PATH"',
+        '"$$PYTHON" -m unittest discover',
+        '"$$ROOT/scripts/test-makefile-root.sh"',
+        "verify: root-test lint contract-test test build",
         "check: verify",
-        '"$(ROOT)/SineWaveform.podspec"',
-        '"$(ROOT)/scripts/check-sinewaveform-source.py"',
-        '"$(ROOT)/scripts/run-waveform-math-tests.sh"',
-        '"$(ROOT)/SineWaveform.xcodeproj"',
         "-scheme SineWaveform",
-        '-derivedDataPath "$(XCODEBUILD_DERIVED_DATA_PATH)"',
         "generic/platform=iOS Simulator",
         "CODE_SIGNING_ALLOWED=NO",
     ):
@@ -286,6 +306,66 @@ def package_checks():
         errors.append("README must index temp Xcode artifact evidence")
     if str(TEST_EXECUTION_CONTRACT_PLAN.relative_to(ROOT)) not in read_text("README.md"):
         errors.append("README must index waveform test execution contract evidence")
+    if str(MAKE_AUTHORITY_PLAN.relative_to(ROOT)) not in read_text("README.md"):
+        errors.append("README must index Make authority isolation evidence")
+
+    trusted_launchers = {
+        "scripts/run-python.sh": (
+            'exec /usr/bin/python3 -I -B "$@"',
+            "runpy.run_path",
+        ),
+        "scripts/run-ruby.sh": ('exec /usr/bin/ruby "$@"',),
+        "scripts/run-swiftc.sh": (
+            "/usr/bin/swiftc /usr/local/swift/usr/bin/swiftc",
+            'if [ "${1:-}" = --available ]',
+            'exec "$compiler" "$@"',
+        ),
+        "scripts/run-xcodebuild.sh": (
+            'if [ "${1:-}" = --available ]',
+            'exec /usr/bin/xcodebuild "$@"',
+        ),
+    }
+    for relative_path, fragments in trusted_launchers.items():
+        launcher = read_text(relative_path)
+        for fragment in fragments:
+            if fragment not in launcher:
+                errors.append(
+                    f"{relative_path} must preserve trusted launcher fragment {fragment!r}"
+                )
+
+    runner = read_text("scripts/run-waveform-math-tests.sh")
+    for fragment in (
+        'PYTHON="$ROOT/scripts/run-python.sh"',
+        'SWIFTC="$ROOT/scripts/run-swiftc.sh"',
+    ):
+        if fragment not in runner:
+            errors.append(f"scripts/run-waveform-math-tests.sh must preserve {fragment}")
+
+    contract_tests = read_text("Tests/ContractCheckerTests/test_waveform_execution_contract.py")
+    if '["/usr/bin/make", "test"]' not in contract_tests:
+        errors.append("contract mutation tests must invoke the trusted absolute GNU Make path")
+
+    root_test = read_text("scripts/test-makefile-root.sh")
+    for evidence in (
+        "133 executed target/authority cases",
+        "2 MAKEFILE_LIST rejections",
+        "3 contained startup-boundary cases",
+        "10 mode-flag rejections",
+        "SINEWAVEFORM_DOLLAR_MARKER",
+    ):
+        if evidence not in root_test:
+            errors.append(f"scripts/test-makefile-root.sh must preserve {evidence!r}")
+
+    if MAKE_AUTHORITY_PLAN.exists():
+        authority_plan = MAKE_AUTHORITY_PLAN.read_text(encoding="utf-8")
+        for evidence in (
+            "Status: Completed",
+            "`make root-test` passed 133 target/authority cases",
+            "visible additional files are rejected before recipes",
+            "Repository and external-directory `make check` passed",
+        ):
+            if evidence not in authority_plan:
+                errors.append(f"{MAKE_AUTHORITY_PLAN.relative_to(ROOT)} must record {evidence!r}")
 
     for doc_path in ("README.md", "VISION.md", "SECURITY.md", "CHANGES.md"):
         document = re.sub(r"\s+", " ", read_text(doc_path)).lower()
@@ -457,8 +537,8 @@ def waveform_checks():
         if fragment not in test_source:
             errors.append(f"executable waveform behavior coverage is missing: {fragment}")
     for fragment in (
-        'PYTHON=${PYTHON:-python3}',
-        'SWIFTC=${SWIFTC:-swiftc}',
+        'PYTHON="$ROOT/scripts/run-python.sh"',
+        'SWIFTC="$ROOT/scripts/run-swiftc.sh"',
         'exec "$PYTHON" "$ROOT/scripts/verify-waveform-math-execution.py" --swiftc "$SWIFTC"',
     ):
         if fragment not in test_runner:
@@ -495,8 +575,9 @@ def main():
 
     errors = package_checks() if args.mode == "package" else waveform_checks()
     if errors:
-        for error in errors:
-            print(error, file=sys.stderr)
+        print(f"{args.mode} checks failed: {len(errors)} validation error(s)", file=sys.stderr)
+        for index in range(1, len(errors) + 1):
+            print(f"validation error {index}", file=sys.stderr)
         return 1
     print(f"{args.mode} checks passed")
     return 0

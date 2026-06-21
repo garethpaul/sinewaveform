@@ -98,8 +98,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   macOS 15 it also compiles and runs the shared Swift waveform math tests before
   building the framework for a generic iOS Simulator.
 - Xcode builds use the shared `SineWaveform` scheme and place DerivedData under
-  `TMPDIR` by default; override `XCODEBUILD_DERIVED_DATA_PATH` when a different
-  temporary artifact location is required.
+  `/tmp/sinewaveform-derived-data` so caller variables cannot redirect build
+  artifacts into the repository or another sensitive path.
 - The single approved workflow uses immutable actions, read-only permissions,
   and checkout with persisted GitHub credentials disabled in both jobs.
 - The Xcode project uses Swift 5 language mode and targets iOS 12 or newer.
@@ -150,6 +150,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   budget on pathological finite view widths.
 - See `docs/plans/2026-06-14-make-root-override-protection.md` for authoritative
   repository-root selection across all Make aliases.
+- See `docs/plans/2026-06-21-make-authority-isolation.md` for checked-in recipe
+  authority, hostile-input coverage, and the GNU Make startup boundary.
 - See `docs/plans/2026-06-14-exact-waveform-sample-budget.md` for the exact
   endpoint-inclusive per-wave point budget.
 - See `docs/plans/2026-06-16-executable-waveform-math-tests.md` for the shared

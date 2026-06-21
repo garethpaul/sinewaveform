@@ -1,9 +1,16 @@
 # Changes
 
+## 2026-06-21
+
+- Isolated repository verification from caller-controlled Make variables,
+  hostile `PATH` entries, and whitespace-sensitive checkout roots.
+- Rejected non-executing Make modes and trailing additional Makefiles before
+  they can bypass or replace repository verification recipes.
+
 ## 2026-06-19
 
-- Xcode builds now use the shared scheme and put DerivedData under `TMPDIR` by
-  default, keeping local and CI build artifacts out of user-global locations.
+- Xcode builds now use the shared scheme and put DerivedData under a temporary
+  location, keeping local and CI build artifacts out of user-global locations.
 - Static package verification now rejects waveform test runners that compile
   the behavioral harness without executing the resulting binary.
 
