@@ -184,8 +184,25 @@ grep -Fq "repository Makefile path could not be resolved" "$TEMP_ROOT/multiple.o
 [ -e "$EARLIER_MARKER" ]
 LATER="$TEMP_ROOT/later.mk"
 LATER_MARKER="$TEMP_ROOT/later-startup-ran"
-printf '%s\n' "\$(shell /usr/bin/touch '$LATER_MARKER')" >"$LATER"
-(cd "$CONTROL_DIR" && SINEWAVEFORM_COMMAND_LOG="$COMMAND_LOG" /usr/bin/make --no-print-directory --file "$MAKEFILE" --file "$LATER" lint) >"$TEMP_ROOT/later.out" 2>&1
+LATER_RECIPE_MARKER="$TEMP_ROOT/later-recipe-ran"
+cat >"$LATER" <<EOF
+\$(shell /usr/bin/touch '$LATER_MARKER')
+lint:
+	@/usr/bin/touch '$LATER_RECIPE_MARKER'
+EOF
+if (cd "$CONTROL_DIR" && SINEWAVEFORM_COMMAND_LOG="$COMMAND_LOG" /usr/bin/make --no-print-directory --file "$MAKEFILE" --file "$LATER" lint) >"$TEMP_ROOT/later.out" 2>&1; then exit 1; fi
+grep -Fq "repository Makefile must be loaded alone" "$TEMP_ROOT/later.out"
 [ -e "$LATER_MARKER" ]
+[ ! -e "$LATER_RECIPE_MARKER" ]
 
-printf '%s\n' "Makefile root tests passed: 133 executed target/authority cases, 1 dollar-syntax checkout case, 2 MAKEFILE_LIST rejections, and 3 documented GNU Make startup-boundary cases"
+for flag in -n -t -q -i --just-print --touch --question --ignore-errors; do
+  mode_name=$(printf '%s' "$flag" | /usr/bin/sed 's/^-*//; s/-/_/g')
+  if (cd "$CONTROL_DIR" && /usr/bin/make --no-print-directory "$flag" --file "$MAKEFILE" lint) >"$TEMP_ROOT/mode-$mode_name.out" 2>&1; then exit 1; fi
+  grep -Fq "non-executing or error-ignoring MAKEFLAGS are not supported" "$TEMP_ROOT/mode-$mode_name.out"
+done
+if (cd "$CONTROL_DIR" && MAKEFLAGS=-n /usr/bin/make --no-print-directory --file "$MAKEFILE" lint) >"$TEMP_ROOT/environment-makeflags.out" 2>&1; then exit 1; fi
+grep -Fq "non-executing or error-ignoring MAKEFLAGS are not supported" "$TEMP_ROOT/environment-makeflags.out"
+if (cd "$CONTROL_DIR" && /usr/bin/make --no-print-directory --file "$MAKEFILE" MAKEFLAGS=-n lint) >"$TEMP_ROOT/command-makeflags.out" 2>&1; then exit 1; fi
+grep -Fq "MAKEFLAGS must not be overridden" "$TEMP_ROOT/command-makeflags.out"
+
+printf '%s\n' "Makefile root tests passed: 133 executed target/authority cases, 1 dollar-syntax checkout case, 2 MAKEFILE_LIST rejections, 3 contained startup-boundary cases, and 10 mode-flag rejections"

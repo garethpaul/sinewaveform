@@ -23,7 +23,7 @@ TEST_EXECUTION_CONTRACT_PLAN = DOCS_PLANS / "2026-06-19-waveform-test-execution-
 MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXECUTION_CONTRACT_HASHES = {
-    "Makefile": "a5b65eab9e786023722f3cbb0d4608c9c8e16ec9ca15fc6d3b04def614efa8ab",
+    "Makefile": "19a5f1d4f119034456c88291d1b24097dc98f20daf3be29755e428bff9821b11",
     "Tests/WaveformMathTests/main.swift": "735ef34cc9affe9efe44e015a722d6632e2ea85c250fb7db7c656b6021e59b24",
     "scripts/run-waveform-math-tests.sh": "156169416ec43dae2730fbf22dfac7ddc87fce9c1da05faa4863615b301b153b",
     "scripts/verify-waveform-math-execution.py": "eb5042f68e29d1b5840083da440b3ebf6b87ece2e7ac321b7ca6226fdb789cbb",
@@ -256,12 +256,16 @@ def package_checks():
 
     for fragment in (
         ".DEFAULT_GOAL := check",
-        ".PHONY: build check contract-test lint root-test test verify",
+        ".PHONY: __repository-make-authority build check contract-test lint root-test test verify",
+        ".SECONDEXPANSION:",
         "override SHELL := /bin/sh",
         "override .SHELLFLAGS := -c",
         "override PYTHONDONTWRITEBYTECODE := 1",
+        "$(error MAKEFLAGS must not be overridden for repository verification)",
+        "$(error non-executing or error-ignoring MAKEFLAGS are not supported for repository verification)",
         "$(error MAKEFILES must be empty; repository verification requires this Makefile to be loaded alone)",
         "$(error MAKEFILE_LIST must not be overridden)",
+        "$(error repository Makefile must be loaded alone)",
         root_declaration,
         "$(error repository Makefile path could not be resolved)",
         "override PYTHON := $(ROOT)/scripts/run-python.sh",
@@ -345,7 +349,8 @@ def package_checks():
     for evidence in (
         "133 executed target/authority cases",
         "2 MAKEFILE_LIST rejections",
-        "3 documented GNU Make startup-boundary cases",
+        "3 contained startup-boundary cases",
+        "10 mode-flag rejections",
         "SINEWAVEFORM_DOLLAR_MARKER",
     ):
         if evidence not in root_test:
@@ -356,7 +361,7 @@ def package_checks():
         for evidence in (
             "Status: Completed",
             "`make root-test` passed 133 target/authority cases",
-            "checked-in Makefile cannot make an already-started GNU Make process safe",
+            "visible additional files are rejected before recipes",
             "Repository and external-directory `make check` passed",
         ):
             if evidence not in authority_plan:

@@ -4,6 +4,8 @@
 
 - Isolated repository verification from caller-controlled Make variables,
   hostile `PATH` entries, and whitespace-sensitive checkout roots.
+- Rejected non-executing Make modes and trailing additional Makefiles before
+  they can bypass or replace repository verification recipes.
 
 ## 2026-06-19
 

@@ -18,9 +18,14 @@ intended source tree.
 - Added repository-owned launchers that select approved absolute system tools.
 - Made shell flags, quality tools, temporary paths, and derived-data paths
   authoritative over caller assignments.
+- Rejected non-executing and error-ignoring Make modes that could otherwise
+  report success without completing repository verification.
+- Deferred final Makefile-list validation until target expansion so an
+  additional trailing `-f` program cannot replace a verification recipe.
 - Added a bounded hostile-input matrix across all seven public Make targets.
-- Documented that GNU Make preload and additional `-f` files can execute during
-  startup before an in-Makefile guard can establish authority.
+- Documented that GNU Make preload and additional `-f` files can execute
+  parse-time expressions during startup before an in-Makefile guard can
+  establish authority; visible additional files are rejected before recipes.
 - Documented that GNU Make also expands literal `$()` syntax in an absolute
   `-f` filename before exposing `MAKEFILE_LIST`, so that external filename form
   cannot be recovered portably by the loaded Makefile.
@@ -28,8 +33,8 @@ intended source tree.
 ## Verification
 
 - `make root-test` passed 133 target/authority cases, one literal-dollar checkout
-  case, two metadata rejection cases, and three documented startup-boundary
-  cases.
+  case, two metadata rejection cases, three contained startup-boundary cases,
+  and ten mode-flag rejection cases.
 - Repository and external-directory `make check` passed.
 - Hostile `PATH` and direct tool-variable probes could not replace verification
   tools.
@@ -42,8 +47,9 @@ deployment targets, or signing behavior.
 
 ## Trust Boundary
 
-The checked-in Makefile cannot make an already-started GNU Make process safe
-against caller-supplied programs. `MAKEFILES` preloads and additional `-f`
-programs can execute during GNU Make startup before this Makefile can reject
-their visible metadata. Trusted automation must invoke the repository Makefile
+The checked-in Makefile cannot prevent parse-time side effects from a
+caller-supplied GNU Make program that starts before or after this file.
+`MAKEFILES` preloads and additional `-f` programs can execute during startup,
+but visible additional files are rejected before any repository verification
+recipe runs. Trusted automation must still invoke the repository Makefile
 without preload or additional Makefile programs.
