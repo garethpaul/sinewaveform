@@ -22,9 +22,12 @@ TEMP_XCODE_ARTIFACT_PLAN = DOCS_PLANS / "2026-06-19-temp-xcode-artifacts.md"
 TEST_EXECUTION_CONTRACT_PLAN = DOCS_PLANS / "2026-06-19-waveform-test-execution-contract.md"
 MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 INSTALLATION_DOCS_PLAN = DOCS_PLANS / "2026-06-25-installation-naming.md"
+RENDER_TEST = ROOT / "Tests" / "SineWaveformRenderTests" / "SineWaveformRenderTests.swift"
+RENDER_TEST_RUNNER = ROOT / "scripts" / "run-ios-render-tests.sh"
+SHARED_SCHEME = ROOT / "SineWaveform.xcodeproj" / "xcshareddata" / "xcschemes" / "SineWaveform.xcscheme"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXECUTION_CONTRACT_HASHES = {
-    "Makefile": "19a5f1d4f119034456c88291d1b24097dc98f20daf3be29755e428bff9821b11",
+    "Makefile": "b66569b22fc20a854b9bdb041dfb19e8ff16db54ecd200462883f69f882bce79",
     "Tests/WaveformMathTests/main.swift": "735ef34cc9affe9efe44e015a722d6632e2ea85c250fb7db7c656b6021e59b24",
     "scripts/run-waveform-math-tests.sh": "156169416ec43dae2730fbf22dfac7ddc87fce9c1da05faa4863615b301b153b",
     "scripts/verify-waveform-math-execution.py": "eb5042f68e29d1b5840083da440b3ebf6b87ece2e7ac321b7ca6226fdb789cbb",
@@ -91,7 +94,11 @@ def require_paths():
         "SineWaveform/WaveformMath.swift",
         "SineWaveform/SineWaveform.h",
         "SineWaveform.xcodeproj/project.pbxproj",
+        "SineWaveform.xcodeproj/xcshareddata/xcschemes/SineWaveform.xcscheme",
+        "Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift",
         "Tests/WaveformMathTests/main.swift",
+        "scripts/select-ios-simulator.py",
+        "scripts/run-ios-render-tests.sh",
         "scripts/run-waveform-math-tests.sh",
         "scripts/run-python.sh",
         "scripts/run-ruby.sh",
@@ -409,12 +416,51 @@ def waveform_checks():
 
     source = read_text("SineWaveform/SineWaveForm.swift")
     math_source = read_text("SineWaveform/WaveformMath.swift")
+    render_test = RENDER_TEST.read_text(encoding="utf-8")
+    render_test_runner = RENDER_TEST_RUNNER.read_text(encoding="utf-8")
+    project = read_text("SineWaveform.xcodeproj/project.pbxproj")
+    scheme = SHARED_SCHEME.read_text(encoding="utf-8")
+    makefile = read_text("Makefile")
     test_source = read_text("Tests/WaveformMathTests/main.swift")
     test_runner = read_text("scripts/run-waveform-math-tests.sh")
     for relative_path, expected_hash in EXECUTION_CONTRACT_HASHES.items():
         actual_hash = _hashlib.openssl_sha256((ROOT / relative_path).read_bytes()).hexdigest()
         if actual_hash != expected_hash:
             errors.append(f"waveform execution contract file changed unexpectedly: {relative_path}")
+    for fragment in (
+        "testDefaultViewUsesNonopaqueCompositing",
+        "testNilBackgroundLeavesRenderedPixelTransparent",
+        "format.opaque = false",
+        "return pixel[3]",
+    ):
+        if fragment not in render_test:
+            errors.append(f"iOS rendering test coverage is missing: {fragment}")
+    for fragment in (
+        "/usr/bin/xcrun simctl list devices available -j",
+        '"$ROOT/scripts/select-ios-simulator.py"',
+        'exec "$XCODEBUILD"',
+        "CODE_SIGNING_ALLOWED=NO",
+        "test",
+    ):
+        if fragment not in render_test_runner:
+            errors.append(f"iOS rendering test runner is missing: {fragment}")
+    for fragment in (
+        "SineWaveformRenderTests.xctest",
+        "com.apple.product-type.bundle.unit-test",
+        "SineWaveformRenderTests.swift in Sources",
+        "PBXTargetDependency",
+    ):
+        if fragment not in project:
+            errors.append(f"Xcode render-test target is missing: {fragment}")
+    for fragment in (
+        'BlueprintName = "SineWaveformRenderTests"',
+        "<TestableReference",
+        'skipped = "NO"',
+    ):
+        if fragment not in scheme:
+            errors.append(f"shared render-test scheme is missing: {fragment}")
+    if makefile.count('"$$ROOT/scripts/run-ios-render-tests.sh"') != 1:
+        errors.append("make test must execute the iOS rendering test runner exactly once")
     if "class SiriWaveformView: UIView" not in source:
         errors.append("SiriWaveformView class is missing")
     if "for waveNumber in 0...numOfWaves" in source:

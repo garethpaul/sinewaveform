@@ -4,7 +4,7 @@ set -eu
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && /bin/pwd -P)
 TEMP_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/sinewaveform-root-control-XXXXXX")
 trap 'rm -rf "$TEMP_ROOT"' EXIT HUP INT TERM
-unset MAKEFILES MAKEFILE_LIST MAKEFLAGS MFLAGS MAKEOVERRIDES ROOT PYTHON RUBY SWIFTC XCODEBUILD TMPDIR XCODEBUILD_DERIVED_DATA_PATH PYTHONDONTWRITEBYTECODE
+unset MAKEFILES MAKEFILE_LIST MAKEFLAGS MFLAGS MAKEOVERRIDES ROOT PYTHON RUBY SWIFTC XCODEBUILD TMPDIR XCODEBUILD_DERIVED_DATA_PATH XCODETEST_DERIVED_DATA_PATH PYTHONDONTWRITEBYTECODE
 
 CONTROL_DIR="$TEMP_ROOT/control"
 CHECKOUT="$TEMP_ROOT/sinewaveform's [gate] \"quoted\" \`touch SINEWAVEFORM_BACKTICK_MARKER\`"
@@ -20,6 +20,10 @@ CHECKOUT=$(CDPATH= cd -- "$CHECKOUT" && /bin/pwd -P)
 MAKEFILE="$CHECKOUT/Makefile"
 cp "$ROOT_DIR/Makefile" "$MAKEFILE"
 cp "$ROOT_DIR/scripts/run-waveform-math-tests.sh" "$CHECKOUT/scripts/run-waveform-math-tests.sh"
+cat >"$CHECKOUT/scripts/run-ios-render-tests.sh" <<'EOF'
+#!/bin/sh
+printf '%s|%s|%s|render-tests\n' "$PWD" "$0" "${PYTHONDONTWRITEBYTECODE:-}" >> "$SINEWAVEFORM_COMMAND_LOG"
+EOF
 
 for command in python3 ruby swiftc xcodebuild; do
   cat >"$CHECKOUT/bin/$command" <<'EOF'
@@ -44,7 +48,7 @@ cat >"$CHECKOUT/scripts/test-makefile-root.sh" <<'EOF'
 #!/bin/sh
 printf '%s|%s|%s|root-test\n' "$PWD" "$0" "${PYTHONDONTWRITEBYTECODE:-}" >> "$SINEWAVEFORM_COMMAND_LOG"
 EOF
-chmod +x "$CHECKOUT/scripts/test-makefile-root.sh" "$CHECKOUT/scripts/run-waveform-math-tests.sh"
+chmod +x "$CHECKOUT/scripts/test-makefile-root.sh" "$CHECKOUT/scripts/run-waveform-math-tests.sh" "$CHECKOUT/scripts/run-ios-render-tests.sh"
 
 BAD_COMMAND="$TEMP_ROOT/bad-command"
 cat >"$BAD_COMMAND" <<EOF
@@ -139,7 +143,7 @@ for target in build check contract-test lint root-test test verify; do
   run_case environment-shell "$target" environment-shell
   run_case command-flags "$target" command-flags
   run_case environment-flags "$target" environment-flags
-  for variable in PYTHON RUBY SWIFTC XCODEBUILD TMPDIR XCODEBUILD_DERIVED_DATA_PATH; do
+  for variable in PYTHON RUBY SWIFTC XCODEBUILD TMPDIR XCODEBUILD_DERIVED_DATA_PATH XCODETEST_DERIVED_DATA_PATH; do
     run_case "command-$variable" "$target" command-variable "$variable"
     run_case "environment-$variable" "$target" environment-variable "$variable"
   done
