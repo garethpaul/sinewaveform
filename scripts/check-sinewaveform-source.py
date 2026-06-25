@@ -429,6 +429,7 @@ def waveform_checks():
             errors.append(f"waveform execution contract file changed unexpectedly: {relative_path}")
     for fragment in (
         "testDefaultViewUsesNonopaqueCompositing",
+        "testDecodedViewUsesNonopaqueCompositing",
         "testNilBackgroundLeavesRenderedPixelTransparent",
         "format.opaque = false",
         "return pixel[3]",

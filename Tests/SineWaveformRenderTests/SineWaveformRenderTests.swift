@@ -11,6 +11,14 @@ final class SineWaveformRenderTests: XCTestCase {
         XCTAssertFalse(view.isOpaque)
     }
 
+    func testDecodedViewUsesNonopaqueCompositing() throws {
+        let original = SiriWaveformView(frame: CGRect(x: 0, y: 0, width: 40, height: 20))
+        let archive = try NSKeyedArchiver.archivedData(withRootObject: original, requiringSecureCoding: false)
+        let decoded = try XCTUnwrap(NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(archive) as? SiriWaveformView)
+
+        XCTAssertFalse(decoded.isOpaque)
+    }
+
     func testNilBackgroundLeavesRenderedPixelTransparent() throws {
         let view = SiriWaveformView(frame: CGRect(x: 0, y: 0, width: 40, height: 20))
         view.backgroundColor = nil
