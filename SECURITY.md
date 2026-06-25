@@ -38,6 +38,8 @@ Helpful reports include:
   underflowed geometry cannot produce non-finite path coordinates.
 - The exact 4,096-point waveform sample budget bounds path-generation work for
   extremely wide finite views while counting both endpoints.
+- The view is nonopaque by default and a nil background remains transparent;
+  hosted UIKit rendering tests guard both programmatic and decoded instances.
 
 ## Mobile Privacy Notes
 

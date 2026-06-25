@@ -377,7 +377,7 @@ def package_checks():
 
     root_test = read_text("scripts/test-makefile-root.sh")
     for evidence in (
-        "133 executed target/authority cases",
+        "147 executed target/authority cases",
         "2 MAKEFILE_LIST rejections",
         "3 contained startup-boundary cases",
         "10 mode-flag rejections",
@@ -462,6 +462,16 @@ def waveform_checks():
             errors.append(f"shared render-test scheme is missing: {fragment}")
     if makefile.count('"$$ROOT/scripts/run-ios-render-tests.sh"') != 1:
         errors.append("make test must execute the iOS rendering test runner exactly once")
+    if source.count("isOpaque = false") != 2:
+        errors.append("programmatic and decoded waveform views must both use nonopaque compositing")
+    for fragment in (
+        "if let backgroundColor = backgroundColor",
+        "context.setFillColor(backgroundColor.cgColor)",
+    ):
+        if fragment not in source:
+            errors.append(f"waveform background compositing is missing: {fragment}")
+    if "backgroundColor?.set()" in source:
+        errors.append("a nil waveform background must not select an implicit fill color")
     if "class SiriWaveformView: UIView" not in source:
         errors.append("SiriWaveformView class is missing")
     if "for waveNumber in 0...numOfWaves" in source:

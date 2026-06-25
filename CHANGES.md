@@ -1,5 +1,67 @@
 # Changes
 
+## 2026-06-25 16:54 PDT - P1 - Preserve default waveform transparency
+
+### Summary
+
+Added an executable UIKit rendering boundary and fixed the waveform view's
+default compositing. Programmatic and decoded instances are now nonopaque, and
+a nil background no longer becomes an implicit opaque context fill.
+
+### Work completed
+
+- Added an iOS Simulator XCTest target and shared scheme that render the real
+  `SiriWaveformView` and inspect pixel alpha.
+- Added repository-owned simulator selection and test execution to `make test`.
+- Set `isOpaque = false` in frame and coder initialization paths.
+- Made background filling conditional on an explicitly assigned color.
+- Added static and mutation-sensitive contracts for the test target, runner,
+  and compositing implementation.
+
+### Threads
+
+- Started: none; the focused UIKit defect was completed directly.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `SineWaveform/SineWaveForm.swift` — preserves transparent compositing.
+- `Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift` — verifies
+  programmatic, decoded, and pixel-alpha behavior.
+- `SineWaveform.xcodeproj` — adds the test bundle and shared test scheme.
+- `scripts/run-ios-render-tests.sh` and `scripts/select-ios-simulator.py` — run
+  the hosted simulator boundary deterministically.
+- `Makefile`, static checks, guidance, and plans — wire and document the gate.
+
+### Validation
+
+- RED hosted `make check` at `f515bd2` — all three UIKit tests failed for the
+  intended behavior: both views were opaque and transparent pixel alpha was
+  `255` rather than `0`.
+- GREEN hosted `make check` at `0a48af8` — simulator rendering tests and the
+  iOS framework build passed.
+- Local package, waveform, contract, and 147-case root-authority checks passed;
+  Swift and Xcode execution skipped because approved host tools are absent.
+- Local full `make check` reached the known `/usr/bin/ruby` absence after the
+  root-authority gate; hosted macOS remains authoritative for Ruby and UIKit.
+
+### Bugs / findings
+
+- P1: a default nil-background waveform cleared its context and then filled it
+  with the implicit current fill color, producing opaque output.
+- P2: the view retained UIKit's opaque default across both initialization paths.
+
+### Blockers
+
+- None for the implementation; exact-head review and final hosted checks remain
+  required before merge.
+
+### Next action
+
+- Run hostile mutations and exact-head Codex review, then merge only with all
+  hosted checks green.
+
 ## 2026-06-25 11:54 PDT - P2 - Clarify package, module, and public type names
 
 ### Summary

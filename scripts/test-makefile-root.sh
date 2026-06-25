@@ -209,4 +209,4 @@ grep -Fq "non-executing or error-ignoring MAKEFLAGS are not supported" "$TEMP_RO
 if (cd "$CONTROL_DIR" && /usr/bin/make --no-print-directory --file "$MAKEFILE" MAKEFLAGS=-n lint) >"$TEMP_ROOT/command-makeflags.out" 2>&1; then exit 1; fi
 grep -Fq "MAKEFLAGS must not be overridden" "$TEMP_ROOT/command-makeflags.out"
 
-printf '%s\n' "Makefile root tests passed: 133 executed target/authority cases, 1 dollar-syntax checkout case, 2 MAKEFILE_LIST rejections, 3 contained startup-boundary cases, and 10 mode-flag rejections"
+printf '%s\n' "Makefile root tests passed: 147 executed target/authority cases, 1 dollar-syntax checkout case, 2 MAKEFILE_LIST rejections, 3 contained startup-boundary cases, and 10 mode-flag rejections"

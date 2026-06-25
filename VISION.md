@@ -28,6 +28,8 @@ Priority:
 - Keep sampled waveform coordinates within the view's horizontal bounds
 - Keep an exact 4,096-point waveform sample budget including both endpoints
 - Subnormal waveform widths are rejected before Core Graphics mutation
+- Preserve transparent compositing when no waveform background color is set
+- Keep UIKit simulator rendering coverage for programmatic and decoded views
 - Keep root and archived podspec metadata aligned
 - Keep the publishable podspec's Swift and iOS requirements aligned with CI
 - Keep CocoaPods description metadata non-empty and unambiguous
@@ -38,7 +40,7 @@ Priority:
 Next priorities:
 
 - Document the exact iOS and CocoaPods compatibility matrix
-- Add a simple sample app or snapshot verification path
+- Add a simple sample app or broader pixel snapshot fixtures
 - Modernize drawing APIs in a dedicated compatibility pass
 
 Contribution rules:
