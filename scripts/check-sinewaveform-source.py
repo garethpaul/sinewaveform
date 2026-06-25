@@ -21,6 +21,7 @@ BEHAVIOR_TEST_PLAN = DOCS_PLANS / "2026-06-16-executable-waveform-math-tests.md"
 TEMP_XCODE_ARTIFACT_PLAN = DOCS_PLANS / "2026-06-19-temp-xcode-artifacts.md"
 TEST_EXECUTION_CONTRACT_PLAN = DOCS_PLANS / "2026-06-19-waveform-test-execution-contract.md"
 MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
+INSTALLATION_DOCS_PLAN = DOCS_PLANS / "2026-06-25-installation-naming.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXECUTION_CONTRACT_HASHES = {
     "Makefile": "19a5f1d4f119034456c88291d1b24097dc98f20daf3be29755e428bff9821b11",
@@ -133,6 +134,8 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-19-waveform-test-execution-contract.md is missing")
     if not MAKE_AUTHORITY_PLAN.exists():
         errors.append("docs/plans/2026-06-21-make-authority-isolation.md is missing")
+    if not INSTALLATION_DOCS_PLAN.exists():
+        errors.append("docs/plans/2026-06-25-installation-naming.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -201,6 +204,26 @@ def package_checks():
     ):
         if fragment not in readme:
             errors.append(f"README must keep visual documentation contract: {fragment}")
+
+    for fragment in (
+        "## Installation",
+        "pod 'SineWaveform', :git => 'https://github.com/garethpaul/sinewaveform.git', :branch => 'master'",
+        "import SineWaveform",
+        "let waveformView = SiriWaveformView(frame: .zero)",
+        "waveformView.updateWithLevel(0.5)",
+        "The CocoaPods and Swift module name is `SineWaveform`",
+        "The public view type is `SiriWaveformView`",
+        "docs/plans/2026-06-25-installation-naming.md",
+    ):
+        if fragment not in readme:
+            errors.append(f"README installation contract is missing: {fragment}")
+    for incorrect_fragment in (
+        "pod 'sinewaveform'",
+        "import sinewaveform",
+        ":tag => '0.0.6'",
+    ):
+        if incorrect_fragment in readme:
+            errors.append(f"README must not use incorrect package naming: {incorrect_fragment}")
 
     for relative_path in ("docs/readme-overview.svg", "docs/device-preview.svg"):
         try:

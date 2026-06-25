@@ -51,6 +51,37 @@ cd sinewaveform
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 
+## Installation
+
+The CocoaPods and Swift module name is `SineWaveform`.
+The public view type is `SiriWaveformView`. The lowercase repository name and
+the historical `SineWaveForm.swift` filename are not Swift import or type names.
+
+The root podspec currently declares version 0.0.6, but the historical `0.0.6`
+Git tag predates the checked-in Swift 5/iOS 12 metadata. To consume the current
+default-branch source and podspec directly from Git, add this to the application
+Podfile:
+
+```ruby
+pod 'SineWaveform', :git => 'https://github.com/garethpaul/sinewaveform.git', :branch => 'master'
+```
+
+Run `pod install`, open the generated workspace, and import the module from the
+application target:
+
+```swift
+import SineWaveform
+
+let waveformView = SiriWaveformView(frame: .zero)
+waveformView.updateWithLevel(0.5)
+```
+
+The branch form documents repository-backed installation and does not claim
+that version 0.0.6 is currently available from the public CocoaPods trunk or
+provide an immutable dependency pin. Applications that require reproducible
+builds should replace `:branch` with a reviewed commit containing the current
+podspec.
+
 ## Running or Using the Project
 
 - Open `SineWaveform.xcodeproj` in Xcode, choose the app or sample scheme, and run it on the matching simulator/device.
@@ -164,6 +195,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   static guarantee that the compiled waveform math test binary is executed.
 - See `docs/plans/2026-06-12-root-podspec-toolchain-alignment.md` for the
   publishable CocoaPods/Xcode compatibility contract.
+- See `docs/plans/2026-06-25-installation-naming.md` for the exact CocoaPods,
+  Swift module, source-file, and public view naming boundary.
 
 ## Contributing
 

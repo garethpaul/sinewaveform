@@ -1,5 +1,77 @@
 # Changes
 
+## 2026-06-25 11:54 PDT - P2 - Clarify package, module, and public type names
+
+### Summary
+
+Added an exact repository-backed CocoaPods installation example and minimal
+Swift usage snippet. The README now distinguishes the lowercase repository,
+`SineWaveform` pod/module, historical `SineWaveForm.swift` filename, and public
+`SiriWaveformView` type.
+
+### Work completed
+
+- Added a default-branch Git Podfile entry that consumes the current root
+  podspec instead of the stale historical 0.0.6 tag.
+- Added `import SineWaveform`, view construction, and level-update examples.
+- Added positive and incorrect-lowercase naming contracts plus completed plan
+  evidence and roadmap synchronization.
+
+### Threads
+
+- Started: none; the focused documentation gap was completed directly.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `README.md` — added installation, naming, import, and usage guidance.
+- `scripts/check-sinewaveform-source.py` — enforced exact documented names.
+- `VISION.md` — removed the completed installation priority.
+- `AGENTS.md` — recorded the naming boundary for future maintenance.
+- `docs/plans/2026-06-25-installation-naming.md` — recorded scope and evidence.
+
+### Validation
+
+- Initial red package check — failed fast on the missing completed plan.
+- Second red package check — after adding scope evidence, reported all seven
+  missing README installation/import fragments.
+- First focused rerun — package validation found the required public-type phrase
+  split across a Markdown line break; corrected the wording. The attempted
+  `--mode source` command also failed because the valid mode is `waveform`.
+- Initial exact-head Codex review — found the proposed 0.0.6 tag resolves to an
+  older iOS 8/HTTP podspec rather than the current checked-in metadata.
+- Corrected the example to `:branch => 'master'`, documented its non-immutable
+  boundary, and explicitly rejected the stale 0.0.6 tag form.
+- Three hostile README mutations — lowercase import, stale tag, and wrong
+  public type were each rejected for the intended contract violation.
+- Full `/usr/bin/make check` — passed 133 Make authority cases, then stopped at
+  podspec syntax because this host lacks the pinned `/usr/bin/ruby`.
+- Root and external-directory `make root-test contract-test test` — passed 133
+  authority cases, three execution-contract tests, and waveform checks; Swift
+  execution skipped truthfully because no approved `swiftc` exists locally.
+- Direct package/waveform checks, Python compilation, and `git diff --check` —
+  passed. Hosted Ruby, Swift, and Xcode validation remains pending.
+- CocoaPods installation — not executed; the example targets the current
+  default branch, explains commit pinning for reproducibility, and does not
+  claim public trunk availability.
+
+### Bugs / findings
+
+- P2: users could confuse the lowercase repository name, pod/module name,
+  historical source filename, and public view type because no install or import
+  example existed.
+
+### Blockers
+
+- CocoaPods and Xcode are unavailable on this Linux host; hosted build evidence
+  remains authoritative for the framework target.
+
+### Next action
+
+- Open the pull request, run exact-head review, and require hosted podspec,
+  Swift execution, Xcode build, and CodeQL success before merge.
+
 ## 2026-06-21
 
 - Isolated repository verification from caller-controlled Make variables,

@@ -37,7 +37,6 @@ Priority:
 
 Next priorities:
 
-- Fix README installation naming and import examples
 - Document the exact iOS and CocoaPods compatibility matrix
 - Add a simple sample app or snapshot verification path
 - Modernize drawing APIs in a dedicated compatibility pass
