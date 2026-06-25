@@ -11,7 +11,8 @@ Swift usage snippet. The README now distinguishes the lowercase repository,
 
 ### Work completed
 
-- Added a Git/tag Podfile entry aligned with root podspec version 0.0.6.
+- Added a default-branch Git Podfile entry that consumes the current root
+  podspec instead of the stale historical 0.0.6 tag.
 - Added `import SineWaveform`, view construction, and level-update examples.
 - Added positive and incorrect-lowercase naming contracts plus completed plan
   evidence and roadmap synchronization.
@@ -38,7 +39,11 @@ Swift usage snippet. The README now distinguishes the lowercase repository,
 - First focused rerun — package validation found the required public-type phrase
   split across a Markdown line break; corrected the wording. The attempted
   `--mode source` command also failed because the valid mode is `waveform`.
-- Three hostile README mutations — lowercase import, wrong pod tag, and wrong
+- Initial exact-head Codex review — found the proposed 0.0.6 tag resolves to an
+  older iOS 8/HTTP podspec rather than the current checked-in metadata.
+- Corrected the example to `:branch => 'master'`, documented its non-immutable
+  boundary, and explicitly rejected the stale 0.0.6 tag form.
+- Three hostile README mutations — lowercase import, stale tag, and wrong
   public type were each rejected for the intended contract violation.
 - Full `/usr/bin/make check` — passed 133 Make authority cases, then stopped at
   podspec syntax because this host lacks the pinned `/usr/bin/ruby`.
@@ -47,8 +52,9 @@ Swift usage snippet. The README now distinguishes the lowercase repository,
   execution skipped truthfully because no approved `swiftc` exists locally.
 - Direct package/waveform checks, Python compilation, and `git diff --check` —
   passed. Hosted Ruby, Swift, and Xcode validation remains pending.
-- CocoaPods installation — not executed; the example is verified against the
-  checked-in podspec/tag and does not claim public trunk availability.
+- CocoaPods installation — not executed; the example targets the current
+  default branch, explains commit pinning for reproducibility, and does not
+  claim public trunk availability.
 
 ### Bugs / findings
 

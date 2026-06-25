@@ -57,11 +57,13 @@ The CocoaPods and Swift module name is `SineWaveform`.
 The public view type is `SiriWaveformView`. The lowercase repository name and
 the historical `SineWaveForm.swift` filename are not Swift import or type names.
 
-The publishable root podspec is version 0.0.6. To install that exact checked-in
-package definition directly from Git, add this to the application Podfile:
+The root podspec currently declares version 0.0.6, but the historical `0.0.6`
+Git tag predates the checked-in Swift 5/iOS 12 metadata. To consume the current
+default-branch source and podspec directly from Git, add this to the application
+Podfile:
 
 ```ruby
-pod 'SineWaveform', :git => 'https://github.com/garethpaul/sinewaveform.git', :tag => '0.0.6'
+pod 'SineWaveform', :git => 'https://github.com/garethpaul/sinewaveform.git', :branch => 'master'
 ```
 
 Run `pod install`, open the generated workspace, and import the module from the
@@ -74,8 +76,11 @@ let waveformView = SiriWaveformView(frame: .zero)
 waveformView.updateWithLevel(0.5)
 ```
 
-The Git/tag form documents repository-backed installation and does not claim
-that version 0.0.6 is currently available from the public CocoaPods trunk.
+The branch form documents repository-backed installation and does not claim
+that version 0.0.6 is currently available from the public CocoaPods trunk or
+provide an immutable dependency pin. Applications that require reproducible
+builds should replace `:branch` with a reviewed commit containing the current
+podspec.
 
 ## Running or Using the Project
 

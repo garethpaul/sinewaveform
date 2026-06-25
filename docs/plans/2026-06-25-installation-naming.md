@@ -6,7 +6,7 @@
 
 1. State the exact CocoaPods package and Swift module name.
 2. Show the public waveform view type and update method without ambiguity.
-3. Use a version/tag that matches the publishable root podspec.
+3. Avoid the stale 0.0.6 tag that predates the current root podspec metadata.
 4. Reject lowercase package/import examples that do not match the module.
 
 ## Context
@@ -19,7 +19,7 @@ historical `SineWaveForm.swift` capitalization, and the public class is
 
 ## Requirements
 
-- R1. Add a CocoaPods Git/tag example aligned with root podspec version 0.0.6.
+- R1. Add a CocoaPods Git/branch example that consumes the current root podspec.
 - R2. Show `import SineWaveform` and reject lowercase imports.
 - R3. Show `SiriWaveformView` construction and `updateWithLevel(_:)` usage.
 - R4. Explain the repository, module, source-file, and public-type names.
@@ -49,8 +49,11 @@ historical `SineWaveForm.swift` capitalization, and the public class is
 
 - The package checker failed before README installation content was added on
   2026-06-25.
-- Lowercase import, wrong tag, and wrong public-type mutations were rejected on
+- Lowercase import, stale-tag, and wrong public-type mutations were rejected on
   2026-06-25.
+- Exact-head Codex review found the 0.0.6 tag carries an older iOS 8/HTTP
+  podspec. The example now targets `master`, explains the non-immutable branch
+  boundary, and rejects the stale tag form.
 - Full `/usr/bin/make check` passed 133 Make authority cases, then stopped
   because the pinned `/usr/bin/ruby` is unavailable on this Linux host.
 - Root and external-directory `make root-test contract-test test` passed 133

@@ -207,7 +207,7 @@ def package_checks():
 
     for fragment in (
         "## Installation",
-        "pod 'SineWaveform', :git => 'https://github.com/garethpaul/sinewaveform.git', :tag => '0.0.6'",
+        "pod 'SineWaveform', :git => 'https://github.com/garethpaul/sinewaveform.git', :branch => 'master'",
         "import SineWaveform",
         "let waveformView = SiriWaveformView(frame: .zero)",
         "waveformView.updateWithLevel(0.5)",
@@ -217,7 +217,11 @@ def package_checks():
     ):
         if fragment not in readme:
             errors.append(f"README installation contract is missing: {fragment}")
-    for incorrect_fragment in ("pod 'sinewaveform'", "import sinewaveform"):
+    for incorrect_fragment in (
+        "pod 'sinewaveform'",
+        "import sinewaveform",
+        ":tag => '0.0.6'",
+    ):
         if incorrect_fragment in readme:
             errors.append(f"README must not use incorrect package naming: {incorrect_fragment}")
 
