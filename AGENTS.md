@@ -60,6 +60,10 @@
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-sinewaveform-baseline.md` for the canonical package and drawing safety baseline.
 - See `docs/plans/2026-06-08-versioned-podspec-metadata.md` for the archived podspec metadata guard.
+- Preserve the installation naming boundary: pod/module `SineWaveform`, public
+  view `SiriWaveformView`, and historical source file `SineWaveForm.swift`.
+- See `docs/plans/2026-06-25-installation-naming.md` for the checked install and
+  import examples.
 - Keep `.github/workflows/check.yml` as the only workflow, with immutable actions, read-only permissions, and persisted checkout credentials disabled in both jobs.
 - Preserve the checked-in project overview and device preview SVG references in README.md.
 
