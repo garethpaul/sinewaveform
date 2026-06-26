@@ -48,9 +48,9 @@ view is opaque and the nil-background render has a nonzero alpha pixel.
 
 **Step 1: Implement the minimal fix**
 
-Add programmatic and coder initializers that set `isOpaque = false`. Keep the
-context clear, then fill only when an explicit background color is assigned so
-nil remains transparent and assigned colors still render.
+Add programmatic and coder initializers that set `isOpaque = false`. Make the
+post-clear background fill conditional so nil remains transparent while an
+explicit color is restored once; keep the existing bounds validation.
 
 **Step 2: Verify GREEN**
 
@@ -95,12 +95,12 @@ global repository indexes.
   translucent background retains approximately 50% alpha.
 - Temporary hosted run `28208410926` passed all four UIKit tests against the
   conditional fill. Exact-head run `28208773112` then proved removing that fill
-  was incorrect: the translucent pixel alpha became `0` instead of `128`.
-  Restoring the conditional fill is therefore required behavior, not duplicate
-  compositing.
+  yields alpha `0` because `draw(_:)` clears after layer compositing, so the
+  conditional fill was restored.
 - Adversarial portable tests failed before the review fixes because comment-only
   opacity assignments bypassed the occurrence count, iOS 18.9 sorted ahead of
   iOS 18.10, and an iOS 9.3 runtime remained eligible. The corrected five-test
   contract suite plus package and waveform checks pass.
-- Exact-head Codex review was attempted but the nested CLI returned HTTP 401;
-  the authentication-dependent skill was skipped under maintainer instruction.
+- Exact-head Codex review at `d86f78c` raised an integer-accuracy compile concern,
+  but hosted Xcode 16.4 compiled and executed that assertion; the actionable
+  failure was the translucent alpha regression described above.

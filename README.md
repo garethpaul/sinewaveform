@@ -95,8 +95,8 @@ podspec.
   `xcodebuild` is installed, `make test` renders the real view in an iPhone
   Simulator XCTest and the `build` target builds the framework.
 - `SiriWaveformView` is nonopaque by default. A nil `backgroundColor` preserves
-  destination transparency; assigning a background color fills the view once
-  before the waveform paths are stroked.
+  destination transparency. Because `draw(_:)` clears the context, an assigned
+  background color is explicitly restored once before waveform paths are stroked.
 - Static waveform checks also require caller-provided levels and idle amplitude
   values to be clamped into the expected `0...1` drawing range.
 - Static waveform checks also require level and idle-amplitude normalization to

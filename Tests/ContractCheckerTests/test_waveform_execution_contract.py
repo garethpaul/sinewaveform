@@ -109,6 +109,15 @@ class WaveformExecutionContractTests(unittest.TestCase):
                 "    public required init?(coder: NSCoder) {\n        super.init(coder: coder)\n        isOpaque = false\n",
                 "    public required init?(coder: NSCoder) {\n        super.init(coder: coder)\n        // isOpaque = false\n",
             ),
+            "background_fill_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "        if let backgroundColor = backgroundColor {\n"
+                "            context.setFillColor(backgroundColor.cgColor)\n"
+                "            context.fill(rect)\n"
+                "        }\n\n",
+                "",
+            ),
             "swift_if_false": lambda checkout: mutate_assertion_region(
                 checkout, lambda region: f"if false {{\n{region}\n}}\n"
             ),

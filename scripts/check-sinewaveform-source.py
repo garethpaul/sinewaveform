@@ -482,13 +482,13 @@ def waveform_checks():
     ):
         if re.search(pattern, source) is None:
             errors.append(f"{initializer} waveform views must initialize nonopaque compositing")
-    for fragment in (
-        "if let backgroundColor = backgroundColor",
-        "context.setFillColor(backgroundColor.cgColor)",
-        "context.fill(rect)",
-    ):
-        if fragment not in executable_source:
-            errors.append(f"waveform background compositing is missing: {fragment}")
+    background_fill = (
+        r"if let backgroundColor = backgroundColor \{\s*"
+        r"context\.setFillColor\(backgroundColor\.cgColor\)\s*"
+        r"context\.fill\(rect\)\s*\}"
+    )
+    if re.search(background_fill, executable_source) is None:
+        errors.append("explicit waveform backgrounds must be restored after the context clear")
     if "backgroundColor?.set()" in executable_source:
         errors.append("a nil waveform background must not select an implicit fill color")
     if "class SiriWaveformView: UIView" not in source:

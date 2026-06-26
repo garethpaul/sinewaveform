@@ -24,9 +24,8 @@ the real view layer in the UIKit alpha tests.
 - Reviewed: Xcode target integrity — confirmed the XCTest source, framework
   dependency, shared scheme, Make entry point, and hosted workflow are wired.
 - Reviewed: adversarial implementation pass — accepted the coder-contract and
-  simulator-order findings. The double-compositing hypothesis was not
-  reproduced; exact-head hosted testing instead proved UIKit layer ownership
-  alone dropped the assigned background, so the conditional fill was restored.
+  simulator-order findings. Hosted rendering proved the layer-only background
+  attempt was cleared by `draw(_:)`, so the passing conditional fill returned.
 
 ### Files changed
 
@@ -49,16 +48,15 @@ the real view layer in the UIKit alpha tests.
 - Corrected Python contract run — five tests passed; package and waveform source
   checks passed.
 - Temporary hosted run `28208410926` — four UIKit tests and the framework build
-  passed on `macos-15`, disproving the suspected translucent double fill.
-- Exact-head hosted run `28208773112` — failed the translucent-background test
-  after a concurrent commit removed the conditional fill; observed alpha was
-  `0` instead of `128`, directly proving the fill remains required.
+  passed on `macos-15` with the conditional background fill.
+- Exact-head run `28208773112` — the layer-only attempt failed the translucent
+  assertion with alpha `0`, proving the post-clear fill remains required.
 - Local `make check` — passed 147 target/authority cases, one dollar-syntax
   checkout case, two `MAKEFILE_LIST` rejections, three startup-boundary cases,
   and ten mode-flag rejections before stopping at missing `/usr/bin/ruby`.
-- Codex review helper against `origin/master` — attempted and stopped with HTTP
-  401 because the nested CLI lacks bearer authentication; skipped under the
-  maintainer's authentication-failure instruction.
+- Codex review helper at `d86f78c` raised an integer-accuracy compile concern;
+  hosted Xcode 16.4 compiled and executed that assertion, so the finding was
+  rejected. The same run exposed the separate alpha regression above.
 
 ### Bugs / findings
 
@@ -66,10 +64,9 @@ the real view layer in the UIKit alpha tests.
   occurrence-count contract without protecting either initializer.
 - P3 fixed: lexicographic runtime ordering selected iOS 18.9 before iOS 18.10
   and allowed unsupported pre-iOS-12 runtimes.
-- Not reproduced: normal layer rendering showed the prior conditional fill also
-  preserved 50% alpha. Removing it then erased the assigned background in the
-  hosted simulator, so the final branch retains the conditional fill under the
-  same real-layer regression test.
+- P2 fixed: removing the conditional background fill caused `draw(_:)` to clear
+  the layer-owned color and render alpha `0`; the restored fill preserves 50%
+  alpha while the nil-background test remains transparent.
 
 ### Blockers
 
@@ -95,8 +92,8 @@ a nil background no longer becomes an implicit opaque context fill.
   `SiriWaveformView` and inspect pixel alpha.
 - Added repository-owned simulator selection and test execution to `make test`.
 - Set `isOpaque = false` in frame and coder initialization paths.
-- Made background filling conditional on an explicitly assigned color so nil
-  remains transparent and assigned translucent colors still render.
+- Restored an explicitly assigned background after the context clear while
+  leaving a nil background transparent.
 - Added static and mutation-sensitive contracts for the test target, runner,
   and compositing implementation.
 
@@ -127,10 +124,10 @@ a nil background no longer becomes an implicit opaque context fill.
 - GREEN hosted `make check` at `0a48af8` — simulator rendering tests and the
   iOS framework build passed.
 - Review-gap tests at `debc388` failed on lexical iOS runtime ordering,
-  unsupported pre-iOS-12 selection, and comment-only opacity assignments. A
-  temporary hosted run showed the conditional fill preserves expected alpha;
-  exact-head run `28208773112` proved removing it yields fully transparent
-  output for an assigned translucent background.
+  unsupported pre-iOS-12 selection, and comment-only opacity assignments.
+- Temporary run `28208410926` passed the translucent test with the conditional
+  fill; exact-head run `28208773112` failed with alpha `0` after its removal,
+  so the conditional post-clear fill was restored.
 - Local package, waveform, contract, and 147-case root-authority checks passed;
   Swift and Xcode execution skipped because approved host tools are absent.
 - Local full `make check` reached the known `/usr/bin/ruby` absence after the
