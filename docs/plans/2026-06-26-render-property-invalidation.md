@@ -21,5 +21,9 @@ Status: Completed
   contract suites. Xcode execution skipped as unavailable in Linux.
 - Local shell syntax and `git diff --check` passed; direct local `make check`
   reached the documented missing `/usr/bin/ruby` boundary.
-- Hosted UIKit/Xcode, CodeQL, and exact-head review evidence remain to be
-  recorded before merge.
+- Hosted Check run `28245014338` passed the contract job in 15 seconds and the
+  UIKit tests plus iOS Simulator framework build in 6m47s.
+- CodeQL run `28245012697` passed Actions, Python, and Swift analysis; Swift
+  completed in 16m20s.
+- The Codex review helper was attempted and blocked by repeated OpenAI API HTTP
+  401 failures; immutable exact-head manual review found no actionable issues.

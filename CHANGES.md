@@ -45,7 +45,12 @@ geometry properties did not request another draw pass.
   math assertions plus the negative control, and all contract suites.
 - Shell syntax and `git diff --check` — passed. Local direct `make check`
   reached the documented missing `/usr/bin/ruby` boundary; Linux skipped Xcode.
-- Hosted UIKit/Xcode, CodeQL, and exact-head review — pending.
+- Hosted Check run `28245014338` — passed the contract job in 15 seconds and
+  the UIKit tests plus iOS Simulator framework build in 6m47s.
+- CodeQL run `28245012697` — passed Actions, Python, and Swift analysis; Swift
+  completed in 16m20s.
+- Codex review helper — blocked by repeated OpenAI API HTTP 401 failures;
+  immutable exact-head manual review found no actionable issues.
 
 ### Bugs / findings
 
@@ -59,8 +64,7 @@ geometry properties did not request another draw pass.
 
 ### Next action
 
-- Complete the contract mutation suite and portable `make check`, then open a
-  PR for hosted UIKit/Xcode verification and exact-head review.
+- Merge PR #17 after the final documentation-only head passes hosted checks.
 
 ## 2026-06-26 03:15 PDT - P2 - Add semantic waveform pixel fixtures
 
