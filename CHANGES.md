@@ -20,14 +20,16 @@ changing synchronous behavior for callers already on UIKit's main thread.
 ### Validation
 
 - RED: waveform checks rejected the missing guard, dispatch, and reuse path.
-- GREEN: clean Ruby 3.3 container gates, six contract-checker tests, and the
+- GREEN: clean Ruby 3.3 container gates, seven contract-checker tests, and the
   Swift 5.10 waveform harness with 15 assertions and its negative control pass.
 - Hosted Check run `28215127189` passed the synchronous-main/background-handoff
   UIKit regression and framework build in Xcode 16.4; contract validation also passed.
 - CodeQL run `28215125327` passed Actions, Python, and Swift analysis.
 - The Codex review helper targeted `origin/master` at `21e08c3` and `855b64e`
   but could not authenticate with the OpenAI API (HTTP 401), so both attempts
-  were skipped per maintenance policy; manual exact-diff review found no issue.
+  were skipped per maintenance policy. After the branch rebased onto the
+  provenance correction, the equivalent exact diff passed the expanded gate
+  and manual review found no issue.
 
 ### Blockers
 

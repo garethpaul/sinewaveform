@@ -27,9 +27,11 @@ main thread without changing main-thread API behavior.
 
 - RED: waveform checks rejected the absent main-thread guard, main-queue
   dispatch, and bounded update-path reuse.
-- Clean Ruby 3.3 Make gates, six contract-checker tests, and the Swift 5.10
+- Clean Ruby 3.3 Make gates, seven contract-checker tests, and the Swift 5.10
   waveform harness with 15 assertions plus its negative control passed.
 - Hosted Check run `28215127189` passed the UIKit regression and framework
   build in Xcode 16.4; CodeQL run `28215125327` passed all configured languages.
 - Codex review attempts on `21e08c3` and `855b64e` returned OpenAI API HTTP 401
-  and were skipped per maintenance policy; manual exact-diff review was clean.
+  and were skipped per maintenance policy. The branch then rebased onto the
+  provenance correction; the equivalent exact diff passed the expanded gate
+  and manual review was clean.
