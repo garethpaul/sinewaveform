@@ -177,6 +177,54 @@ class WaveformExecutionContractTests(unittest.TestCase):
                 "            DispatchQueue.main.async { [weak self] in\n",
                 "            if false {\n",
             ),
+            "wave_color_invalidation_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "    @IBInspectable public var waveColor: UIColor = UIColor.black {\n"
+                "        didSet { setNeedsDisplay() }\n"
+                "    }\n",
+                "    @IBInspectable public var waveColor: UIColor = UIColor.black\n",
+            ),
+            "wave_count_invalidation_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "    @IBInspectable public var numOfWaves = 7 {\n"
+                "        didSet { setNeedsDisplay() }\n"
+                "    }\n",
+                "    @IBInspectable public var numOfWaves = 7\n",
+            ),
+            "primary_width_invalidation_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "    @IBInspectable public var primaryWaveLineWidth: CGFloat = 2.0 {\n"
+                "        didSet { setNeedsDisplay() }\n"
+                "    }\n",
+                "    @IBInspectable public var primaryWaveLineWidth: CGFloat = 2.0\n",
+            ),
+            "secondary_width_invalidation_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "    @IBInspectable public var secondaryWaveLineWidth: CGFloat = 3.0 {\n"
+                "        didSet { setNeedsDisplay() }\n"
+                "    }\n",
+                "    @IBInspectable public var secondaryWaveLineWidth: CGFloat = 3.0\n",
+            ),
+            "frequency_invalidation_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "    @IBInspectable public var frequency: CGFloat = 1.5 {\n"
+                "        didSet { setNeedsDisplay() }\n"
+                "    }\n",
+                "    @IBInspectable public var frequency: CGFloat = 1.5\n",
+            ),
+            "density_invalidation_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "    @IBInspectable public var density: CGFloat = 4 {\n"
+                "        didSet { setNeedsDisplay() }\n"
+                "    }\n",
+                "    @IBInspectable public var density: CGFloat = 4\n",
+            ),
             "swift_if_false": lambda checkout: mutate_assertion_region(
                 checkout, lambda region: f"if false {{\n{region}\n}}\n"
             ),

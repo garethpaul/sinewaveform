@@ -80,6 +80,10 @@ waveformView.updateWithLevel(0.5)
 hands that work to the main queue before changing UIKit-owned state; calls that
 already occur on the main thread remain synchronous.
 
+Changing `waveColor`, `numOfWaves`, either line width, `frequency`, or `density`
+invalidates the current waveform display automatically. `idleAmplitude` and
+`phaseShift` continue to take effect on the next level update.
+
 The branch form documents repository-backed installation and does not claim
 that version 0.0.6 is currently available from the public CocoaPods trunk or
 provide an immutable dependency pin. Applications that require reproducible
@@ -109,6 +113,8 @@ installation, hosted Xcode evidence, and the historical 2016 tags.
   values to be clamped into the expected `0...1` drawing range.
 - UIKit tests require background level updates to return before view state
   changes and then apply through the main queue.
+- UIKit tests require every property read directly by `draw(_:)` to invalidate
+  the backing layer when changed.
 - Hosted UIKit pixel fixtures render a deterministic single-wave view and
   require the idle stroke to remain in the center band while an active waveform
   reaches both upper and lower pixel bands without filling transparent corners.

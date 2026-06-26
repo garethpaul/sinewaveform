@@ -1,5 +1,71 @@
 # Changes
 
+## 2026-06-26 14:36 UTC - P2 - Invalidate live waveform rendering properties
+
+### Summary
+
+Closed a UIKit stale-display gap where changing public waveform color or
+geometry properties did not request another draw pass.
+
+### Work completed
+
+- Added `setNeedsDisplay()` observers to color, wave count, primary and
+  secondary line widths, frequency, and density.
+- Preserved the existing level-update semantics for idle amplitude and phase
+  shift, which do not alter the current frame until the next update.
+- Added a hosted UIKit regression that clears layer invalidation, mutates each
+  live rendering property, and requires the layer to become dirty.
+- Added portable source contracts, six hostile observer-removal mutations, and
+  focused design and implementation records.
+
+### Threads
+
+- Started: live rendering property invalidation — implementation complete.
+- Continued: hosted UIKit behavioral verification — pending exact-head CI.
+- Stopped: invalidating every inspectable property — rejected because idle
+  amplitude and phase shift apply only during the next level update.
+
+### Files changed
+
+- `SineWaveform/SineWaveForm.swift` — invalidates display from six live
+  rendering property observers.
+- `Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift` — verifies each
+  property dirties the backing layer.
+- Contract checker, README, VISION, AGENTS, and plans — preserve and document
+  the behavior.
+
+### Validation
+
+- RED portable waveform contract — failed on all six missing observers.
+- GREEN portable waveform contract — passed after the focused implementation.
+- Seven contract-checker suites — passed, including six hostile observer-removal
+  mutations.
+- Clean Swift 6/Ruby container `make check` from the checkout and `/tmp` —
+  passed 147 Make authority cases, package/waveform contracts, 15 executable
+  math assertions plus the negative control, and all contract suites.
+- Shell syntax and `git diff --check` — passed. Local direct `make check`
+  reached the documented missing `/usr/bin/ruby` boundary; Linux skipped Xcode.
+- Hosted Check run `28245014338` — passed the contract job in 15 seconds and
+  the UIKit tests plus iOS Simulator framework build in 6m47s.
+- CodeQL run `28245012697` — passed Actions, Python, and Swift analysis; Swift
+  completed in 16m20s.
+- Codex review helper — blocked by repeated OpenAI API HTTP 401 failures;
+  immutable exact-head manual review found no actionable issues.
+
+### Bugs / findings
+
+- P2: callers could update public properties read directly by `draw(_:)` while
+  UIKit continued displaying the previously rendered frame.
+
+### Blockers
+
+- Local Linux lacks Xcode; the hosted macOS simulator remains authoritative for
+  the layer invalidation behavior.
+
+### Next action
+
+- Merge PR #17 after the final documentation-only head passes hosted checks.
+
 ## 2026-06-26 03:15 PDT - P2 - Add semantic waveform pixel fixtures
 
 ### Summary

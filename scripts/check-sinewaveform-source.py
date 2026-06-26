@@ -24,6 +24,8 @@ MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 INSTALLATION_DOCS_PLAN = DOCS_PLANS / "2026-06-25-installation-naming.md"
 COMPATIBILITY_DESIGN = DOCS_PLANS / "2026-06-25-compatibility-matrix-design.md"
 COMPATIBILITY_PLAN = DOCS_PLANS / "2026-06-25-compatibility-matrix.md"
+RENDER_INVALIDATION_DESIGN = DOCS_PLANS / "2026-06-26-render-property-invalidation-design.md"
+RENDER_INVALIDATION_PLAN = DOCS_PLANS / "2026-06-26-render-property-invalidation.md"
 COMPATIBILITY_MATRIX = ROOT / "docs" / "compatibility-matrix.md"
 RENDER_TEST = ROOT / "Tests" / "SineWaveformRenderTests" / "SineWaveformRenderTests.swift"
 RENDER_TEST_RUNNER = ROOT / "scripts" / "run-ios-render-tests.sh"
@@ -112,6 +114,8 @@ def require_paths():
         "docs/compatibility-matrix.md",
         "docs/plans/2026-06-25-compatibility-matrix-design.md",
         "docs/plans/2026-06-25-compatibility-matrix.md",
+        "docs/plans/2026-06-26-render-property-invalidation-design.md",
+        "docs/plans/2026-06-26-render-property-invalidation.md",
         "docs/readme-overview.svg",
         "docs/device-preview.svg",
         "LICENSE",
@@ -153,6 +157,10 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-25-compatibility-matrix-design.md is missing")
     if not COMPATIBILITY_PLAN.exists():
         errors.append("docs/plans/2026-06-25-compatibility-matrix.md is missing")
+    if not RENDER_INVALIDATION_DESIGN.exists():
+        errors.append("docs/plans/2026-06-26-render-property-invalidation-design.md is missing")
+    if not RENDER_INVALIDATION_PLAN.exists():
+        errors.append("docs/plans/2026-06-26-render-property-invalidation.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -596,6 +604,7 @@ def waveform_checks():
         "testNilBackgroundLeavesRenderedPixelTransparent",
         "testTranslucentBackgroundIsCompositedOnce",
         "testBackgroundLevelUpdateHandsOffToMainThread",
+        "testRenderingPropertiesInvalidateDisplay",
         "testIdleWaveformStaysInCenterPixelBand",
         "testActiveWaveformOccupiesUpperAndLowerPixelBands",
         "alphaBounds(in image: UIImage)",
@@ -609,6 +618,7 @@ def waveform_checks():
         "backgroundReturned.wait(timeout: .now() + 1)",
         "XCTAssertEqual(view.amplitude, 0.25)",
         "XCTAssertEqual(view.amplitude, 0.75)",
+        "XCTAssertTrue(view.layer.needsDisplay(), property)",
     ):
         if fragment not in render_test:
             errors.append(f"iOS rendering test coverage is missing: {fragment}")
@@ -665,6 +675,25 @@ def waveform_checks():
         errors.append("a nil waveform background must not select an implicit fill color")
     if "class SiriWaveformView: UIView" not in source:
         errors.append("SiriWaveformView class is missing")
+    for property_name in (
+        "waveColor",
+        "numOfWaves",
+        "primaryWaveLineWidth",
+        "secondaryWaveLineWidth",
+        "frequency",
+        "density",
+    ):
+        pattern = rf"@IBInspectable public var {property_name}[^\n]*\{{\s*didSet \{{ setNeedsDisplay\(\) \}}\s*\}}"
+        if re.search(pattern, source) is None:
+            errors.append(f"rendering property must invalidate display: {property_name}")
+    for relative_path, fragment in (
+        ("README.md", "invalidates the current waveform display automatically"),
+        ("VISION.md", "Keep live color, count, line-width, frequency, and density changes invalidating"),
+        ("AGENTS.md", "Preserve `setNeedsDisplay()` observers on the six public properties"),
+        ("CHANGES.md", "Invalidate live waveform rendering properties"),
+    ):
+        if fragment not in read_text(relative_path):
+            errors.append(f"render property invalidation guidance is missing: {relative_path}")
     if "for waveNumber in 0...numOfWaves" in source:
         errors.append("drawRect must not divide by raw numOfWaves")
     if "for waveNumber in 0...waveCount" in source:

@@ -63,6 +63,27 @@ final class SineWaveformRenderTests: XCTestCase {
         wait(for: [updateApplied], timeout: 1)
     }
 
+    func testRenderingPropertiesInvalidateDisplay() {
+        let view = SiriWaveformView(frame: CGRect(x: 0, y: 0, width: 40, height: 20))
+        let mutations: [(String, (SiriWaveformView) -> Void)] = [
+            ("waveColor", { $0.waveColor = .red }),
+            ("numOfWaves", { $0.numOfWaves = 3 }),
+            ("primaryWaveLineWidth", { $0.primaryWaveLineWidth = 4 }),
+            ("secondaryWaveLineWidth", { $0.secondaryWaveLineWidth = 5 }),
+            ("frequency", { $0.frequency = 2 }),
+            ("density", { $0.density = 2 }),
+        ]
+
+        for (property, mutate) in mutations {
+            view.layer.display()
+            XCTAssertFalse(view.layer.needsDisplay(), property)
+
+            mutate(view)
+
+            XCTAssertTrue(view.layer.needsDisplay(), property)
+        }
+    }
+
     func testIdleWaveformStaysInCenterPixelBand() throws {
         let view = waveformFixture()
 
