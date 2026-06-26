@@ -28,6 +28,16 @@ public class SiriWaveformView: UIView {
             return _amplitude
         }
     }
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        isOpaque = false
+    }
+
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        isOpaque = false
+    }
     
     public func updateWithLevel(_ level: CGFloat) {
         let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: -0.15)
@@ -59,9 +69,11 @@ public class SiriWaveformView: UIView {
         guard midpoint > 0.0 else { return }
 
         context.clear(bounds)
-        
-        backgroundColor?.set()
-        context.fill(rect)
+
+        if let backgroundColor = backgroundColor {
+            context.setFillColor(backgroundColor.cgColor)
+            context.fill(rect)
+        }
 
         let waveCount = min(max(1, numOfWaves), maximumWaveCount)
         let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)

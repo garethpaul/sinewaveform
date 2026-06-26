@@ -1,5 +1,159 @@
 # Changes
 
+## 2026-06-25 17:13 PDT - P2 - Harden transparent rendering verification
+
+### Summary
+
+Closed the final review gaps in pull request #11 by making initializer checks
+mutation-sensitive, selecting iOS Simulator runtimes numerically, and rendering
+the real view layer in the UIKit alpha tests.
+
+### Work completed
+
+- Strengthened the decoded-view test by archiving an explicitly opaque source
+  view before verifying `init(coder:)` restores nonopaque compositing.
+- Replaced direct `draw(_:)` test invocation with normal `CALayer` rendering
+  and added a translucent-background alpha assertion.
+- Replaced lexicographic simulator runtime ordering with numeric version tuples
+  and rejected runtimes below the iOS 12 deployment target.
+- Replaced the two-occurrence opacity contract with initializer-specific
+  structural checks and hostile comment-only mutations.
+
+### Threads
+
+- Reviewed: Xcode target integrity — confirmed the XCTest source, framework
+  dependency, shared scheme, Make entry point, and hosted workflow are wired.
+- Reviewed: adversarial implementation pass — accepted the coder-contract and
+  simulator-order findings. Hosted rendering proved the layer-only background
+  attempt was cleared by `draw(_:)`, so the passing conditional fill returned.
+
+### Files changed
+
+- `Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift` — uses real
+  layer rendering and covers decoded override plus translucent backgrounds.
+- `Tests/ContractCheckerTests/test_waveform_execution_contract.py` — rejects
+  opacity assignments moved into comments.
+- `Tests/ContractCheckerTests/test_select_ios_simulator.py` — covers numeric
+  runtime ordering and the deployment-target floor.
+- `scripts/check-sinewaveform-source.py` — validates each initializer and the
+  stronger render-test boundary.
+- `scripts/select-ios-simulator.py` — parses and sorts numeric iOS versions.
+- `CHANGES.md` and the completed rendering plan — record review evidence.
+
+### Validation
+
+- Initial Python contract run — failed on both simulator fixtures and both
+  comment-only opacity mutations; the old static contract also rejected the
+  proposed UIKit-owned background implementation.
+- Corrected Python contract run — five tests passed; package and waveform source
+  checks passed.
+- Temporary hosted run `28208410926` — four UIKit tests and the framework build
+  passed on `macos-15` with the conditional background fill.
+- Exact-head run `28208773112` — the layer-only attempt failed the translucent
+  assertion with alpha `0`, proving the post-clear fill remains required.
+- Local `make check` — passed 147 target/authority cases, one dollar-syntax
+  checkout case, two `MAKEFILE_LIST` rejections, three startup-boundary cases,
+  and ten mode-flag rejections before stopping at missing `/usr/bin/ruby`.
+- Codex review helper at `d86f78c` raised an integer-accuracy compile concern;
+  hosted Xcode 16.4 compiled and executed that assertion, so the finding was
+  rejected. The same run exposed the separate alpha regression above.
+- Implementation head `4b6f667` — exact-head Codex review reported no
+  actionable findings; hosted run `28209032847` passed the contract lane and
+  all four UIKit rendering tests plus the iOS Simulator framework build.
+
+### Bugs / findings
+
+- P2 fixed: comment-only `isOpaque = false` text could satisfy the previous
+  occurrence-count contract without protecting either initializer.
+- P3 fixed: lexicographic runtime ordering selected iOS 18.9 before iOS 18.10
+  and allowed unsupported pre-iOS-12 runtimes.
+- P2 fixed: removing the conditional background fill caused `draw(_:)` to clear
+  the layer-owned color and render alpha `0`; the restored fill preserves 50%
+  alpha while the nil-background test remains transparent.
+
+### Blockers
+
+- None in the implementation; the final documentation-only head must retain
+  the same green review and hosted-check state before merge.
+
+### Next action
+
+- Revalidate the documentation-only head, merge PR #11, and synchronize
+  `master`.
+
+## 2026-06-25 16:54 PDT - P1 - Preserve default waveform transparency
+
+### Summary
+
+Added an executable UIKit rendering boundary and fixed the waveform view's
+default compositing. Programmatic and decoded instances are now nonopaque, and
+a nil background no longer becomes an implicit opaque context fill.
+
+### Work completed
+
+- Added an iOS Simulator XCTest target and shared scheme that render the real
+  `SiriWaveformView` and inspect pixel alpha.
+- Added repository-owned simulator selection and test execution to `make test`.
+- Set `isOpaque = false` in frame and coder initialization paths.
+- Restored an explicitly assigned background after the context clear while
+  leaving a nil background transparent.
+- Added static and mutation-sensitive contracts for the test target, runner,
+  and compositing implementation.
+
+### Threads
+
+- Started: none; the focused UIKit defect was completed directly.
+- Reviewed: external review-gap commit `debc388` — accepted its simulator
+  selector, comment-bypass, and decoded-state findings; added the translucent
+  background assertion as stronger coverage without claiming a reproduced bug.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `SineWaveform/SineWaveForm.swift` — preserves transparent compositing.
+- `Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift` — verifies
+  programmatic, decoded, and pixel-alpha behavior.
+- `SineWaveform.xcodeproj` — adds the test bundle and shared test scheme.
+- `scripts/run-ios-render-tests.sh` and `scripts/select-ios-simulator.py` — run
+  the hosted simulator boundary deterministically.
+- `Makefile`, static checks, guidance, and plans — wire and document the gate.
+
+### Validation
+
+- RED hosted `make check` at `f515bd2` — all three UIKit tests failed for the
+  intended behavior: both views were opaque and transparent pixel alpha was
+  `255` rather than `0`.
+- GREEN hosted `make check` at `0a48af8` — simulator rendering tests and the
+  iOS framework build passed.
+- Review-gap tests at `debc388` failed on lexical iOS runtime ordering,
+  unsupported pre-iOS-12 selection, and comment-only opacity assignments.
+- Temporary run `28208410926` passed the translucent test with the conditional
+  fill; exact-head run `28208773112` failed with alpha `0` after its removal,
+  so the conditional post-clear fill was restored.
+- Local package, waveform, contract, and 147-case root-authority checks passed;
+  Swift and Xcode execution skipped because approved host tools are absent.
+- Local full `make check` reached the known `/usr/bin/ruby` absence after the
+  root-authority gate; hosted macOS remains authoritative for Ruby and UIKit.
+
+### Bugs / findings
+
+- P1: a default nil-background waveform cleared its context and then filled it
+  with the implicit current fill color, producing opaque output.
+- P2: the view retained UIKit's opaque default across both initialization paths.
+- P2: lexical runtime sorting preferred iOS 18.9 over 18.10 and did not filter
+  simulators below the framework's iOS 12 deployment target.
+
+### Blockers
+
+- None for the implementation; exact-head review and final hosted checks remain
+  required before merge.
+
+### Next action
+
+- Run hostile mutations and exact-head Codex review, then merge only with all
+  hosted checks green.
+
 ## 2026-06-25 11:54 PDT - P2 - Clarify package, module, and public type names
 
 ### Summary

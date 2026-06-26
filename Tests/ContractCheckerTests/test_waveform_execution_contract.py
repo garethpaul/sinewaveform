@@ -43,6 +43,11 @@ class WaveformExecutionContractTests(unittest.TestCase):
 \telse \\
 \t\techo "swiftc not found; executable waveform math tests skipped"; \\
 \tfi
+\t@if "$$XCODEBUILD" --available; then \\
+\t\t"$$ROOT/scripts/run-ios-render-tests.sh"; \\
+\telse \\
+\t\techo "xcodebuild not found; iOS rendering tests skipped"; \\
+\tfi
 '''
         runner_command = 'exec "$PYTHON" "$ROOT/scripts/verify-waveform-math-execution.py" --swiftc "$SWIFTC"'
         all_assertions_start = 'expectEqual(\n    "nan-fallback",'
@@ -85,6 +90,33 @@ class WaveformExecutionContractTests(unittest.TestCase):
 \t"$$PYTHON" "$$ROOT/scripts/check-sinewaveform-source.py" --mode waveform
 \t@printf '%s\n' '"$$ROOT/scripts/run-waveform-math-tests.sh"'
 ''',
+            ),
+            "render_runner_removed": lambda checkout: self.replace_once(
+                checkout,
+                "Makefile",
+                '\t\t"$$ROOT/scripts/run-ios-render-tests.sh"; \\\n',
+                '\t\t:; \\\n',
+            ),
+            "programmatic_opacity_only_in_comment": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "        isOpaque = false\n    }\n\n    public required init?(coder: NSCoder)",
+                "        // isOpaque = false\n    }\n\n    public required init?(coder: NSCoder)",
+            ),
+            "decoded_opacity_only_in_comment": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "    public required init?(coder: NSCoder) {\n        super.init(coder: coder)\n        isOpaque = false\n",
+                "    public required init?(coder: NSCoder) {\n        super.init(coder: coder)\n        // isOpaque = false\n",
+            ),
+            "background_fill_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "        if let backgroundColor = backgroundColor {\n"
+                "            context.setFillColor(backgroundColor.cgColor)\n"
+                "            context.fill(rect)\n"
+                "        }\n\n",
+                "",
             ),
             "swift_if_false": lambda checkout: mutate_assertion_region(
                 checkout, lambda region: f"if false {{\n{region}\n}}\n"

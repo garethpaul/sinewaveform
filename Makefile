@@ -47,7 +47,8 @@ override SWIFTC := $(ROOT)/scripts/run-swiftc.sh
 override XCODEBUILD := $(ROOT)/scripts/run-xcodebuild.sh
 override TMPDIR := /tmp
 override XCODEBUILD_DERIVED_DATA_PATH := $(TMPDIR)/sinewaveform-derived-data
-export PYTHON RUBY SWIFTC XCODEBUILD TMPDIR XCODEBUILD_DERIVED_DATA_PATH
+override XCODETEST_DERIVED_DATA_PATH := $(TMPDIR)/sinewaveform-render-tests-derived-data
+export PYTHON RUBY SWIFTC XCODEBUILD TMPDIR XCODEBUILD_DERIVED_DATA_PATH XCODETEST_DERIVED_DATA_PATH
 
 build check contract-test lint root-test test verify: $$(if $$(filter file,$$(origin MAKEFILE_LIST)),,$$(error MAKEFILE_LIST must not be overridden))
 build check contract-test lint root-test test verify: $$(if $$(shell path=$$$$(/usr/bin/printf '%s' '$$(subst ','"'"',$$(MAKEFILE_LIST))' | /usr/bin/sed 's/^ //') && [ -f "$$$$path" ] && /usr/bin/printf '%s' ok),,$$(error repository Makefile must be loaded alone))
@@ -66,6 +67,11 @@ test:
 		"$$ROOT/scripts/run-waveform-math-tests.sh"; \
 	else \
 		echo "swiftc not found; executable waveform math tests skipped"; \
+	fi
+	@if "$$XCODEBUILD" --available; then \
+		"$$ROOT/scripts/run-ios-render-tests.sh"; \
+	else \
+		echo "xcodebuild not found; iOS rendering tests skipped"; \
 	fi
 
 contract-test:

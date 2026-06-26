@@ -44,6 +44,8 @@
 - Preserve the shared finite-range normalization path for inspectable waveform
   values before phase math or Core Graphics calls.
 - Subnormal waveform widths are rejected before Core Graphics mutation.
+- Preserve `isOpaque = false` in both UIKit initialization paths and keep a nil
+  background transparent in the hosted simulator rendering tests.
 
 ## PR / change guidance
 
@@ -64,6 +66,8 @@
   view `SiriWaveformView`, and historical source file `SineWaveForm.swift`.
 - See `docs/plans/2026-06-25-installation-naming.md` for the checked install and
   import examples.
+- See `docs/plans/2026-06-25-transparent-waveform-rendering.md` for the UIKit
+  render-test boundary and transparent compositing contract.
 - Keep `.github/workflows/check.yml` as the only workflow, with immutable actions, read-only permissions, and persisted checkout credentials disabled in both jobs.
 - Preserve the checked-in project overview and device preview SVG references in README.md.
 

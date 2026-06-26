@@ -32,7 +32,7 @@ Additional scan context:
 - Source directories: SineWaveform
 - Dependency and build manifests: SineWaveform.podspec
 - Entry points or build surfaces: SineWaveform.xcodeproj
-- Test-looking files: no obvious test files detected
+- Tests: executable waveform math plus UIKit simulator rendering coverage
 
 ## Getting Started
 
@@ -91,8 +91,12 @@ podspec.
 
 - `make check` runs podspec syntax checks, static package metadata checks, and
   waveform drawing safety checks for context availability, finite positive
-  bounds, wave count, and draw step handling. When `xcodebuild` is installed,
-  the `build` target also builds the `SineWaveform` target for the iOS simulator.
+  bounds, wave count, draw step handling, and default transparency. When
+  `xcodebuild` is installed, `make test` renders the real view in an iPhone
+  Simulator XCTest and the `build` target builds the framework.
+- `SiriWaveformView` is nonopaque by default. A nil `backgroundColor` preserves
+  destination transparency. Because `draw(_:)` clears the context, an assigned
+  background color is explicitly restored once before waveform paths are stroked.
 - Static waveform checks also require caller-provided levels and idle amplitude
   values to be clamped into the expected `0...1` drawing range.
 - Static waveform checks also require level and idle-amplitude normalization to
