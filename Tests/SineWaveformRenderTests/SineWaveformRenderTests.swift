@@ -63,6 +63,44 @@ final class SineWaveformRenderTests: XCTestCase {
         wait(for: [updateApplied], timeout: 1)
     }
 
+    func testIdleWaveformStaysInCenterPixelBand() throws {
+        let view = waveformFixture()
+
+        let idleBounds = try XCTUnwrap(alphaBounds(in: render(view)))
+
+        XCTAssertGreaterThan(idleBounds.width, 75)
+        XCTAssertGreaterThanOrEqual(idleBounds.minY, 18)
+        XCTAssertLessThanOrEqual(idleBounds.maxY, 22)
+    }
+
+    func testActiveWaveformOccupiesUpperAndLowerPixelBands() throws {
+        let view = waveformFixture()
+        view.updateWithLevel(1)
+
+        let image = render(view)
+        let activeBounds = try XCTUnwrap(alphaBounds(in: image))
+
+        XCTAssertLessThan(activeBounds.minY, 12)
+        XCTAssertGreaterThan(activeBounds.maxY, 28)
+        XCTAssertEqual(try alpha(at: CGPoint(x: 0, y: 0), in: image), 0)
+        XCTAssertEqual(try alpha(at: CGPoint(x: 79, y: 0), in: image), 0)
+        XCTAssertEqual(try alpha(at: CGPoint(x: 0, y: 39), in: image), 0)
+        XCTAssertEqual(try alpha(at: CGPoint(x: 79, y: 39), in: image), 0)
+    }
+
+    private func waveformFixture() -> SiriWaveformView {
+        let view = SiriWaveformView(frame: CGRect(x: 0, y: 0, width: 80, height: 40))
+        view.backgroundColor = nil
+        view.waveColor = .black
+        view.numOfWaves = 1
+        view.primaryWaveLineWidth = 2
+        view.secondaryWaveLineWidth = 2
+        view.frequency = 1
+        view.density = 1
+        view.phaseShift = 0
+        return view
+    }
+
     private func render(_ view: UIView) -> UIImage {
         let format = UIGraphicsImageRendererFormat()
         format.opaque = false
@@ -87,5 +125,47 @@ final class SineWaveformRenderTests: XCTestCase {
         ))
         context.draw(crop, in: CGRect(x: 0, y: 0, width: 1, height: 1))
         return pixel[3]
+    }
+
+    private func alphaBounds(in image: UIImage) throws -> CGRect? {
+        let cgImage = try XCTUnwrap(image.cgImage)
+        let width = cgImage.width
+        let height = cgImage.height
+        var pixels = [UInt8](repeating: 0, count: width * height)
+        let context = try XCTUnwrap(CGContext(
+            data: &pixels,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: width,
+            space: nil,
+            bitmapInfo: CGImageAlphaInfo.alphaOnly.rawValue
+        ))
+        context.draw(cgImage, in: CGRect(
+            x: 0,
+            y: 0,
+            width: CGFloat(width),
+            height: CGFloat(height)
+        ))
+
+        var minimumX = width
+        var minimumY = height
+        var maximumX = -1
+        var maximumY = -1
+        for y in 0..<height {
+            for x in 0..<width where pixels[y * width + x] != 0 {
+                minimumX = min(minimumX, x)
+                minimumY = min(minimumY, y)
+                maximumX = max(maximumX, x)
+                maximumY = max(maximumY, y)
+            }
+        }
+        guard maximumX >= minimumX, maximumY >= minimumY else { return nil }
+        return CGRect(
+            x: CGFloat(minimumX),
+            y: CGFloat(minimumY),
+            width: CGFloat(maximumX - minimumX + 1),
+            height: CGFloat(maximumY - minimumY + 1)
+        )
     }
 }

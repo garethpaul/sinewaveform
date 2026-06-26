@@ -109,6 +109,9 @@ installation, hosted Xcode evidence, and the historical 2016 tags.
   values to be clamped into the expected `0...1` drawing range.
 - UIKit tests require background level updates to return before view state
   changes and then apply through the main queue.
+- Hosted UIKit pixel fixtures render a deterministic single-wave view and
+  require the idle stroke to remain in the center band while an active waveform
+  reaches both upper and lower pixel bands without filling transparent corners.
 - Static waveform checks also require level and idle-amplitude normalization to
   reject `NaN` before updating the draw amplitude.
 - Static waveform checks also require draw-time maximum amplitude to stay
@@ -139,6 +142,8 @@ installation, hosted Xcode evidence, and the historical 2016 tags.
 - Static package checks reject empty placeholder podspec descriptions before
   the real package description.
 - Static package checks also require completed canonical plans under `docs/plans`.
+- See `docs/plans/2026-06-26-semantic-waveform-pixel-fixtures.md` for the
+  semantic rendering fixture boundary and its non-hash-based geometry checks.
 - GitHub Actions runs portable package and waveform checks on Ubuntu 24.04. On
   macOS 15 it also compiles and runs the shared Swift waveform math tests before
   building the framework for a generic iOS Simulator.
