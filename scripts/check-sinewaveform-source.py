@@ -432,7 +432,10 @@ def waveform_checks():
         "testDefaultViewUsesNonopaqueCompositing",
         "testDecodedViewUsesNonopaqueCompositing",
         "testNilBackgroundLeavesRenderedPixelTransparent",
+        "testTranslucentBackgroundIsCompositedOnce",
+        "original.isOpaque = true",
         "format.opaque = false",
+        "view.layer.render(in: context.cgContext)",
         "return pixel[3]",
     ):
         if fragment not in render_test:
@@ -463,8 +466,22 @@ def waveform_checks():
             errors.append(f"shared render-test scheme is missing: {fragment}")
     if makefile.count('"$$ROOT/scripts/run-ios-render-tests.sh"') != 1:
         errors.append("make test must execute the iOS rendering test runner exactly once")
-    if executable_source.count("isOpaque = false") != 2:
-        errors.append("programmatic and decoded waveform views must both use nonopaque compositing")
+    for initializer, pattern in (
+        (
+            "programmatic",
+            r"public override init\(frame: CGRect\) \{\s*"
+            r"super\.init\(frame: frame\)\s*"
+            r"isOpaque = false\s*\}",
+        ),
+        (
+            "decoded",
+            r"public required init\?\(coder: NSCoder\) \{\s*"
+            r"super\.init\(coder: coder\)\s*"
+            r"isOpaque = false\s*\}",
+        ),
+    ):
+        if re.search(pattern, source) is None:
+            errors.append(f"{initializer} waveform views must initialize nonopaque compositing")
     if "context.fill(rect)" in executable_source or "backgroundColor?.set()" in executable_source:
         errors.append("the UIView layer must own background compositing without a second draw-time fill")
     if "class SiriWaveformView: UIView" not in source:

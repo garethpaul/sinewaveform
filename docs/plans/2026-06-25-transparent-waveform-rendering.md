@@ -85,8 +85,20 @@ global repository indexes.
 - GREEN head `0a48af8`: the same hosted simulator suite and framework build
   passed after the two initializer flags and conditional background fill.
 - Review-gap head `debc388` added a translucent-background test and portable
-  selector contracts. They correctly exposed lexical runtime ordering, missing
-  deployment-target filtering, comment-sensitive static checks, and duplicate
-  background compositing.
+  selector contracts. They exposed lexical runtime ordering, missing
+  deployment-target filtering, and comment-sensitive static checks; the
+  suspected duplicate background compositing was not reproduced.
 - Portable package, waveform, contract, and 147-case root-authority checks passed; local
   full `make check` stops at the known missing `/usr/bin/ruby` boundary.
+- Final review strengthened the UIKit probe to render through `CALayer`, archive
+  an explicitly opaque source view before decoding, and assert that a
+  translucent background retains approximately 50% alpha.
+- Temporary hosted run `28208410926` passed all four UIKit tests against the
+  existing conditional fill. The final branch still delegates assigned
+  backgrounds to UIKit and retains the same translucent-alpha regression test.
+- Adversarial portable tests failed before the review fixes because comment-only
+  opacity assignments bypassed the occurrence count, iOS 18.9 sorted ahead of
+  iOS 18.10, and an iOS 9.3 runtime remained eligible. The corrected five-test
+  contract suite plus package and waveform checks pass.
+- Exact-head Codex review was attempted but the nested CLI returned HTTP 401;
+  the authentication-dependent skill was skipped under maintainer instruction.
