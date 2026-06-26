@@ -76,6 +76,10 @@ let waveformView = SiriWaveformView(frame: .zero)
 waveformView.updateWithLevel(0.5)
 ```
 
+`updateWithLevel(_:)` may be called by a background level producer. The view
+hands that work to the main queue before changing UIKit-owned state; calls that
+already occur on the main thread remain synchronous.
+
 The branch form documents repository-backed installation and does not claim
 that version 0.0.6 is currently available from the public CocoaPods trunk or
 provide an immutable dependency pin. Applications that require reproducible
@@ -103,6 +107,8 @@ installation, hosted Xcode evidence, and the historical 2016 tags.
   background color is explicitly restored once before waveform paths are stroked.
 - Static waveform checks also require caller-provided levels and idle amplitude
   values to be clamped into the expected `0...1` drawing range.
+- UIKit tests require background level updates to return before view state
+  changes and then apply through the main queue.
 - Static waveform checks also require level and idle-amplitude normalization to
   reject `NaN` before updating the draw amplitude.
 - Static waveform checks also require draw-time maximum amplitude to stay

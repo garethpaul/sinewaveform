@@ -141,6 +141,18 @@ class WaveformExecutionContractTests(unittest.TestCase):
                 "        }\n\n",
                 "",
             ),
+            "main_thread_guard_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "        if !Thread.isMainThread {\n",
+                "        if false {\n",
+            ),
+            "main_queue_handoff_removed": lambda checkout: self.replace_once(
+                checkout,
+                "SineWaveform/SineWaveForm.swift",
+                "            DispatchQueue.main.async { [weak self] in\n",
+                "            if false {\n",
+            ),
             "swift_if_false": lambda checkout: mutate_assertion_region(
                 checkout, lambda region: f"if false {{\n{region}\n}}\n"
             ),

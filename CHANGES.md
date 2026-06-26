@@ -1,5 +1,45 @@
 # Changes
 
+## 2026-06-26 03:19 UTC - P1 - Own waveform updates on the main thread
+
+### Summary
+
+Made the public level-update API safe for background audio producers without
+changing synchronous behavior for callers already on UIKit's main thread.
+
+### Work completed
+
+- Added a main-thread guard that weakly hands background calls to
+  `DispatchQueue.main` before phase, amplitude, or redraw mutation.
+- Added a UIKit regression test proving the background call returns before
+  amplitude changes, main-thread calls remain synchronous, and the queued
+  update then applies.
+- Added source contracts and hostile mutations for the guard and dispatch.
+- Documented the UIKit ownership boundary and focused design decision.
+
+### Validation
+
+- RED: waveform checks rejected the missing guard, dispatch, and reuse path.
+- GREEN: clean Ruby 3.3 container gates, seven contract-checker tests, and the
+  Swift 5.10 waveform harness with 15 assertions and its negative control pass.
+- Hosted Check run `28215127189` passed the synchronous-main/background-handoff
+  UIKit regression and framework build in Xcode 16.4; contract validation also passed.
+- CodeQL run `28215125327` passed Actions, Python, and Swift analysis.
+- The Codex review helper targeted `origin/master` at `21e08c3` and `855b64e`
+  but could not authenticate with the OpenAI API (HTTP 401), so both attempts
+  were skipped per maintenance policy. After the branch rebased onto the
+  provenance correction, the equivalent exact diff passed the expanded gate
+  and manual review found no issue.
+
+### Blockers
+
+- No implementation blocker remains; the documentation-only closeout head
+  still requires normal hosted checks before merge.
+
+### Next action
+
+- Merge the final hosted-green head and retain both synchronous and handoff tests.
+
 ## 2026-06-25 20:10 PDT - P1 - Correct review provenance
 
 ### Summary
@@ -43,7 +83,6 @@ with unsupported independent-review claims.
 
 - Merge the factual correction after package, mutation, hosted, and CodeQL gates
   pass.
-
 ## 2026-06-25 19:20 PDT - P2 - Document compatibility boundaries
 
 ### Summary

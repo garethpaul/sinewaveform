@@ -1,5 +1,6 @@
 import UIKit
 import Darwin
+import Dispatch
 
 let pi = Double.pi
 
@@ -40,6 +41,13 @@ public class SiriWaveformView: UIView {
     }
     
     public func updateWithLevel(_ level: CGFloat) {
+        if !Thread.isMainThread {
+            DispatchQueue.main.async { [weak self] in
+                self?.updateWithLevel(level)
+            }
+            return
+        }
+
         let safePhaseShift = normalizedValue(phaseShift, minimum: -phaseCycle, maximum: phaseCycle, fallback: -0.15)
         _phase = normalizedPhase(_phase + safePhaseShift)
         let normalizedLevel = normalizedUnitValue(level)
