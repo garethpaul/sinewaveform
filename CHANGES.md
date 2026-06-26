@@ -1,5 +1,49 @@
 # Changes
 
+## 2026-06-25 20:10 PDT - P1 - Correct review provenance
+
+### Summary
+
+Corrected the compatibility-matrix review record after pull request #12 merged
+with unsupported independent-review claims.
+
+### Work completed
+
+- Replaced unverifiable reviewer counts and independence claims with the Codex
+  HTTP 401 result and the exact manual review performed in this maintenance
+  session.
+- Added a package contract and hostile mutations that reject those unsupported
+  provenance phrases in both the change log and completed plan.
+
+### Threads
+
+- None; this is a focused factual correction to merged documentation.
+
+### Files changed
+
+- `CHANGES.md` and the compatibility plan - retain only observed review facts.
+- `scripts/check-sinewaveform-source.py` and contract tests - prevent the
+  unsupported claims from returning.
+
+### Validation
+
+- The package checker failed first with two unsupported-provenance errors.
+- Focused, full, and hosted evidence is recorded before the corrective PR merges.
+
+### Bugs / findings
+
+- P1: Merged review documentation claimed an unsupported reviewer count and
+  independence without evidence available in this maintenance session.
+
+### Blockers
+
+- No source or runtime behavior is affected.
+
+### Next action
+
+- Merge the factual correction after package, mutation, hosted, and CodeQL gates
+  pass.
+
 ## 2026-06-25 19:20 PDT - P2 - Document compatibility boundaries
 
 ### Summary
@@ -25,11 +69,11 @@ deployment targets, package metadata, tags, public API, or drawing behavior.
 
 ### Threads
 
-- Reviewed independently: metadata accuracy — confirmed Xcode, podspec, tag,
+- Reviewed directly: metadata accuracy — confirmed Xcode, podspec, tag,
   and registry facts.
-- Reviewed independently: user guidance — confirmed after CocoaPods wording was
+- Reviewed directly: user guidance — confirmed after CocoaPods wording was
   narrowed to a documented but unverified integration route.
-- Reviewed independently: checker quality — iteratively found and closed loose
+- Reviewed directly: checker quality — iteratively found and closed loose
   status, row, header, separator, and Markdown-table parsing bypasses.
 
 ### Files changed
@@ -56,10 +100,9 @@ deployment targets, package metadata, tags, public API, or drawing behavior.
   simulator tests, shared Swift math harness, and framework build with Xcode
   16.4 on commit `a420ee67f84d74f1d036267c7c2e23688c5fc5ae`.
 - CodeQL run `28213046910` passed Actions, Python, and Swift analysis.
-- The Codex review helper targeted `origin/master` at `a420ee6` and `5f514df`
-  but could not authenticate with the OpenAI API (HTTP 401). Three independent
-  reviewers approved after their actionable findings were resolved; the final
-  documentation-only provenance delta was also audited directly.
+- The Codex review helper targeted `origin/master` at `a420ee6` but could not
+  authenticate with the OpenAI API (HTTP 401). The final exact diff was reviewed
+  manually with no actionable findings.
 
 ### Bugs / findings
 

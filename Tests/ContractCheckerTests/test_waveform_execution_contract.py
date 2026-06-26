@@ -410,6 +410,25 @@ class WaveformExecutionContractTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.run_package_mutation(name, mutate)
 
+    def test_rejects_unsupported_review_provenance(self):
+        def inject_unsupported_claim(checkout, relative_path):
+            path = checkout / relative_path
+            path.write_text(
+                "three independent reviewers approved this change\n" + path.read_text()
+            )
+
+        for relative_path in (
+            "CHANGES.md",
+            "docs/plans/2026-06-25-compatibility-matrix.md",
+        ):
+            with self.subTest(relative_path=relative_path):
+                self.run_package_mutation(
+                    relative_path.replace("/", "-"),
+                    lambda checkout, path=relative_path: inject_unsupported_claim(
+                        checkout, path
+                    ),
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
