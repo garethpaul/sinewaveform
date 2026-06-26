@@ -282,6 +282,98 @@ def package_checks():
             if forbidden in compatibility:
                 errors.append(f"compatibility matrix contains contradictory claim: {forbidden}")
 
+        matrix_rows = {}
+        duplicate_routes = set()
+        compatibility_lines = compatibility.splitlines()
+        expected_header_cells = [
+            "Consumption route",
+            "Declared requirement or metadata",
+            "Executed evidence",
+            "Status",
+        ]
+        header_candidates = []
+        for index, line in enumerate(compatibility_lines):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if cells and cells[0] == "Consumption route":
+                header_candidates.append((index, cells))
+        table_header_index = None
+        if len(header_candidates) != 1:
+            errors.append("compatibility matrix must contain exactly one route table header")
+        else:
+            table_header_index, header_cells = header_candidates[0]
+            if header_cells != expected_header_cells:
+                errors.append("compatibility matrix contains a malformed route table header")
+        table_lines = []
+        if table_header_index is None:
+            errors.append("compatibility matrix is missing the route table header")
+        else:
+            for line in compatibility_lines[table_header_index + 1 :]:
+                if not line.strip():
+                    break
+                table_lines.append(line)
+
+        route_lines = table_lines
+        if table_lines:
+            separator_cells = [
+                cell.strip() for cell in table_lines[0].strip().strip("|").split("|")
+            ]
+            valid_separator = len(separator_cells) == 4 and all(
+                re.fullmatch(r":?-{3,}:?", cell) for cell in separator_cells
+            )
+            if valid_separator:
+                route_lines = table_lines[1:]
+            else:
+                errors.append("compatibility matrix is missing its four-cell separator")
+
+        for line in route_lines:
+            stripped = line.strip()
+            cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+            if cells and all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+                errors.append("compatibility matrix contains an unexpected separator row")
+                continue
+            if len(cells) != 4:
+                errors.append("compatibility matrix contains malformed route row")
+                continue
+            if cells[0] == "Consumption route":
+                continue
+            if cells[0] in matrix_rows:
+                duplicate_routes.add(cells[0])
+            matrix_rows[cells[0]] = cells[1:]
+
+        route_contracts = {
+            "Current `master` / direct Xcode": (
+                "iOS 12.0 or newer; Swift 5 language mode; iPhone and iPad target families",
+                "The June 25, 2026 PR #12 hosted macOS run compiled the framework and executed the Swift math and UIKit iOS Simulator tests with Xcode 16.4",
+                "Maintained repository path",
+            ),
+            "Git-sourced CocoaPods from `master` or an exact commit": (
+                "Root `SineWaveform.podspec` declares package version 0.0.6, iOS 12.0, Swift 5.0, and the current source glob",
+                "Ruby syntax and repository metadata are checked; the framework builds through the Xcode project, but CI does not execute `pod install` or `pod lib lint`",
+                "Documented route; CocoaPods integration unverified",
+            ),
+            "Public CocoaPods trunk with `pod 'SineWaveform'`": (
+                "No package entry was present in the official index when checked",
+                "No public-trunk installation was available to execute",
+                "Unavailable; do not document as an install path",
+            ),
+            "Historical 2016 tags": (
+                "Tag-specific podspecs and source from July 9, 2016",
+                "No current CI or device verification",
+                "Historical snapshots only, not current compatibility claims",
+            ),
+        }
+        for route in sorted(duplicate_routes):
+            errors.append(f"compatibility matrix contains duplicate route row: {route}")
+        for route in sorted(set(matrix_rows) - set(route_contracts)):
+            errors.append(f"compatibility matrix contains unexpected route row: {route}")
+        for route, expected_cells in route_contracts.items():
+            actual_cells = matrix_rows.get(route)
+            if actual_cells is None:
+                errors.append(f"compatibility matrix is missing route row: {route}")
+                continue
+            if actual_cells != list(expected_cells):
+                errors.append(f"compatibility matrix route has incorrect contract: {route}")
+
     for document_path in ("README.md", "VISION.md", "AGENTS.md", "CHANGES.md"):
         document = read_text(document_path)
         if "docs/compatibility-matrix.md" not in document:

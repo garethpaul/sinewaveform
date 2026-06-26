@@ -287,12 +287,68 @@ class WaveformExecutionContractTests(unittest.TestCase):
         self.assertNotIn("must be valid XML", result.stderr)
 
     def test_rejects_compatibility_matrix_contradictions(self):
+        def swap_route_statuses(checkout):
+            path = checkout / "docs/compatibility-matrix.md"
+            source = path.read_text()
+            git_status = "Documented route; CocoaPods integration unverified"
+            trunk_status = "Unavailable; do not document as an install path"
+            self.assertEqual(source.count(git_status), 1)
+            self.assertEqual(source.count(trunk_status), 1)
+            source = source.replace(git_status, "COMPATIBILITY_STATUS_SENTINEL", 1)
+            source = source.replace(trunk_status, git_status, 1)
+            path.write_text(source.replace("COMPATIBILITY_STATUS_SENTINEL", trunk_status, 1))
+
+        def duplicate_public_trunk_route(checkout):
+            path = checkout / "docs/compatibility-matrix.md"
+            source = path.read_text()
+            correct_row = (
+                "| Public CocoaPods trunk with `pod 'SineWaveform'` | No package entry was present in the official index when checked | "
+                "No public-trunk installation was available to execute | Unavailable; do not document as an install path |"
+            )
+            contradictory_row = (
+                "| Public CocoaPods trunk with `pod 'SineWaveform'` | No package entry was present in the official index when checked | "
+                "No public-trunk installation was available to execute | Maintained repository path |"
+            )
+            self.assertEqual(source.count(correct_row), 1)
+            path.write_text(source.replace(correct_row, contradictory_row + "\n" + correct_row, 1))
+
+        def add_matrix_row(checkout, row):
+            path = checkout / "docs/compatibility-matrix.md"
+            source = path.read_text()
+            separator = "| --- | --- | --- | --- |"
+            self.assertEqual(source.count(separator), 1)
+            path.write_text(source.replace(separator, separator + "\n" + row, 1))
+
         mutations = {
+            "extra_header_cell": lambda checkout: self.replace_once(
+                checkout,
+                "docs/compatibility-matrix.md",
+                "| Consumption route | Declared requirement or metadata | Executed evidence | Status |",
+                "| Consumption route | Declared requirement or metadata | Executed evidence | Status | Extra column |",
+            ),
+            "table_separator_removed": lambda checkout: self.replace_once(
+                checkout,
+                "docs/compatibility-matrix.md",
+                "| --- | --- | --- | --- |\n",
+                "",
+            ),
             "public_trunk_supported": lambda checkout: self.replace_once(
                 checkout,
                 "docs/compatibility-matrix.md",
                 "Unavailable; do not document as an install path",
                 "Available and supported",
+            ),
+            "public_trunk_status_suffix": lambda checkout: self.replace_once(
+                checkout,
+                "docs/compatibility-matrix.md",
+                "Unavailable; do not document as an install path",
+                "Unavailable; do not document as an install path; nevertheless supported",
+            ),
+            "public_trunk_evidence_suffix": lambda checkout: self.replace_once(
+                checkout,
+                "docs/compatibility-matrix.md",
+                "No public-trunk installation was available to execute",
+                "No public-trunk installation was available to execute; however installation succeeded",
             ),
             "git_integration_verified": lambda checkout: self.replace_once(
                 checkout,
@@ -329,6 +385,24 @@ class WaveformExecutionContractTests(unittest.TestCase):
                 "run, so each later compatibility claim must record the version actually printed\n"
                 "by that run rather than treating 16.4 as a permanent workflow guarantee.\n",
                 "",
+            ),
+            "route_statuses_swapped": swap_route_statuses,
+            "duplicate_public_trunk_route": duplicate_public_trunk_route,
+            "unexpected_route": lambda checkout: add_matrix_row(
+                checkout,
+                "| Surprise supported route | requirement | evidence | supported |",
+            ),
+            "malformed_extra_cell_route": lambda checkout: add_matrix_row(
+                checkout,
+                "| Surprise supported route | requirement | evidence | supported | extra cell |",
+            ),
+            "no_space_unexpected_route": lambda checkout: add_matrix_row(
+                checkout,
+                "|Surprise supported route | requirement | evidence | supported |",
+            ),
+            "outer_pipe_free_unexpected_route": lambda checkout: add_matrix_row(
+                checkout,
+                "Surprise supported route | requirement | evidence | supported",
             ),
         }
 

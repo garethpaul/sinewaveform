@@ -19,7 +19,9 @@ deployment targets, package metadata, tags, public API, or drawing behavior.
 - Added package-check contracts for the matrix, maintainer links, and completed
   roadmap item.
 - Strengthened the package checker with exact route statuses, all unverified
-  boundary bullets, dated Xcode evidence, and five hostile matrix mutations.
+  boundary bullets, dated Xcode evidence, route-to-status parsing, and fifteen
+  hostile matrix mutations covering contradictory content and malformed table
+  structure.
 
 ### Threads
 

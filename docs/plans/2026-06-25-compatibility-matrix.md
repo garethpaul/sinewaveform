@@ -77,9 +77,12 @@
 - The official CocoaPods package list returned HTTP 200 without a
   `SineWaveform` entry, the package page returned HTTP 404, and repository tag
   podspecs confirmed the documented 0.0.6/iOS 8 and 0.1.0/0.0.1 mismatches.
-- Five hostile matrix mutations proved the checker rejects contradictory public
+- Fifteen hostile matrix mutations proved the checker rejects contradictory public
   trunk and Git-integration statuses, removed unverified boundaries, missing
-  dated Xcode evidence, and missing floating-runner caveats.
+  dated Xcode evidence, missing floating-runner caveats, and statuses attached
+  to the wrong route or hidden behind duplicate, unexpected, malformed, or
+  no-space or outer-pipe-free Markdown rows, a malformed header, and a missing
+  table separator, and contradictory status or evidence suffixes.
 - Final hosted macOS and CodeQL results remain the merge boundary for the
   corrected head.
 - Hosted Check run `28213048100` passed the portable contract lane, shared Swift
