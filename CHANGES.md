@@ -57,6 +57,9 @@ the real view layer in the UIKit alpha tests.
 - Codex review helper at `d86f78c` raised an integer-accuracy compile concern;
   hosted Xcode 16.4 compiled and executed that assertion, so the finding was
   rejected. The same run exposed the separate alpha regression above.
+- Implementation head `4b6f667` — exact-head Codex review reported no
+  actionable findings; hosted run `28209032847` passed the contract lane and
+  all four UIKit rendering tests plus the iOS Simulator framework build.
 
 ### Bugs / findings
 
@@ -70,13 +73,13 @@ the real view layer in the UIKit alpha tests.
 
 ### Blockers
 
-- None in the change; final exact-head hosted checks remain required before
-  merge.
+- None in the implementation; the final documentation-only head must retain
+  the same green review and hosted-check state before merge.
 
 ### Next action
 
-- Push the review fixes, require all PR #11 checks to pass, then merge and
-  synchronize `master`.
+- Revalidate the documentation-only head, merge PR #11, and synchronize
+  `master`.
 
 ## 2026-06-25 16:54 PDT - P1 - Preserve default waveform transparency
 

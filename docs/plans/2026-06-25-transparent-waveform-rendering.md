@@ -104,3 +104,7 @@ global repository indexes.
 - Exact-head Codex review at `d86f78c` raised an integer-accuracy compile concern,
   but hosted Xcode 16.4 compiled and executed that assertion; the actionable
   failure was the translucent alpha regression described above.
+- Implementation head `4b6f667` received a clean exact-head Codex review.
+  Hosted run `28209032847` passed the portable contract lane and the macOS lane,
+  including all four UIKit rendering tests and the iOS Simulator framework
+  build.
