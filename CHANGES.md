@@ -1,5 +1,63 @@
 # Changes
 
+## 2026-06-25 19:20 PDT - P2 - Document compatibility boundaries
+
+### Summary
+
+Documented the exact iOS and CocoaPods compatibility matrix without changing
+deployment targets, package metadata, tags, public API, or drawing behavior.
+
+### Work completed
+
+- Separated current `master`/Xcode, Git-sourced CocoaPods, public CocoaPods
+  trunk, and historical 2016 tag compatibility claims.
+- Recorded iOS 12 and Swift 5 as declared floors while treating hosted Xcode
+  16.4 simulator execution as evidence rather than an upper support bound.
+- Documented that public-trunk installation is unavailable, current CocoaPods
+  consumer integration remains unexecuted, and immutable commit pins are the
+  reproducible Git source boundary.
+- Added package-check contracts for the matrix, maintainer links, and completed
+  roadmap item.
+
+### Threads
+
+- None; the focused compatibility documentation was completed directly.
+
+### Files changed
+
+- `docs/compatibility-matrix.md` - route-by-route compatibility and validation
+  matrix.
+- `scripts/check-sinewaveform-source.py` - static matrix and documentation
+  synchronization contracts.
+- README, vision, agent guidance, and design/implementation plans - preserve the
+  declared-versus-verified boundary.
+
+### Validation
+
+- The direct package checker failed first with one missing matrix contract.
+- Direct package and waveform checks plus five contract-checker tests passed.
+- All four Make aliases and external-directory `make check` passed in a clean
+  Debian container with Ruby; Swift and Xcode execution skipped as unavailable.
+- The official CocoaPods package list returned HTTP 200 with no `SineWaveform`
+  entry, the package page returned HTTP 404, and tag podspec facts matched the
+  documented historical boundaries.
+
+### Bugs / findings
+
+- P2: Existing installation notes did not provide one exact matrix separating
+  current source, historical tags, public registry state, and executed tests.
+
+### Blockers
+
+- No documentation blocker remains. CocoaPods consumer integration, physical
+  devices, publication, and future toolchain ceilings remain explicitly
+  unverified.
+
+### Next action
+
+- Add a sample application or broader pixel snapshot fixtures without changing
+  the compatibility floor implicitly.
+
 ## 2026-06-25 17:13 PDT - P2 - Harden transparent rendering verification
 
 ### Summary

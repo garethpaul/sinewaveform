@@ -22,6 +22,9 @@ TEMP_XCODE_ARTIFACT_PLAN = DOCS_PLANS / "2026-06-19-temp-xcode-artifacts.md"
 TEST_EXECUTION_CONTRACT_PLAN = DOCS_PLANS / "2026-06-19-waveform-test-execution-contract.md"
 MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 INSTALLATION_DOCS_PLAN = DOCS_PLANS / "2026-06-25-installation-naming.md"
+COMPATIBILITY_DESIGN = DOCS_PLANS / "2026-06-25-compatibility-matrix-design.md"
+COMPATIBILITY_PLAN = DOCS_PLANS / "2026-06-25-compatibility-matrix.md"
+COMPATIBILITY_MATRIX = ROOT / "docs" / "compatibility-matrix.md"
 RENDER_TEST = ROOT / "Tests" / "SineWaveformRenderTests" / "SineWaveformRenderTests.swift"
 RENDER_TEST_RUNNER = ROOT / "scripts" / "run-ios-render-tests.sh"
 SHARED_SCHEME = ROOT / "SineWaveform.xcodeproj" / "xcshareddata" / "xcschemes" / "SineWaveform.xcscheme"
@@ -106,6 +109,9 @@ def require_paths():
         "scripts/run-xcodebuild.sh",
         "scripts/test-makefile-root.sh",
         "README.md",
+        "docs/compatibility-matrix.md",
+        "docs/plans/2026-06-25-compatibility-matrix-design.md",
+        "docs/plans/2026-06-25-compatibility-matrix.md",
         "docs/readme-overview.svg",
         "docs/device-preview.svg",
         "LICENSE",
@@ -143,6 +149,10 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-21-make-authority-isolation.md is missing")
     if not INSTALLATION_DOCS_PLAN.exists():
         errors.append("docs/plans/2026-06-25-installation-naming.md is missing")
+    if not COMPATIBILITY_DESIGN.exists():
+        errors.append("docs/plans/2026-06-25-compatibility-matrix-design.md is missing")
+    if not COMPATIBILITY_PLAN.exists():
+        errors.append("docs/plans/2026-06-25-compatibility-matrix.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -231,6 +241,37 @@ def package_checks():
     ):
         if incorrect_fragment in readme:
             errors.append(f"README must not use incorrect package naming: {incorrect_fragment}")
+
+    if COMPATIBILITY_MATRIX.exists():
+        compatibility = COMPATIBILITY_MATRIX.read_text(encoding="utf-8")
+        for fragment in (
+            "## Compatibility Matrix",
+            "Current `master` / direct Xcode",
+            "iOS 12.0 or newer",
+            "Swift 5 language mode",
+            "Xcode 16.4",
+            "evidence, not a maximum",
+            "Git-sourced CocoaPods",
+            "exact reviewed commit",
+            "Public CocoaPods trunk",
+            "not published in the public CocoaPods Specs CDN",
+            "https://cdn.cocoapods.org/all_pods.txt",
+            "Historical 2016 tags",
+            "0.0.6 tag declares iOS 8.0",
+            "0.1.0 tag contains podspec version 0.0.1",
+            "Unverified Boundaries",
+        ):
+            if fragment not in compatibility:
+                errors.append(f"compatibility matrix is missing required boundary: {fragment}")
+
+    for document_path in ("README.md", "VISION.md", "AGENTS.md", "CHANGES.md"):
+        document = read_text(document_path)
+        if "docs/compatibility-matrix.md" not in document:
+            errors.append(f"{document_path} must link the compatibility matrix")
+    if "- Document the exact iOS and CocoaPods compatibility matrix" in read_text("VISION.md"):
+        errors.append("VISION.md must remove the completed compatibility-matrix priority")
+    if "Documented the exact iOS and CocoaPods compatibility matrix" not in read_text("CHANGES.md"):
+        errors.append("CHANGES.md must record the compatibility-matrix work")
 
     for relative_path in ("docs/readme-overview.svg", "docs/device-preview.svg"):
         try:

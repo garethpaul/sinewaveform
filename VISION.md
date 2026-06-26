@@ -36,10 +36,12 @@ Priority:
 - Maintain screenshot and GIF examples
 - Keep completed maintenance plans under `docs/plans`
 - Keep the Swift 5 framework compiling for the iOS Simulator in hosted CI
+- `docs/compatibility-matrix.md` separates current iOS/Swift declarations,
+  hosted Xcode evidence, Git-sourced CocoaPods, public trunk availability, and
+  historical tag metadata.
 
 Next priorities:
 
-- Document the exact iOS and CocoaPods compatibility matrix
 - Add a simple sample app or broader pixel snapshot fixtures
 - Modernize drawing APIs in a dedicated compatibility pass
 

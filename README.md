@@ -82,6 +82,10 @@ provide an immutable dependency pin. Applications that require reproducible
 builds should replace `:branch` with a reviewed commit containing the current
 podspec.
 
+See `docs/compatibility-matrix.md` for the exact distinction between current
+iOS 12/Swift 5 source, Git-sourced CocoaPods, unavailable public-trunk
+installation, hosted Xcode evidence, and the historical 2016 tags.
+
 ## Running or Using the Project
 
 - Open `SineWaveform.xcodeproj` in Xcode, choose the app or sample scheme, and run it on the matching simulator/device.
