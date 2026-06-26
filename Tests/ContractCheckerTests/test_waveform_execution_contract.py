@@ -35,6 +35,29 @@ class WaveformExecutionContractTests(unittest.TestCase):
         self.assertEqual(source.count(old), 1, f"unexpected fixture for {relative_path}")
         path.write_text(source.replace(old, new, 1))
 
+    def run_package_mutation(self, name, mutate):
+        with tempfile.TemporaryDirectory(prefix=f"sinewaveform-{name}-") as temporary:
+            checkout = Path(temporary) / "repo"
+            shutil.copytree(ROOT, checkout, ignore=shutil.ignore_patterns(".git"))
+            mutate(checkout)
+            result = subprocess.run(
+                [
+                    str(checkout / "scripts/run-python.sh"),
+                    str(checkout / "scripts/check-sinewaveform-source.py"),
+                    "--mode",
+                    "package",
+                ],
+                cwd=checkout,
+                text=True,
+                capture_output=True,
+                timeout=120,
+            )
+        self.assertNotEqual(
+            result.returncode,
+            0,
+            f"{name} bypassed the package contract\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+
     def test_rejects_all_known_bypass_families(self):
         test_recipe = '''test:
 \t"$$PYTHON" "$$ROOT/scripts/check-sinewaveform-source.py" --mode waveform
@@ -262,6 +285,56 @@ class WaveformExecutionContractTests(unittest.TestCase):
         self.assertNotIn(marker, result.stderr)
         self.assertRegex(result.stderr, r"package checks failed: \d+ validation error\(s\)")
         self.assertNotIn("must be valid XML", result.stderr)
+
+    def test_rejects_compatibility_matrix_contradictions(self):
+        mutations = {
+            "public_trunk_supported": lambda checkout: self.replace_once(
+                checkout,
+                "docs/compatibility-matrix.md",
+                "Unavailable; do not document as an install path",
+                "Available and supported",
+            ),
+            "git_integration_verified": lambda checkout: self.replace_once(
+                checkout,
+                "docs/compatibility-matrix.md",
+                "Documented route; CocoaPods integration unverified",
+                "Available and supported",
+            ),
+            "unverified_boundaries_removed": lambda checkout: self.replace_once(
+                checkout,
+                "docs/compatibility-matrix.md",
+                "## Unverified Boundaries\n\nThe repository does not currently claim:\n\n"
+                "- a public CocoaPods trunk release;\n"
+                "- a completed `pod install` or `pod lib lint` result for current `master`;\n"
+                "- physical iPhone or iPad execution;\n"
+                "- support below iOS 12 for current source;\n"
+                "- a maximum compatible Xcode, Swift compiler, SDK, simulator, or device OS;\n"
+                "- compatibility for the historical tags on modern toolchains; or\n"
+                "- semantic-version stability beyond the existing public Swift API.\n\n"
+                "To promote one of these boundaries, record the exact commit or tag, Xcode and\n"
+                "Swift versions, CocoaPods and Ruby versions where relevant, destination runtime,\n"
+                "commands, results, and cleanup in a focused plan and `CHANGES.md` entry.\n",
+                "## Unverified Boundaries\n",
+            ),
+            "dated_xcode_evidence_removed": lambda checkout: self.replace_once(
+                checkout,
+                "docs/compatibility-matrix.md",
+                "The June 25, 2026 PR #12 hosted macOS run",
+                "A hosted macOS run",
+            ),
+            "floating_runner_caveat_removed": lambda checkout: self.replace_once(
+                checkout,
+                "docs/compatibility-matrix.md",
+                "The floating `macos-15` runner may select a different Xcode version in a future\n"
+                "run, so each later compatibility claim must record the version actually printed\n"
+                "by that run rather than treating 16.4 as a permanent workflow guarantee.\n",
+                "",
+            ),
+        }
+
+        for name, mutate in mutations.items():
+            with self.subTest(name=name):
+                self.run_package_mutation(name, mutate)
 
 
 if __name__ == "__main__":

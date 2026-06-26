@@ -9,8 +9,8 @@ release.
 
 | Consumption route | Declared requirement or metadata | Executed evidence | Status |
 | --- | --- | --- | --- |
-| Current `master` / direct Xcode | iOS 12.0 or newer; Swift 5 language mode; iPhone and iPad target families | Hosted `macos-15` runs compiled the framework and executed the Swift math and UIKit iOS Simulator tests with Xcode 16.4 | Maintained repository path |
-| Git-sourced CocoaPods from `master` or an exact commit | Root `SineWaveform.podspec` declares package version 0.0.6, iOS 12.0, Swift 5.0, and the current source glob | Ruby syntax and repository metadata are checked; the framework builds through the Xcode project, but CI does not execute `pod install` or `pod lib lint` | Source integration available, full CocoaPods integration unverified |
+| Current `master` / direct Xcode | iOS 12.0 or newer; Swift 5 language mode; iPhone and iPad target families | The June 25, 2026 PR #12 hosted macOS run compiled the framework and executed the Swift math and UIKit iOS Simulator tests with Xcode 16.4 | Maintained repository path |
+| Git-sourced CocoaPods from `master` or an exact commit | Root `SineWaveform.podspec` declares package version 0.0.6, iOS 12.0, Swift 5.0, and the current source glob | Ruby syntax and repository metadata are checked; the framework builds through the Xcode project, but CI does not execute `pod install` or `pod lib lint` | Documented route; CocoaPods integration unverified |
 | Public CocoaPods trunk with `pod 'SineWaveform'` | No package entry was present in the official index when checked | No public-trunk installation was available to execute | Unavailable; do not document as an install path |
 | Historical 2016 tags | Tag-specific podspecs and source from July 9, 2016 | No current CI or device verification | Historical snapshots only, not current compatibility claims |
 
@@ -18,6 +18,9 @@ Xcode 16.4 is evidence, not a maximum supported Xcode or SDK version. The
 project does not declare an upper Xcode, Swift compiler, iOS SDK, simulator, or
 device OS bound. Newer-toolchain compatibility must be established by a green
 framework build and test run rather than inferred from this table.
+The floating `macos-15` runner may select a different Xcode version in a future
+run, so each later compatibility claim must record the version actually printed
+by that run rather than treating 16.4 as a permanent workflow guarantee.
 
 ## Current Source and Xcode
 

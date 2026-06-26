@@ -69,7 +69,7 @@
 - `make check` remains blocked locally at the repository's pinned
   `/usr/bin/ruby` boundary; narrow package, contract, waveform, and hosted gates
   provide the remaining verification before merge.
-- Direct package and waveform checks passed, along with all five Python
+- Direct package and waveform checks passed, along with all six Python
   contract-checker tests.
 - In a clean Debian container with `/usr/bin/ruby`, `make check`, `make lint`,
   `make test`, `make build`, and external-directory `make check` passed. Swift
@@ -77,3 +77,15 @@
 - The official CocoaPods package list returned HTTP 200 without a
   `SineWaveform` entry, the package page returned HTTP 404, and repository tag
   podspecs confirmed the documented 0.0.6/iOS 8 and 0.1.0/0.0.1 mismatches.
+- Five hostile matrix mutations proved the checker rejects contradictory public
+  trunk and Git-integration statuses, removed unverified boundaries, missing
+  dated Xcode evidence, and missing floating-runner caveats.
+- Final hosted macOS and CodeQL results remain the merge boundary for the
+  corrected head.
+- Hosted Check run `28213048100` passed the portable contract lane, shared Swift
+  math harness, four UIKit simulator tests, and framework build with Xcode 16.4
+  (16F6) on commit `a420ee67f84d74f1d036267c7c2e23688c5fc5ae`.
+- CodeQL run `28213046910` passed Actions, Python, and Swift analysis.
+- The Codex review helper selected the PR base `origin/master` but failed with
+  HTTP 401 authentication errors. Per the maintenance instruction, that review
+  was skipped; exact-head manual review found no actionable findings.

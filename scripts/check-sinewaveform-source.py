@@ -249,20 +249,38 @@ def package_checks():
             "Current `master` / direct Xcode",
             "iOS 12.0 or newer",
             "Swift 5 language mode",
+            "The June 25, 2026 PR #12 hosted macOS run",
             "Xcode 16.4",
             "evidence, not a maximum",
+            "The floating `macos-15` runner may select a different Xcode version",
             "Git-sourced CocoaPods",
             "exact reviewed commit",
+            "Documented route; CocoaPods integration unverified",
             "Public CocoaPods trunk",
             "not published in the public CocoaPods Specs CDN",
+            "Unavailable; do not document as an install path",
             "https://cdn.cocoapods.org/all_pods.txt",
             "Historical 2016 tags",
             "0.0.6 tag declares iOS 8.0",
             "0.1.0 tag contains podspec version 0.0.1",
             "Unverified Boundaries",
+            "- a public CocoaPods trunk release;",
+            "- a completed `pod install` or `pod lib lint` result for current `master`;",
+            "- physical iPhone or iPad execution;",
+            "- support below iOS 12 for current source;",
+            "- a maximum compatible Xcode, Swift compiler, SDK, simulator, or device OS;",
+            "- compatibility for the historical tags on modern toolchains; or",
+            "- semantic-version stability beyond the existing public Swift API.",
         ):
             if fragment not in compatibility:
                 errors.append(f"compatibility matrix is missing required boundary: {fragment}")
+        for forbidden in (
+            "Available and supported",
+            "CocoaPods integration verified",
+            "Public CocoaPods trunk release available",
+        ):
+            if forbidden in compatibility:
+                errors.append(f"compatibility matrix contains contradictory claim: {forbidden}")
 
     for document_path in ("README.md", "VISION.md", "AGENTS.md", "CHANGES.md"):
         document = read_text(document_path)

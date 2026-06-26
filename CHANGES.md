@@ -18,10 +18,13 @@ deployment targets, package metadata, tags, public API, or drawing behavior.
   reproducible Git source boundary.
 - Added package-check contracts for the matrix, maintainer links, and completed
   roadmap item.
+- Strengthened the package checker with exact route statuses, all unverified
+  boundary bullets, dated Xcode evidence, and five hostile matrix mutations.
 
 ### Threads
 
-- None; the focused compatibility documentation was completed directly.
+- None; the checker hardening and compatibility wording were integrated
+  directly and verified with mutation tests.
 
 ### Files changed
 
@@ -29,29 +32,40 @@ deployment targets, package metadata, tags, public API, or drawing behavior.
   matrix.
 - `scripts/check-sinewaveform-source.py` - static matrix and documentation
   synchronization contracts.
+- `Tests/ContractCheckerTests/test_waveform_execution_contract.py` - hostile
+  compatibility-matrix mutations.
 - README, vision, agent guidance, and design/implementation plans - preserve the
   declared-versus-verified boundary.
 
 ### Validation
 
 - The direct package checker failed first with one missing matrix contract.
-- Direct package and waveform checks plus five contract-checker tests passed.
+- Direct package and waveform checks plus six contract-checker tests passed.
 - All four Make aliases and external-directory `make check` passed in a clean
   Debian container with Ruby; Swift and Xcode execution skipped as unavailable.
 - The official CocoaPods package list returned HTTP 200 with no `SineWaveform`
   entry, the package page returned HTTP 404, and tag podspec facts matched the
   documented historical boundaries.
+- Hosted Check run `28213048100` passed the portable contract lane, four UIKit
+  simulator tests, shared Swift math harness, and framework build with Xcode
+  16.4 on commit `a420ee67f84d74f1d036267c7c2e23688c5fc5ae`.
+- CodeQL run `28213046910` passed Actions, Python, and Swift analysis.
+- The Codex review helper targeted `origin/master` but could not authenticate
+  with the OpenAI API (HTTP 401); exact-head manual review found no actionable
+  findings.
 
 ### Bugs / findings
 
 - P2: Existing installation notes did not provide one exact matrix separating
   current source, historical tags, public registry state, and executed tests.
+- P2: The first checker accepted contradictory availability claims and did not
+  bind Xcode 16.4 to a dated hosted observation; both gaps are closed.
 
 ### Blockers
 
-- No documentation blocker remains. CocoaPods consumer integration, physical
-  devices, publication, and future toolchain ceilings remain explicitly
-  unverified.
+- No implementation blocker remains; the corrected head still requires normal
+  hosted checks before merge. CocoaPods consumer integration, physical devices,
+  publication, and future toolchain ceilings remain explicitly unverified.
 
 ### Next action
 
