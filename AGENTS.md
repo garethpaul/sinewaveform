@@ -66,6 +66,9 @@
   view `SiriWaveformView`, and historical source file `SineWaveForm.swift`.
 - See `docs/plans/2026-06-25-installation-naming.md` for the checked install and
   import examples.
+- Read `docs/compatibility-matrix.md` before changing deployment targets,
+  podspec metadata, installation claims, tags, or release guidance. Preserve
+  its declared-versus-executed distinction.
 - See `docs/plans/2026-06-25-transparent-waveform-rendering.md` for the UIKit
   render-test boundary and transparent compositing contract.
 - Keep `.github/workflows/check.yml` as the only workflow, with immutable actions, read-only permissions, and persisted checkout credentials disabled in both jobs.

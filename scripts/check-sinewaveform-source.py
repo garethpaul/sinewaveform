@@ -22,6 +22,9 @@ TEMP_XCODE_ARTIFACT_PLAN = DOCS_PLANS / "2026-06-19-temp-xcode-artifacts.md"
 TEST_EXECUTION_CONTRACT_PLAN = DOCS_PLANS / "2026-06-19-waveform-test-execution-contract.md"
 MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 INSTALLATION_DOCS_PLAN = DOCS_PLANS / "2026-06-25-installation-naming.md"
+COMPATIBILITY_DESIGN = DOCS_PLANS / "2026-06-25-compatibility-matrix-design.md"
+COMPATIBILITY_PLAN = DOCS_PLANS / "2026-06-25-compatibility-matrix.md"
+COMPATIBILITY_MATRIX = ROOT / "docs" / "compatibility-matrix.md"
 RENDER_TEST = ROOT / "Tests" / "SineWaveformRenderTests" / "SineWaveformRenderTests.swift"
 RENDER_TEST_RUNNER = ROOT / "scripts" / "run-ios-render-tests.sh"
 SHARED_SCHEME = ROOT / "SineWaveform.xcodeproj" / "xcshareddata" / "xcschemes" / "SineWaveform.xcscheme"
@@ -106,6 +109,9 @@ def require_paths():
         "scripts/run-xcodebuild.sh",
         "scripts/test-makefile-root.sh",
         "README.md",
+        "docs/compatibility-matrix.md",
+        "docs/plans/2026-06-25-compatibility-matrix-design.md",
+        "docs/plans/2026-06-25-compatibility-matrix.md",
         "docs/readme-overview.svg",
         "docs/device-preview.svg",
         "LICENSE",
@@ -143,6 +149,10 @@ def docs_plan_checks():
         errors.append("docs/plans/2026-06-21-make-authority-isolation.md is missing")
     if not INSTALLATION_DOCS_PLAN.exists():
         errors.append("docs/plans/2026-06-25-installation-naming.md is missing")
+    if not COMPATIBILITY_DESIGN.exists():
+        errors.append("docs/plans/2026-06-25-compatibility-matrix-design.md is missing")
+    if not COMPATIBILITY_PLAN.exists():
+        errors.append("docs/plans/2026-06-25-compatibility-matrix.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -231,6 +241,147 @@ def package_checks():
     ):
         if incorrect_fragment in readme:
             errors.append(f"README must not use incorrect package naming: {incorrect_fragment}")
+
+    if COMPATIBILITY_MATRIX.exists():
+        compatibility = COMPATIBILITY_MATRIX.read_text(encoding="utf-8")
+        for fragment in (
+            "## Compatibility Matrix",
+            "Current `master` / direct Xcode",
+            "iOS 12.0 or newer",
+            "Swift 5 language mode",
+            "The June 25, 2026 PR #12 hosted macOS run",
+            "Xcode 16.4",
+            "evidence, not a maximum",
+            "The floating `macos-15` runner may select a different Xcode version",
+            "Git-sourced CocoaPods",
+            "exact reviewed commit",
+            "Documented route; CocoaPods integration unverified",
+            "Public CocoaPods trunk",
+            "not published in the public CocoaPods Specs CDN",
+            "Unavailable; do not document as an install path",
+            "https://cdn.cocoapods.org/all_pods.txt",
+            "Historical 2016 tags",
+            "0.0.6 tag declares iOS 8.0",
+            "0.1.0 tag contains podspec version 0.0.1",
+            "Unverified Boundaries",
+            "- a public CocoaPods trunk release;",
+            "- a completed `pod install` or `pod lib lint` result for current `master`;",
+            "- physical iPhone or iPad execution;",
+            "- support below iOS 12 for current source;",
+            "- a maximum compatible Xcode, Swift compiler, SDK, simulator, or device OS;",
+            "- compatibility for the historical tags on modern toolchains; or",
+            "- semantic-version stability beyond the existing public Swift API.",
+        ):
+            if fragment not in compatibility:
+                errors.append(f"compatibility matrix is missing required boundary: {fragment}")
+        for forbidden in (
+            "Available and supported",
+            "CocoaPods integration verified",
+            "Public CocoaPods trunk release available",
+        ):
+            if forbidden in compatibility:
+                errors.append(f"compatibility matrix contains contradictory claim: {forbidden}")
+
+        matrix_rows = {}
+        duplicate_routes = set()
+        compatibility_lines = compatibility.splitlines()
+        expected_header_cells = [
+            "Consumption route",
+            "Declared requirement or metadata",
+            "Executed evidence",
+            "Status",
+        ]
+        header_candidates = []
+        for index, line in enumerate(compatibility_lines):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if cells and cells[0] == "Consumption route":
+                header_candidates.append((index, cells))
+        table_header_index = None
+        if len(header_candidates) != 1:
+            errors.append("compatibility matrix must contain exactly one route table header")
+        else:
+            table_header_index, header_cells = header_candidates[0]
+            if header_cells != expected_header_cells:
+                errors.append("compatibility matrix contains a malformed route table header")
+        table_lines = []
+        if table_header_index is None:
+            errors.append("compatibility matrix is missing the route table header")
+        else:
+            for line in compatibility_lines[table_header_index + 1 :]:
+                if not line.strip():
+                    break
+                table_lines.append(line)
+
+        route_lines = table_lines
+        if table_lines:
+            separator_cells = [
+                cell.strip() for cell in table_lines[0].strip().strip("|").split("|")
+            ]
+            valid_separator = len(separator_cells) == 4 and all(
+                re.fullmatch(r":?-{3,}:?", cell) for cell in separator_cells
+            )
+            if valid_separator:
+                route_lines = table_lines[1:]
+            else:
+                errors.append("compatibility matrix is missing its four-cell separator")
+
+        for line in route_lines:
+            stripped = line.strip()
+            cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+            if cells and all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+                errors.append("compatibility matrix contains an unexpected separator row")
+                continue
+            if len(cells) != 4:
+                errors.append("compatibility matrix contains malformed route row")
+                continue
+            if cells[0] == "Consumption route":
+                continue
+            if cells[0] in matrix_rows:
+                duplicate_routes.add(cells[0])
+            matrix_rows[cells[0]] = cells[1:]
+
+        route_contracts = {
+            "Current `master` / direct Xcode": (
+                "iOS 12.0 or newer; Swift 5 language mode; iPhone and iPad target families",
+                "The June 25, 2026 PR #12 hosted macOS run compiled the framework and executed the Swift math and UIKit iOS Simulator tests with Xcode 16.4",
+                "Maintained repository path",
+            ),
+            "Git-sourced CocoaPods from `master` or an exact commit": (
+                "Root `SineWaveform.podspec` declares package version 0.0.6, iOS 12.0, Swift 5.0, and the current source glob",
+                "Ruby syntax and repository metadata are checked; the framework builds through the Xcode project, but CI does not execute `pod install` or `pod lib lint`",
+                "Documented route; CocoaPods integration unverified",
+            ),
+            "Public CocoaPods trunk with `pod 'SineWaveform'`": (
+                "No package entry was present in the official index when checked",
+                "No public-trunk installation was available to execute",
+                "Unavailable; do not document as an install path",
+            ),
+            "Historical 2016 tags": (
+                "Tag-specific podspecs and source from July 9, 2016",
+                "No current CI or device verification",
+                "Historical snapshots only, not current compatibility claims",
+            ),
+        }
+        for route in sorted(duplicate_routes):
+            errors.append(f"compatibility matrix contains duplicate route row: {route}")
+        for route in sorted(set(matrix_rows) - set(route_contracts)):
+            errors.append(f"compatibility matrix contains unexpected route row: {route}")
+        for route, expected_cells in route_contracts.items():
+            actual_cells = matrix_rows.get(route)
+            if actual_cells is None:
+                errors.append(f"compatibility matrix is missing route row: {route}")
+                continue
+            if actual_cells != list(expected_cells):
+                errors.append(f"compatibility matrix route has incorrect contract: {route}")
+
+    for document_path in ("README.md", "VISION.md", "AGENTS.md", "CHANGES.md"):
+        document = read_text(document_path)
+        if "docs/compatibility-matrix.md" not in document:
+            errors.append(f"{document_path} must link the compatibility matrix")
+    if "- Document the exact iOS and CocoaPods compatibility matrix" in read_text("VISION.md"):
+        errors.append("VISION.md must remove the completed compatibility-matrix priority")
+    if "Documented the exact iOS and CocoaPods compatibility matrix" not in read_text("CHANGES.md"):
+        errors.append("CHANGES.md must record the compatibility-matrix work")
 
     for relative_path in ("docs/readme-overview.svg", "docs/device-preview.svg"):
         try:

@@ -1,5 +1,84 @@
 # Changes
 
+## 2026-06-25 19:20 PDT - P2 - Document compatibility boundaries
+
+### Summary
+
+Documented the exact iOS and CocoaPods compatibility matrix without changing
+deployment targets, package metadata, tags, public API, or drawing behavior.
+
+### Work completed
+
+- Separated current `master`/Xcode, Git-sourced CocoaPods, public CocoaPods
+  trunk, and historical 2016 tag compatibility claims.
+- Recorded iOS 12 and Swift 5 as declared floors while treating hosted Xcode
+  16.4 simulator execution as evidence rather than an upper support bound.
+- Documented that public-trunk installation is unavailable, current CocoaPods
+  consumer integration remains unexecuted, and immutable commit pins are the
+  reproducible Git source boundary.
+- Added package-check contracts for the matrix, maintainer links, and completed
+  roadmap item.
+- Strengthened the package checker with exact route statuses, all unverified
+  boundary bullets, dated Xcode evidence, route-to-status parsing, and fifteen
+  hostile matrix mutations covering contradictory content and malformed table
+  structure.
+
+### Threads
+
+- Reviewed independently: metadata accuracy — confirmed Xcode, podspec, tag,
+  and registry facts.
+- Reviewed independently: user guidance — confirmed after CocoaPods wording was
+  narrowed to a documented but unverified integration route.
+- Reviewed independently: checker quality — iteratively found and closed loose
+  status, row, header, separator, and Markdown-table parsing bypasses.
+
+### Files changed
+
+- `docs/compatibility-matrix.md` - route-by-route compatibility and validation
+  matrix.
+- `scripts/check-sinewaveform-source.py` - static matrix and documentation
+  synchronization contracts.
+- `Tests/ContractCheckerTests/test_waveform_execution_contract.py` - hostile
+  compatibility-matrix mutations.
+- README, vision, agent guidance, and design/implementation plans - preserve the
+  declared-versus-verified boundary.
+
+### Validation
+
+- The direct package checker failed first with one missing matrix contract.
+- Direct package and waveform checks plus six contract-checker tests passed.
+- All four Make aliases and external-directory `make check` passed in a clean
+  Debian container with Ruby; Swift and Xcode execution skipped as unavailable.
+- The official CocoaPods package list returned HTTP 200 with no `SineWaveform`
+  entry, the package page returned HTTP 404, and tag podspec facts matched the
+  documented historical boundaries.
+- Hosted Check run `28213048100` passed the portable contract lane, four UIKit
+  simulator tests, shared Swift math harness, and framework build with Xcode
+  16.4 on commit `a420ee67f84d74f1d036267c7c2e23688c5fc5ae`.
+- CodeQL run `28213046910` passed Actions, Python, and Swift analysis.
+- The Codex review helper targeted `origin/master` at `a420ee6` and `5f514df`
+  but could not authenticate with the OpenAI API (HTTP 401). Three independent
+  reviewers approved after their actionable findings were resolved; the final
+  documentation-only provenance delta was also audited directly.
+
+### Bugs / findings
+
+- P2: Existing installation notes did not provide one exact matrix separating
+  current source, historical tags, public registry state, and executed tests.
+- P2: The first checker accepted contradictory availability claims and did not
+  bind Xcode 16.4 to a dated hosted observation; both gaps are closed.
+
+### Blockers
+
+- No implementation blocker remains; the corrected head still requires normal
+  hosted checks before merge. CocoaPods consumer integration, physical devices,
+  publication, and future toolchain ceilings remain explicitly unverified.
+
+### Next action
+
+- Add a sample application or broader pixel snapshot fixtures without changing
+  the compatibility floor implicitly.
+
 ## 2026-06-25 17:13 PDT - P2 - Harden transparent rendering verification
 
 ### Summary
