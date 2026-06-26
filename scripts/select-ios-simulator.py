@@ -3,11 +3,28 @@ import json
 import sys
 
 
+MINIMUM_IOS_VERSION = (12, 0)
+
+
+def ios_version(runtime):
+    marker = ".iOS-"
+    if marker not in runtime:
+        return None
+    try:
+        return tuple(int(component) for component in runtime.split(marker, 1)[1].split("-"))
+    except ValueError:
+        return None
+
+
 devices_by_runtime = json.load(sys.stdin).get("devices", {})
-for runtime in sorted(devices_by_runtime, reverse=True):
-    if ".iOS-" not in runtime:
-        continue
-    for device in devices_by_runtime[runtime]:
+ios_runtimes = []
+for runtime, devices in devices_by_runtime.items():
+    version = ios_version(runtime)
+    if version is not None and version >= MINIMUM_IOS_VERSION:
+        ios_runtimes.append((version, devices))
+
+for _, devices in sorted(ios_runtimes, reverse=True):
+    for device in devices:
         if device.get("isAvailable") and device.get("name", "").startswith("iPhone"):
             print(device["udid"])
             raise SystemExit(0)

@@ -29,24 +29,6 @@ class WaveformExecutionContractTests(unittest.TestCase):
             f"{name} bypassed the execution contract\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}",
         )
 
-    def run_valid_change(self, name, mutate):
-        with tempfile.TemporaryDirectory(prefix=f"sinewaveform-{name}-") as temporary:
-            checkout = Path(temporary) / "repo"
-            shutil.copytree(ROOT, checkout, ignore=shutil.ignore_patterns(".git"))
-            mutate(checkout)
-            result = subprocess.run(
-                ["/usr/bin/make", "test"],
-                cwd=checkout,
-                text=True,
-                capture_output=True,
-                timeout=120,
-            )
-        self.assertEqual(
-            result.returncode,
-            0,
-            f"{name} was rejected\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}",
-        )
-
     def replace_once(self, checkout, relative_path, old, new):
         path = checkout / relative_path
         source = path.read_text()
@@ -167,23 +149,6 @@ class WaveformExecutionContractTests(unittest.TestCase):
         for name, mutate in mutations.items():
             with self.subTest(name=name):
                 self.run_mutation(name, mutate)
-
-    def test_accepts_layer_owned_background_compositing(self):
-        def remove_manual_background_fill(checkout):
-            self.replace_once(
-                checkout,
-                "SineWaveform/SineWaveForm.swift",
-                "        if let backgroundColor = backgroundColor {\n"
-                "            context.setFillColor(backgroundColor.cgColor)\n"
-                "            context.fill(rect)\n"
-                "        }\n\n",
-                "",
-            )
-
-        self.run_valid_change(
-            "layer-owned-background-compositing",
-            remove_manual_background_fill,
-        )
 
     def test_rejects_additional_adversarial_mutations(self):
         runner_command = 'exec "$PYTHON" "$ROOT/scripts/verify-waveform-math-execution.py" --swiftc "$SWIFTC"'

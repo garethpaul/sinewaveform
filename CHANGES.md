@@ -14,13 +14,16 @@ a nil background no longer becomes an implicit opaque context fill.
   `SiriWaveformView` and inspect pixel alpha.
 - Added repository-owned simulator selection and test execution to `make test`.
 - Set `isOpaque = false` in frame and coder initialization paths.
-- Made background filling conditional on an explicitly assigned color.
+- Left assigned background-color compositing to the UIKit layer so translucent
+  colors are applied exactly once.
 - Added static and mutation-sensitive contracts for the test target, runner,
   and compositing implementation.
 
 ### Threads
 
 - Started: none; the focused UIKit defect was completed directly.
+- Reviewed: external review-gap commit `debc388` — accepted its simulator
+  selector, comment-bypass, decoded-state, and translucent-background findings.
 - Continued: none.
 - Stopped: none.
 
@@ -41,6 +44,9 @@ a nil background no longer becomes an implicit opaque context fill.
   `255` rather than `0`.
 - GREEN hosted `make check` at `0a48af8` — simulator rendering tests and the
   iOS framework build passed.
+- Review-gap tests at `debc388` then failed on lexical iOS runtime ordering,
+  unsupported pre-iOS-12 selection, comment-only opacity assignments, and a
+  double-composited translucent background; all findings were accepted.
 - Local package, waveform, contract, and 147-case root-authority checks passed;
   Swift and Xcode execution skipped because approved host tools are absent.
 - Local full `make check` reached the known `/usr/bin/ruby` absence after the
@@ -51,6 +57,8 @@ a nil background no longer becomes an implicit opaque context fill.
 - P1: a default nil-background waveform cleared its context and then filled it
   with the implicit current fill color, producing opaque output.
 - P2: the view retained UIKit's opaque default across both initialization paths.
+- P2: lexical runtime sorting preferred iOS 18.9 over 18.10 and did not filter
+  simulators below the framework's iOS 12 deployment target.
 
 ### Blockers
 

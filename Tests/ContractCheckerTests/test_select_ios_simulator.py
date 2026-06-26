@@ -6,12 +6,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SELECTOR = ROOT / "scripts/select-ios-simulator.py"
+PYTHON = ROOT / "scripts/run-python.sh"
 
 
 class SimulatorSelectorTests(unittest.TestCase):
     def run_selector(self, devices):
         return subprocess.run(
-            ["python3", str(SELECTOR)],
+            [str(PYTHON), str(SELECTOR)],
             input=json.dumps({"devices": devices}),
             text=True,
             capture_output=True,

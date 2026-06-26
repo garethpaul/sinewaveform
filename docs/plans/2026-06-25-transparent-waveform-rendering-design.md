@@ -42,8 +42,8 @@ a nil background and clear wave color into a one-scale alpha-enabled image. A
 center pixel must remain transparent.
 
 The production change is deliberately small: initialize both programmatic and
-Interface Builder instances with `isOpaque = false`, and fill the drawing
-context only when a background color exists.
+Interface Builder instances with `isOpaque = false`, and leave assigned
+background-color compositing to the existing `UIView` layer.
 
 ## Validation
 

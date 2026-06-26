@@ -48,9 +48,9 @@ view is opaque and the nil-background render has a nonzero alpha pixel.
 
 **Step 1: Implement the minimal fix**
 
-Add programmatic and coder initializers that set `isOpaque = false`. Remove the
-manual background-color selection and unconditional `context.fill(rect)` from
-`draw(_:)`; keep the existing bounds validation and context clear.
+Add programmatic and coder initializers that set `isOpaque = false`. Remove
+manual background filling from `draw(_:)` so the `UIView` layer owns explicit
+background colors; keep the existing bounds validation and context clear.
 
 **Step 2: Verify GREEN**
 
@@ -84,5 +84,9 @@ global repository indexes.
   and decoded views were opaque, and the nil-background pixel alpha was `255`.
 - GREEN head `0a48af8`: the same hosted simulator suite and framework build
   passed after the two initializer flags and conditional background fill.
+- Review-gap head `debc388` added a translucent-background test and portable
+  selector contracts. They correctly exposed lexical runtime ordering, missing
+  deployment-target filtering, comment-sensitive static checks, and duplicate
+  background compositing.
 - Portable package, waveform, contract, and 147-case root-authority checks passed; local
   full `make check` stops at the known missing `/usr/bin/ruby` boundary.

@@ -415,6 +415,7 @@ def waveform_checks():
         return errors
 
     source = read_text("SineWaveform/SineWaveForm.swift")
+    executable_source = re.sub(r"//[^\n]*", "", source)
     math_source = read_text("SineWaveform/WaveformMath.swift")
     render_test = RENDER_TEST.read_text(encoding="utf-8")
     render_test_runner = RENDER_TEST_RUNNER.read_text(encoding="utf-8")
@@ -462,16 +463,10 @@ def waveform_checks():
             errors.append(f"shared render-test scheme is missing: {fragment}")
     if makefile.count('"$$ROOT/scripts/run-ios-render-tests.sh"') != 1:
         errors.append("make test must execute the iOS rendering test runner exactly once")
-    if source.count("isOpaque = false") != 2:
+    if executable_source.count("isOpaque = false") != 2:
         errors.append("programmatic and decoded waveform views must both use nonopaque compositing")
-    for fragment in (
-        "if let backgroundColor = backgroundColor",
-        "context.setFillColor(backgroundColor.cgColor)",
-    ):
-        if fragment not in source:
-            errors.append(f"waveform background compositing is missing: {fragment}")
-    if "backgroundColor?.set()" in source:
-        errors.append("a nil waveform background must not select an implicit fill color")
+    if "context.fill(rect)" in executable_source or "backgroundColor?.set()" in executable_source:
+        errors.append("the UIView layer must own background compositing without a second draw-time fill")
     if "class SiriWaveformView: UIView" not in source:
         errors.append("SiriWaveformView class is missing")
     if "for waveNumber in 0...numOfWaves" in source:
