@@ -13,6 +13,7 @@ final class SineWaveformRenderTests: XCTestCase {
 
     func testDecodedViewUsesNonopaqueCompositing() throws {
         let original = SiriWaveformView(frame: CGRect(x: 0, y: 0, width: 40, height: 20))
+        original.isOpaque = true
         let archive = try NSKeyedArchiver.archivedData(withRootObject: original, requiringSecureCoding: false)
         let decoded = try XCTUnwrap(NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(archive) as? SiriWaveformView)
 
@@ -24,14 +25,28 @@ final class SineWaveformRenderTests: XCTestCase {
         view.backgroundColor = nil
         view.waveColor = .clear
 
+        let image = render(view)
+
+        XCTAssertEqual(try alpha(at: CGPoint(x: 20, y: 10), in: image), 0)
+    }
+
+    func testTranslucentBackgroundIsCompositedOnce() throws {
+        let view = SiriWaveformView(frame: CGRect(x: 0, y: 0, width: 40, height: 20))
+        view.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.5)
+        view.waveColor = .clear
+
+        let renderedAlpha = try alpha(at: CGPoint(x: 20, y: 10), in: render(view))
+
+        XCTAssertEqual(Int(renderedAlpha), 128, accuracy: 2)
+    }
+
+    private func render(_ view: UIView) -> UIImage {
         let format = UIGraphicsImageRendererFormat()
         format.opaque = false
         format.scale = 1
-        let image = UIGraphicsImageRenderer(size: view.bounds.size, format: format).image { _ in
-            view.draw(view.bounds)
+        return UIGraphicsImageRenderer(size: view.bounds.size, format: format).image { context in
+            view.layer.render(in: context.cgContext)
         }
-
-        XCTAssertEqual(try alpha(at: CGPoint(x: 20, y: 10), in: image), 0)
     }
 
     private func alpha(at point: CGPoint, in image: UIImage) throws -> UInt8 {
