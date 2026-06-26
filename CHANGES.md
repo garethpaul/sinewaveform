@@ -42,6 +42,9 @@ deterministic idle and active waveform geometry without brittle PNG hashes.
   control, package/waveform checks, and 147 Make authority cases.
 - Shell syntax and `git diff --check` — passed. Local direct `make check` reached
   the known missing `/usr/bin/ruby` boundary; container Xcode steps skipped.
+- Hosted head `ae4f3cb` failed before execution because Swift requires an
+  explicit `CGColorSpace` for the bitmap initializer; the helper now uses a
+  four-byte device-RGB layout and scans the premultiplied-last alpha byte.
 - Hosted UIKit, framework build, CodeQL, review, and merge evidence remains the
   next action for this cycle.
 

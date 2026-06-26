@@ -102,3 +102,7 @@ reviewed green commit.
   authority cases. Xcode rendering and framework build skipped as unavailable.
 - Shell syntax and `git diff --check` passed. Hosted exact-head UIKit execution
   remains recorded in `CHANGES.md` as the PR progresses.
+- The first hosted head failed to compile because the Swift `CGContext`
+  initializer did not accept a nil color space. The alpha-bounds helper was
+  corrected to an explicit device-RGB, premultiplied-last bitmap matching the
+  existing single-pixel probe.

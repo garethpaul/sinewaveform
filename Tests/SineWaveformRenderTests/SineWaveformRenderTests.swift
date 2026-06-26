@@ -131,15 +131,16 @@ final class SineWaveformRenderTests: XCTestCase {
         let cgImage = try XCTUnwrap(image.cgImage)
         let width = cgImage.width
         let height = cgImage.height
-        var pixels = [UInt8](repeating: 0, count: width * height)
+        let bytesPerPixel = 4
+        var pixels = [UInt8](repeating: 0, count: width * height * bytesPerPixel)
         let context = try XCTUnwrap(CGContext(
             data: &pixels,
             width: width,
             height: height,
             bitsPerComponent: 8,
-            bytesPerRow: width,
-            space: nil,
-            bitmapInfo: CGImageAlphaInfo.alphaOnly.rawValue
+            bytesPerRow: width * bytesPerPixel,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ))
         context.draw(cgImage, in: CGRect(
             x: 0,
@@ -153,7 +154,7 @@ final class SineWaveformRenderTests: XCTestCase {
         var maximumX = -1
         var maximumY = -1
         for y in 0..<height {
-            for x in 0..<width where pixels[y * width + x] != 0 {
+            for x in 0..<width where pixels[(y * width + x) * bytesPerPixel + 3] != 0 {
                 minimumX = min(minimumX, x)
                 minimumY = min(minimumY, y)
                 maximumX = max(maximumX, x)
