@@ -46,6 +46,8 @@
 - Subnormal waveform widths are rejected before Core Graphics mutation.
 - Preserve `isOpaque = false` in both UIKit initialization paths and keep a nil
   background transparent in the hosted simulator rendering tests.
+- Preserve semantic UIKit pixel fixtures that distinguish the idle centerline
+  from an active waveform reaching both vertical pixel bands.
 
 ## PR / change guidance
 

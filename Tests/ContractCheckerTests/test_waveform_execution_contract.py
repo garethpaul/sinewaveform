@@ -141,6 +141,30 @@ class WaveformExecutionContractTests(unittest.TestCase):
                 "        }\n\n",
                 "",
             ),
+            "idle_pixel_fixture_removed": lambda checkout: self.replace_once(
+                checkout,
+                "Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift",
+                "testIdleWaveformStaysInCenterPixelBand",
+                "disabledIdleWaveformStaysInCenterPixelBand",
+            ),
+            "active_upper_pixel_assertion_removed": lambda checkout: self.replace_once(
+                checkout,
+                "Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift",
+                "        XCTAssertLessThan(activeBounds.minY, 12)\n",
+                "        _ = activeBounds.minY\n",
+            ),
+            "active_lower_pixel_assertion_removed": lambda checkout: self.replace_once(
+                checkout,
+                "Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift",
+                "        XCTAssertGreaterThan(activeBounds.maxY, 28)\n",
+                "        _ = activeBounds.maxY\n",
+            ),
+            "alpha_bounds_helper_removed": lambda checkout: self.replace_once(
+                checkout,
+                "Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift",
+                "alphaBounds(in image: UIImage)",
+                "disabledAlphaBounds(in image: UIImage)",
+            ),
             "main_thread_guard_removed": lambda checkout: self.replace_once(
                 checkout,
                 "SineWaveform/SineWaveForm.swift",

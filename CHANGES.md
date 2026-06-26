@@ -1,5 +1,68 @@
 # Changes
 
+## 2026-06-26 03:15 PDT - P2 - Add semantic waveform pixel fixtures
+
+### Summary
+
+Expanded the real UIKit rendering suite from compositing-only checks to
+deterministic idle and active waveform geometry without brittle PNG hashes.
+
+### Work completed
+
+- Added an idle single-wave fixture that must stay inside the center pixel band.
+- Added an active single-wave fixture that must reach upper and lower pixel
+  bands while retaining transparent corners.
+- Added an alpha-plane bounds helper over the real `CALayer` render output.
+- Added source contracts and four hostile fixture-removal mutations.
+- Retired the completed broader-pixel-fixture roadmap option; no sample app was
+  added.
+
+### Threads
+
+- Started: semantic waveform pixel fixtures — implementation complete.
+- Continued: hosted UIKit rendering — awaiting exact-head simulator execution.
+- Stopped: exact PNG snapshots — rejected as OS- and antialiasing-brittle.
+
+### Files changed
+
+- `Tests/SineWaveformRenderTests/SineWaveformRenderTests.swift` — adds semantic
+  idle/active geometry fixtures and alpha bounds.
+- `scripts/check-sinewaveform-source.py` and contract tests — preserve the new
+  coverage against deletion.
+- README, VISION, AGENTS, and the completed plan — document the boundary.
+
+### Validation
+
+- RED `--mode waveform` — failed on all five missing fixture guarantees.
+- GREEN `--mode waveform` — passed.
+- Focused contract checker — five suites passed, including four new hostile
+  fixture-removal mutations.
+- Clean Swift 6/Ruby container `make check` from checkout and `/tmp` — passed
+  seven contract suites, 15 executable math assertions plus the negative
+  control, package/waveform checks, and 147 Make authority cases.
+- Shell syntax and `git diff --check` — passed. Local direct `make check` reached
+  the known missing `/usr/bin/ruby` boundary; container Xcode steps skipped.
+- Hosted head `ae4f3cb` failed before execution because Swift requires an
+  explicit `CGColorSpace` for the bitmap initializer; the helper now uses a
+  four-byte device-RGB layout and scans the premultiplied-last alpha byte.
+- Hosted UIKit, framework build, CodeQL, review, and merge evidence remains the
+  next action for this cycle.
+
+### Bugs / findings
+
+- P2: rendering tests covered transparency and threading but did not verify the
+  visible waveform occupied the expected idle and active geometry.
+
+### Blockers
+
+- Local Xcode availability is checked by the canonical Make gate; hosted macOS
+  remains authoritative for pixel rendering.
+
+### Next action
+
+- Run portable verification, then require exact-head hosted UIKit tests before
+  review and merge.
+
 ## 2026-06-26 03:19 UTC - P1 - Own waveform updates on the main thread
 
 ### Summary
