@@ -44,13 +44,16 @@ final class SineWaveformRenderTests: XCTestCase {
         let view = SiriWaveformView(frame: CGRect(x: 0, y: 0, width: 40, height: 20))
         let backgroundReturned = DispatchSemaphore(value: 0)
 
+        view.updateWithLevel(0.25)
+        XCTAssertEqual(view.amplitude, 0.25)
+
         DispatchQueue.global().async {
             view.updateWithLevel(0.75)
             backgroundReturned.signal()
         }
 
         XCTAssertEqual(backgroundReturned.wait(timeout: .now() + 1), .success)
-        XCTAssertEqual(view.amplitude, 0.0)
+        XCTAssertEqual(view.amplitude, 0.25)
 
         let updateApplied = expectation(description: "main-thread waveform update applied")
         DispatchQueue.main.async {

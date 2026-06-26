@@ -600,8 +600,9 @@ def waveform_checks():
         "format.opaque = false",
         "view.layer.render(in: context.cgContext)",
         "return pixel[3]",
+        "view.updateWithLevel(0.25)",
         "backgroundReturned.wait(timeout: .now() + 1)",
-        "XCTAssertEqual(view.amplitude, 0.0)",
+        "XCTAssertEqual(view.amplitude, 0.25)",
         "XCTAssertEqual(view.amplitude, 0.75)",
     ):
         if fragment not in render_test:

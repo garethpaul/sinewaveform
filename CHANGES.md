@@ -12,7 +12,8 @@ changing synchronous behavior for callers already on UIKit's main thread.
 - Added a main-thread guard that weakly hands background calls to
   `DispatchQueue.main` before phase, amplitude, or redraw mutation.
 - Added a UIKit regression test proving the background call returns before
-  amplitude changes and that the queued update then applies.
+  amplitude changes, main-thread calls remain synchronous, and the queued
+  update then applies.
 - Added source contracts and hostile mutations for the guard and dispatch.
 - Documented the UIKit ownership boundary and focused design decision.
 
