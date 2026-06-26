@@ -89,6 +89,7 @@
   math harness, four UIKit simulator tests, and framework build with Xcode 16.4
   (16F6) on commit `a420ee67f84d74f1d036267c7c2e23688c5fc5ae`.
 - CodeQL run `28213046910` passed Actions, Python, and Swift analysis.
-- The Codex review helper selected the PR base `origin/master` but failed with
-  HTTP 401 authentication errors. Per the maintenance instruction, that review
-  was skipped; exact-head manual review found no actionable findings.
+- The Codex review helper selected the PR base `origin/master` on the initial
+  and corrected heads, including `5f514df`, but failed with HTTP 401
+  authentication errors. Per the maintenance instruction, that review was
+  skipped; three independent reviewers found no remaining actionable findings.

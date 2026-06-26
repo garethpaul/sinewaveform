@@ -25,8 +25,11 @@ deployment targets, package metadata, tags, public API, or drawing behavior.
 
 ### Threads
 
-- None; the checker hardening and compatibility wording were integrated
-  directly and verified with mutation tests.
+- Reviewed: metadata accuracy — approved Xcode, podspec, tag, and registry facts.
+- Reviewed: user guidance — approved after CocoaPods availability wording was
+  narrowed to a documented but unverified integration route.
+- Reviewed: checker quality — iteratively found and closed loose status, row,
+  header, separator, and Markdown-table parsing bypasses.
 
 ### Files changed
 
@@ -52,9 +55,9 @@ deployment targets, package metadata, tags, public API, or drawing behavior.
   simulator tests, shared Swift math harness, and framework build with Xcode
   16.4 on commit `a420ee67f84d74f1d036267c7c2e23688c5fc5ae`.
 - CodeQL run `28213046910` passed Actions, Python, and Swift analysis.
-- The Codex review helper targeted `origin/master` but could not authenticate
-  with the OpenAI API (HTTP 401); exact-head manual review found no actionable
-  findings.
+- The Codex review helper targeted `origin/master` on the initial and corrected
+  heads, including `5f514df`, but could not authenticate with the OpenAI API
+  (HTTP 401); three independent reviewers found no remaining actionable findings.
 
 ### Bugs / findings
 
