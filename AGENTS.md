@@ -48,6 +48,8 @@
   background transparent in the hosted simulator rendering tests.
 - Preserve semantic UIKit pixel fixtures that distinguish the idle centerline
   from an active waveform reaching both vertical pixel bands.
+- Preserve `setNeedsDisplay()` observers on the six public properties read
+  directly by `draw(_:)`; idle amplitude and phase shift apply on level updates.
 
 ## PR / change guidance
 

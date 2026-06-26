@@ -15,13 +15,25 @@ public class SiriWaveformView: UIView {
     private let maximumLineWidth: CGFloat = 100.0
     private let maximumSamplePointCount = 4096
     
-    @IBInspectable public var waveColor: UIColor = UIColor.black
-    @IBInspectable public var numOfWaves = 7
-    @IBInspectable public var primaryWaveLineWidth: CGFloat = 2.0
-    @IBInspectable public var secondaryWaveLineWidth: CGFloat = 3.0
+    @IBInspectable public var waveColor: UIColor = UIColor.black {
+        didSet { setNeedsDisplay() }
+    }
+    @IBInspectable public var numOfWaves = 7 {
+        didSet { setNeedsDisplay() }
+    }
+    @IBInspectable public var primaryWaveLineWidth: CGFloat = 2.0 {
+        didSet { setNeedsDisplay() }
+    }
+    @IBInspectable public var secondaryWaveLineWidth: CGFloat = 3.0 {
+        didSet { setNeedsDisplay() }
+    }
     @IBInspectable public var idleAmplitude: CGFloat = 0.01
-    @IBInspectable public var frequency: CGFloat = 1.5
-    @IBInspectable public var density: CGFloat = 4
+    @IBInspectable public var frequency: CGFloat = 1.5 {
+        didSet { setNeedsDisplay() }
+    }
+    @IBInspectable public var density: CGFloat = 4 {
+        didSet { setNeedsDisplay() }
+    }
     @IBInspectable public var phaseShift: CGFloat = -0.15
     
     @IBInspectable public var amplitude: CGFloat {

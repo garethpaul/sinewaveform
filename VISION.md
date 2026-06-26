@@ -32,6 +32,8 @@ Priority:
 - Keep UIKit simulator rendering coverage for programmatic and decoded views
 - Keep semantic pixel fixtures for idle centerline and active envelope geometry
 - Keep waveform state mutation and redraw invalidation on UIKit's main thread
+- Keep live color, count, line-width, frequency, and density changes invalidating
+  the current waveform display
 - Keep root and archived podspec metadata aligned
 - Keep the publishable podspec's Swift and iOS requirements aligned with CI
 - Keep CocoaPods description metadata non-empty and unambiguous
