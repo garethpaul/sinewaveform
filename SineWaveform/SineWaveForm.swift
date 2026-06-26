@@ -70,6 +70,11 @@ public class SiriWaveformView: UIView {
 
         context.clear(bounds)
 
+        if let backgroundColor = backgroundColor {
+            context.setFillColor(backgroundColor.cgColor)
+            context.fill(rect)
+        }
+
         let waveCount = min(max(1, numOfWaves), maximumWaveCount)
         let step = normalizedValue(density, minimum: 1.0, maximum: maximumDensity, fallback: 4.0)
         let maximumSampleIntervalCount = maximumSamplePointCount - 1

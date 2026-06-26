@@ -482,8 +482,15 @@ def waveform_checks():
     ):
         if re.search(pattern, source) is None:
             errors.append(f"{initializer} waveform views must initialize nonopaque compositing")
-    if "context.fill(rect)" in executable_source or "backgroundColor?.set()" in executable_source:
-        errors.append("the UIView layer must own background compositing without a second draw-time fill")
+    for fragment in (
+        "if let backgroundColor = backgroundColor",
+        "context.setFillColor(backgroundColor.cgColor)",
+        "context.fill(rect)",
+    ):
+        if fragment not in executable_source:
+            errors.append(f"waveform background compositing is missing: {fragment}")
+    if "backgroundColor?.set()" in executable_source:
+        errors.append("a nil waveform background must not select an implicit fill color")
     if "class SiriWaveformView: UIView" not in source:
         errors.append("SiriWaveformView class is missing")
     if "for waveNumber in 0...numOfWaves" in source:

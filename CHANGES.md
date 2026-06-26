@@ -25,8 +25,8 @@ the real view layer in the UIKit alpha tests.
   dependency, shared scheme, Make entry point, and hosted workflow are wired.
 - Reviewed: adversarial implementation pass — accepted the coder-contract and
   simulator-order findings. The double-compositing hypothesis was not
-  reproduced, while the concurrent branch still moved explicit backgrounds to
-  normal UIKit layer ownership with the same alpha assertion retained.
+  reproduced; exact-head hosted testing instead proved UIKit layer ownership
+  alone dropped the assigned background, so the conditional fill was restored.
 
 ### Files changed
 
@@ -50,6 +50,9 @@ the real view layer in the UIKit alpha tests.
   checks passed.
 - Temporary hosted run `28208410926` — four UIKit tests and the framework build
   passed on `macos-15`, disproving the suspected translucent double fill.
+- Exact-head hosted run `28208773112` — failed the translucent-background test
+  after a concurrent commit removed the conditional fill; observed alpha was
+  `0` instead of `128`, directly proving the fill remains required.
 - Local `make check` — passed 147 target/authority cases, one dollar-syntax
   checkout case, two `MAKEFILE_LIST` rejections, three startup-boundary cases,
   and ten mode-flag rejections before stopping at missing `/usr/bin/ruby`.
@@ -64,8 +67,9 @@ the real view layer in the UIKit alpha tests.
 - P3 fixed: lexicographic runtime ordering selected iOS 18.9 before iOS 18.10
   and allowed unsupported pre-iOS-12 runtimes.
 - Not reproduced: normal layer rendering showed the prior conditional fill also
-  preserved 50% alpha. The final branch delegates assigned backgrounds to UIKit
-  and keeps that behavior under the same real-layer regression test.
+  preserved 50% alpha. Removing it then erased the assigned background in the
+  hosted simulator, so the final branch retains the conditional fill under the
+  same real-layer regression test.
 
 ### Blockers
 
@@ -91,8 +95,8 @@ a nil background no longer becomes an implicit opaque context fill.
   `SiriWaveformView` and inspect pixel alpha.
 - Added repository-owned simulator selection and test execution to `make test`.
 - Set `isOpaque = false` in frame and coder initialization paths.
-- Left assigned background-color compositing to the UIKit layer so translucent
-  colors are applied exactly once.
+- Made background filling conditional on an explicitly assigned color so nil
+  remains transparent and assigned translucent colors still render.
 - Added static and mutation-sensitive contracts for the test target, runner,
   and compositing implementation.
 
@@ -124,8 +128,9 @@ a nil background no longer becomes an implicit opaque context fill.
   iOS framework build passed.
 - Review-gap tests at `debc388` failed on lexical iOS runtime ordering,
   unsupported pre-iOS-12 selection, and comment-only opacity assignments. A
-  temporary hosted run showed both the prior conditional fill and the final
-  UIKit-owned background path preserve the expected translucent alpha.
+  temporary hosted run showed the conditional fill preserves expected alpha;
+  exact-head run `28208773112` proved removing it yields fully transparent
+  output for an assigned translucent background.
 - Local package, waveform, contract, and 147-case root-authority checks passed;
   Swift and Xcode execution skipped because approved host tools are absent.
 - Local full `make check` reached the known `/usr/bin/ruby` absence after the

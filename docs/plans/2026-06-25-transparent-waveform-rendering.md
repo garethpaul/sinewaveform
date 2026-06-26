@@ -48,9 +48,9 @@ view is opaque and the nil-background render has a nonzero alpha pixel.
 
 **Step 1: Implement the minimal fix**
 
-Add programmatic and coder initializers that set `isOpaque = false`. Remove
-manual background filling from `draw(_:)` so the `UIView` layer owns explicit
-background colors; keep the existing bounds validation and context clear.
+Add programmatic and coder initializers that set `isOpaque = false`. Keep the
+context clear, then fill only when an explicit background color is assigned so
+nil remains transparent and assigned colors still render.
 
 **Step 2: Verify GREEN**
 
@@ -94,8 +94,10 @@ global repository indexes.
   an explicitly opaque source view before decoding, and assert that a
   translucent background retains approximately 50% alpha.
 - Temporary hosted run `28208410926` passed all four UIKit tests against the
-  existing conditional fill. The final branch still delegates assigned
-  backgrounds to UIKit and retains the same translucent-alpha regression test.
+  conditional fill. Exact-head run `28208773112` then proved removing that fill
+  was incorrect: the translucent pixel alpha became `0` instead of `128`.
+  Restoring the conditional fill is therefore required behavior, not duplicate
+  compositing.
 - Adversarial portable tests failed before the review fixes because comment-only
   opacity assignments bypassed the occurrence count, iOS 18.9 sorted ahead of
   iOS 18.10, and an iOS 9.3 runtime remained eligible. The corrected five-test
