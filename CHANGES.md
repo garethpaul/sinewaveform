@@ -20,8 +20,23 @@ changing synchronous behavior for callers already on UIKit's main thread.
 ### Validation
 
 - RED: waveform checks rejected the missing guard, dispatch, and reuse path.
-- GREEN: portable checks pass with the main-queue handoff in place.
-- Hosted UIKit execution is required before merge.
+- GREEN: clean Ruby 3.3 container gates, six contract-checker tests, and the
+  Swift 5.10 waveform harness with 15 assertions and its negative control pass.
+- Hosted Check run `28215127189` passed the synchronous-main/background-handoff
+  UIKit regression and framework build in Xcode 16.4; contract validation also passed.
+- CodeQL run `28215125327` passed Actions, Python, and Swift analysis.
+- The Codex review helper targeted `origin/master` at `21e08c3` and `855b64e`
+  but could not authenticate with the OpenAI API (HTTP 401), so both attempts
+  were skipped per maintenance policy; manual exact-diff review found no issue.
+
+### Blockers
+
+- No implementation blocker remains; the documentation-only closeout head
+  still requires normal hosted checks before merge.
+
+### Next action
+
+- Merge the final hosted-green head and retain both synchronous and handoff tests.
 
 ## 2026-06-25 20:10 PDT - P1 - Correct review provenance
 
