@@ -382,6 +382,17 @@ def package_checks():
         errors.append("VISION.md must remove the completed compatibility-matrix priority")
     if "Documented the exact iOS and CocoaPods compatibility matrix" not in read_text("CHANGES.md"):
         errors.append("CHANGES.md must record the compatibility-matrix work")
+    for document_path in ("CHANGES.md", "docs/plans/2026-06-25-compatibility-matrix.md"):
+        document = read_text(document_path)
+        for unsupported_review_claim in (
+            "three independent reviewers",
+            "Reviewed independently:",
+        ):
+            if unsupported_review_claim in document:
+                errors.append(
+                    f"{document_path} contains unsupported review provenance: "
+                    f"{unsupported_review_claim}"
+                )
 
     for relative_path in ("docs/readme-overview.svg", "docs/device-preview.svg"):
         try:
