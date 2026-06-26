@@ -1,5 +1,27 @@
 # Changes
 
+## 2026-06-26 03:19 UTC - P1 - Own waveform updates on the main thread
+
+### Summary
+
+Made the public level-update API safe for background audio producers without
+changing synchronous behavior for callers already on UIKit's main thread.
+
+### Work completed
+
+- Added a main-thread guard that weakly hands background calls to
+  `DispatchQueue.main` before phase, amplitude, or redraw mutation.
+- Added a UIKit regression test proving the background call returns before
+  amplitude changes and that the queued update then applies.
+- Added source contracts and hostile mutations for the guard and dispatch.
+- Documented the UIKit ownership boundary and focused design decision.
+
+### Validation
+
+- RED: waveform checks rejected the missing guard, dispatch, and reuse path.
+- GREEN: portable checks pass with the main-queue handoff in place.
+- Hosted UIKit execution is required before merge.
+
 ## 2026-06-25 20:10 PDT - P1 - Correct review provenance
 
 ### Summary
@@ -43,7 +65,6 @@ with unsupported independent-review claims.
 
 - Merge the factual correction after package, mutation, hosted, and CodeQL gates
   pass.
-
 ## 2026-06-25 19:20 PDT - P2 - Document compatibility boundaries
 
 ### Summary

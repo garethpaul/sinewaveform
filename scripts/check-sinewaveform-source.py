@@ -595,10 +595,14 @@ def waveform_checks():
         "testDecodedViewUsesNonopaqueCompositing",
         "testNilBackgroundLeavesRenderedPixelTransparent",
         "testTranslucentBackgroundIsCompositedOnce",
+        "testBackgroundLevelUpdateHandsOffToMainThread",
         "original.isOpaque = true",
         "format.opaque = false",
         "view.layer.render(in: context.cgContext)",
         "return pixel[3]",
+        "backgroundReturned.wait(timeout: .now() + 1)",
+        "XCTAssertEqual(view.amplitude, 0.0)",
+        "XCTAssertEqual(view.amplitude, 0.75)",
     ):
         if fragment not in render_test:
             errors.append(f"iOS rendering test coverage is missing: {fragment}")
@@ -704,6 +708,12 @@ def waveform_checks():
         errors.append("drawRect must clamp the secondary line width through finite input normalization")
     if "context.setLineWidth(waveNumber == 0 ? primaryLineWidth : secondaryLineWidth)" not in source:
         errors.append("drawRect must set Core Graphics line width from clamped values")
+    if "if !Thread.isMainThread" not in source:
+        errors.append("updateWithLevel must guard UIKit state mutation to the main thread")
+    if "DispatchQueue.main.async { [weak self] in" not in source:
+        errors.append("background waveform updates must hand off weakly to the main queue")
+    if "self?.updateWithLevel(level)" not in source:
+        errors.append("the main-queue handoff must reuse the bounded waveform update path")
     if "_amplitude = fmax(level, idleAmplitude)" in source:
         errors.append("updateWithLevel must not assign unbounded caller-provided amplitude")
     if "let normalizedLevel = min(max(level, 0.0), 1.0)" in source:

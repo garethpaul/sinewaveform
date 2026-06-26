@@ -40,6 +40,26 @@ final class SineWaveformRenderTests: XCTestCase {
         XCTAssertEqual(Int(renderedAlpha), 128, accuracy: 2)
     }
 
+    func testBackgroundLevelUpdateHandsOffToMainThread() {
+        let view = SiriWaveformView(frame: CGRect(x: 0, y: 0, width: 40, height: 20))
+        let backgroundReturned = DispatchSemaphore(value: 0)
+
+        DispatchQueue.global().async {
+            view.updateWithLevel(0.75)
+            backgroundReturned.signal()
+        }
+
+        XCTAssertEqual(backgroundReturned.wait(timeout: .now() + 1), .success)
+        XCTAssertEqual(view.amplitude, 0.0)
+
+        let updateApplied = expectation(description: "main-thread waveform update applied")
+        DispatchQueue.main.async {
+            XCTAssertEqual(view.amplitude, 0.75)
+            updateApplied.fulfill()
+        }
+        wait(for: [updateApplied], timeout: 1)
+    }
+
     private func render(_ view: UIView) -> UIImage {
         let format = UIGraphicsImageRendererFormat()
         format.opaque = false

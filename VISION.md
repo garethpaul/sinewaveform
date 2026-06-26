@@ -30,6 +30,7 @@ Priority:
 - Subnormal waveform widths are rejected before Core Graphics mutation
 - Preserve transparent compositing when no waveform background color is set
 - Keep UIKit simulator rendering coverage for programmatic and decoded views
+- Keep waveform state mutation and redraw invalidation on UIKit's main thread
 - Keep root and archived podspec metadata aligned
 - Keep the publishable podspec's Swift and iOS requirements aligned with CI
 - Keep CocoaPods description metadata non-empty and unambiguous

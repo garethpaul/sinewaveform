@@ -40,6 +40,8 @@ Helpful reports include:
   extremely wide finite views while counting both endpoints.
 - The view is nonopaque by default and a nil background remains transparent;
   hosted UIKit rendering tests guard both programmatic and decoded instances.
+- Background level producers hand updates to the main queue before mutating
+  waveform state or requesting a UIView redraw.
 
 ## Mobile Privacy Notes
 
